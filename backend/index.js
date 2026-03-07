@@ -19,6 +19,35 @@ app.get("/products", async (req, res) => {
   res.json(products);
 });
 
+// get single product
+app.get("/products/:id", async (req, res) => {
+  const id = Number(req.params.id);
+  const singleProduct = await prisma.product.findUnique({
+    where: { id },
+  });
+  res.json(singleProduct);
+});
+
+// delete product
+app.delete("/products/:id", async (req, res) => {
+  const id = Number(req.params.id);
+  const deleteProduct = await prisma.product.delete({
+    where: { id },
+  });
+  res.json(deleteProduct);
+});
+
+//update product
+app.put("/products/:id", async (req, res) => {
+  const { name, description, price, imageUrl, stock } = req.body;
+  const id = Number(req.params.id);
+  const update = await prisma.product.update({
+    where: { id },
+    data: { name, description, price, imageUrl, stock },
+  });
+  res.json(update);
+});
+
 app.post("/products", async (req, res) => {
   const { name, description, price, imageUrl, stock } = req.body;
   const product = await prisma.product.create({
