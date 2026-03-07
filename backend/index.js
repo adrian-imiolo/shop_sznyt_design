@@ -19,6 +19,14 @@ app.get("/products", async (req, res) => {
   res.json(products);
 });
 
+app.post("/products", async (req, res) => {
+  const { name, description, price, imageUrl, stock } = req.body;
+  const product = await prisma.product.create({
+    data: { name, description, price, imageUrl, stock },
+  });
+  res.json(product);
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
