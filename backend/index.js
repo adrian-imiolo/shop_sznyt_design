@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import { PrismaClient } from "./generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
+import cors from "cors";
 
 dotenv.config();
 
@@ -10,6 +11,7 @@ const prisma = new PrismaClient({
 });
 
 const app = express();
+app.use(cors());
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
