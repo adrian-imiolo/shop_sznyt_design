@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Navbar from "./components/Navbar";
 
 type Product = {
   id: number;
@@ -20,6 +21,7 @@ function App() {
 
   return (
     <div>
+      <Navbar />
       {products.map((product) => (
         <div key={product.id}>
           <p>Product: {product.name}</p>
