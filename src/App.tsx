@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import Navbar from "./components/Navbar";
+import Hero from "./components/Hero";
 
 type Product = {
   id: number;
@@ -22,6 +23,7 @@ function App() {
   return (
     <div>
       <Navbar />
+      <Hero />
       {products.map((product) => (
         <div key={product.id}>
           <p>Product: {product.name}</p>
