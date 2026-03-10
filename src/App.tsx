@@ -2,6 +2,7 @@ import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import ProductSection from "./components/ProductSection";
 import BrandStatement from "./components/BrandStatement";
+import Footer from "./components/Footer";
 
 const products = [
   {
@@ -46,6 +47,7 @@ function App() {
         />
       ))}
       <BrandStatement />
+      <Footer />
     </div>
   );
 }
