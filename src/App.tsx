@@ -1,34 +1,44 @@
-import { useState, useEffect } from "react";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
+import ProductSection from "./components/ProductSection";
 
-type Product = {
-  id: number;
-  name: string;
-  price: number;
-  imageUrl: string | null;
-  stock: number;
-  createdAt: string;
-};
+const products = [
+  {
+    id: 1,
+    name: "Rama Klasyczna",
+    tagline: "Prostota, która trwa.",
+    description: "Wykonana z litego dręba dębowego, wykończona naturalnym olejem. Ponadczasowa forma, która pasuje do każdego wnętrza.",
+    price: 299,
+    studioImage: "https://placehold.co/800x1000/2a2420/FAFAF8?text=Studio",
+    lifestyleImage: "https://placehold.co/800x1000/4a3f35/FAFAF8?text=Lifestyle",
+  },
+  {
+    id: 2,
+    name: "Rama Nowoczesna",
+    tagline: "Minimalizm w każdym detalu.",
+    description: "Cienka stalowa rama w matowym czerni. Idealna do fotografii i grafik w stylu współczesnym.",
+    price: 349,
+    studioImage: "https://placehold.co/800x1000/1a1a1a/FAFAF8?text=Studio",
+    lifestyleImage: "https://placehold.co/800x1000/2d2d2d/FAFAF8?text=Lifestyle",
+  },
+];
 
 function App() {
-  const [products, setProducts] = useState<Product[]>([]);
-
-  useEffect(() => {
-    fetch("http://localhost:3000/products")
-      .then((res) => res.json())
-      .then((data) => setProducts(data));
-  }, []);
-
   return (
     <div>
       <Navbar />
       <Hero />
-      {products.map((product) => (
-        <div key={product.id}>
-          <p>Product: {product.name}</p>
-          <p>Price: {product.price}</p>
-        </div>
+      {products.map((product, index) => (
+        <ProductSection
+          key={product.id}
+          name={product.name}
+          tagline={product.tagline}
+          description={product.description}
+          price={product.price}
+          studioImage={product.studioImage}
+          lifestyleImage={product.lifestyleImage}
+          reverse={index % 2 !== 0}
+        />
       ))}
     </div>
   );
