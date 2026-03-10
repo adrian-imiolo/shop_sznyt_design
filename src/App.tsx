@@ -1,25 +1,30 @@
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import ProductSection from "./components/ProductSection";
+import BrandStatement from "./components/BrandStatement";
 
 const products = [
   {
     id: 1,
-    name: "Rama Klasyczna",
+    name: "Ramka Szachownica",
     tagline: "Prostota, która trwa.",
-    description: "Wykonana z litego dręba dębowego, wykończona naturalnym olejem. Ponadczasowa forma, która pasuje do każdego wnętrza.",
+    description:
+      "Wykonana z litego drewna dębowego, wykończona naturalnym olejem. Ponadczasowa forma, która pasuje do każdego wnętrza.",
     price: 299,
     studioImage: "https://placehold.co/800x1000/2a2420/FAFAF8?text=Studio",
-    lifestyleImage: "https://placehold.co/800x1000/4a3f35/FAFAF8?text=Lifestyle",
+    lifestyleImage:
+      "https://placehold.co/800x1000/4a3f35/FAFAF8?text=Lifestyle",
   },
   {
     id: 2,
-    name: "Rama Nowoczesna",
+    name: "Ramka Corner Cut",
     tagline: "Minimalizm w każdym detalu.",
-    description: "Cienka stalowa rama w matowym czerni. Idealna do fotografii i grafik w stylu współczesnym.",
+    description:
+      "Cienka stalowa rama w matowym czerni. Idealna do fotografii i grafik w stylu współczesnym.",
     price: 349,
     studioImage: "https://placehold.co/800x1000/1a1a1a/FAFAF8?text=Studio",
-    lifestyleImage: "https://placehold.co/800x1000/2d2d2d/FAFAF8?text=Lifestyle",
+    lifestyleImage:
+      "https://placehold.co/800x1000/2d2d2d/FAFAF8?text=Lifestyle",
   },
 ];
 
@@ -40,6 +45,7 @@ function App() {
           reverse={index % 2 !== 0}
         />
       ))}
+      <BrandStatement />
     </div>
   );
 }
