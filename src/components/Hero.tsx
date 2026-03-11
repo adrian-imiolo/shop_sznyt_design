@@ -9,7 +9,7 @@ function Hero() {
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
       {/* Text content — bottom-left, zieta.pl style */}
-      <div className="relative z-10 max-w-6xl mx-auto w-full px-6 pb-20">
+      <div className="relative z-10 max-w-6xl mx-auto w-full px-6 pb-16 md:pb-20">
         <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">
           Sznyt Design
         </p>

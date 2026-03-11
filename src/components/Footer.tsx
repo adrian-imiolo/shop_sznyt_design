@@ -1,9 +1,9 @@
 function Footer() {
   return (
-    <footer className="bg-warm-white border-t border-borders px-6 py-20">
+    <footer className="bg-warm-white border-t border-borders px-6 py-12 md:py-20">
       <div className="max-w-6xl mx-auto">
         {/* Main row */}
-        <div className="flex flex-col md:flex-row justify-between gap-16 mb-16">
+        <div className="flex flex-col md:flex-row justify-between gap-8 md:gap-16 mb-8 md:mb-16 items-center md:items-start">
           {/* Brand */}
           <div className="max-w-xs">
             <a className="font-cormorant text-2xl text-near-black tracking-wide block mb-3">
@@ -15,7 +15,7 @@ function Footer() {
           </div>
 
           {/* Links */}
-          <div className="flex gap-32">
+          <div className="flex justify-between w-full px-4 md:px-0 md:w-auto md:gap-32">
             <div className="flex flex-col gap-4">
               <p className="font-dm-sans text-xs text-accent tracking-[0.2em] uppercase mb-1">
                 Linki
@@ -62,7 +62,7 @@ function Footer() {
         {/* Bottom bar */}
         <div className="border-t border-borders pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="font-dm-sans text-xs text-secondary-text">
-            © 2025 Sznyt Design
+            © 2026 Sznyt Design
           </p>
           <div className="flex gap-8">
             <a
