@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const navLinks = [
-  { label: "Sklep", href: "#" },
-  { label: "O nas", href: "#" },
-  { label: "Kontakt", href: "#" },
+  { label: "Sklep", to: "/sklep" },
+  { label: "O nas", to: "/o-nas" },
+  { label: "Kontakt", to: "/kontakt" },
 ];
 
 function Navbar() {
@@ -12,15 +13,15 @@ function Navbar() {
   return (
     <nav className="bg-warm-white border-b border-borders px-6 py-4">
       <div className="flex items-center justify-between max-w-6xl mx-auto">
-        <a className="font-cormorant text-2xl text-near-black tracking-wide">
+        <Link to="/" className="font-cormorant text-2xl text-near-black tracking-wide">
           Sznyt Design
-        </a>
+        </Link>
         <ul className="hidden md:flex gap-8">
           {navLinks.map((link) => (
             <li key={link.label}>
-              <a href={link.href} className="font-dm-sans text-sm text-near-black hover:text-accent tracking-widest uppercase">
+              <Link to={link.to} className="font-dm-sans text-sm text-near-black hover:text-accent tracking-widest uppercase">
                 {link.label}
-              </a>
+              </Link>
             </li>
           ))}
         </ul>
@@ -38,9 +39,9 @@ function Navbar() {
           <ul className="flex flex-col gap-4">
             {navLinks.map((link) => (
               <li key={link.label}>
-                <a href={link.href} className="font-dm-sans text-sm text-near-black hover:text-accent tracking-widest uppercase">
+                <Link to={link.to} className="font-dm-sans text-sm text-near-black hover:text-accent tracking-widest uppercase">
                   {link.label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
