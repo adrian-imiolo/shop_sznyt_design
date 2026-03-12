@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 function Footer() {
   return (
     <footer className="bg-warm-white border-t border-borders px-6 py-12 md:py-20">
@@ -6,9 +8,12 @@ function Footer() {
         <div className="flex flex-col md:flex-row justify-between gap-8 md:gap-16 mb-8 md:mb-16 items-center md:items-start">
           {/* Brand */}
           <div className="max-w-xs">
-            <a className="font-cormorant text-2xl text-near-black tracking-wide block mb-3">
+            <Link
+              to="/"
+              className="font-cormorant text-2xl text-near-black tracking-wide block mb-3"
+            >
               Sznyt Design
-            </a>
+            </Link>
             <p className="font-dm-sans text-sm text-secondary-text leading-relaxed">
               Minimalizm. Jakość. Trwałość.
             </p>
@@ -20,24 +25,24 @@ function Footer() {
               <p className="font-dm-sans text-xs text-accent tracking-[0.2em] uppercase mb-1">
                 Linki
               </p>
-              <a
-                href="#"
+              <Link
+                to="/sklep"
                 className="font-dm-sans text-sm text-near-black hover:text-accent transition-colors"
               >
                 Sklep
-              </a>
-              <a
-                href="#"
+              </Link>
+              <Link
+                to="/o-nas"
                 className="font-dm-sans text-sm text-near-black hover:text-accent transition-colors"
               >
                 O nas
-              </a>
-              <a
-                href="#"
+              </Link>
+              <Link
+                to="/kontakt"
                 className="font-dm-sans text-sm text-near-black hover:text-accent transition-colors"
               >
                 Kontakt
-              </a>
+              </Link>
             </div>
             <div className="flex flex-col gap-4">
               <p className="font-dm-sans text-xs text-accent tracking-[0.2em] uppercase mb-1">
