@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useCart } from "../context/CartContext";
 
 type ProductDetails = {
   name: string;
@@ -15,6 +16,7 @@ function ProductDetails() {
   const { id } = useParams();
   const [product, setProduct] = useState<ProductDetails>(null);
   const [hovered, setHovered] = useState(false);
+  const { addItem } = useCart();
 
   useEffect(() => {
     fetch(`http://localhost:3000/products/${id}`)
@@ -47,7 +49,9 @@ function ProductDetails() {
         {/* Top: breadcrumb + product info */}
         <div>
           <p className="font-dm-sans text-xs text-secondary-text tracking-widest uppercase mb-10">
-            <Link to="/sklep" className="hover:text-accent transition-colors">Sklep</Link>
+            <Link to="/sklep" className="hover:text-accent transition-colors">
+              Sklep
+            </Link>
             {" / "}
             {product.name}
           </p>
@@ -71,14 +75,22 @@ function ProductDetails() {
             {product.price} PLN
           </p>
           <p className="font-dm-sans text-xs text-secondary-text tracking-widest uppercase mb-8">
-            Dostępność: {product.stock > 0 ? `${product.stock} szt.` : "Brak w magazynie"}
+            Dostępność:{" "}
+            {product.stock > 0 ? `${product.stock} szt.` : "Brak w magazynie"}
           </p>
-          <a
-            href="#"
+          <button
+            onClick={() =>
+              addItem({
+                id: Number(id),
+                name: product.name,
+                price: product.price,
+                imageUrl: product.imageUrl,
+              })
+            }
             className="inline-block font-dm-sans text-sm text-near-black border border-near-black px-10 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300"
           >
             Dodaj do koszyka
-          </a>
+          </button>
         </div>
       </div>
     </main>
