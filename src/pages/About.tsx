@@ -71,8 +71,8 @@ function About() {
               text: "Sprawdzamy każdy element, aby gotowy produkt był spójny i dopracowany. Chcemy, by dobrze wyglądał nie tylko dziś, ale także za kilka lat.",
             },
           ].map((step) => (
-            <div key={step.number} className="flex gap-10 border-t border-borders py-10">
-              <span className="font-cormorant text-4xl text-accent font-light shrink-0">
+            <div key={step.number} className="flex gap-10 items-start border-t border-borders py-10">
+              <span className="font-cormorant text-4xl text-accent font-light shrink-0 w-16">
                 {step.number}
               </span>
               <div>
