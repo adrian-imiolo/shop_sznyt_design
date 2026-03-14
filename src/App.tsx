@@ -6,19 +6,24 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import ProductDetail from "./pages/ProductDetail";
 import Shop from "./pages/Shop";
+import Cart from "./pages/Cart";
+import { CartProvider } from "./context/CartContext";
 
 function App() {
   return (
     <BrowserRouter>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/sklep" element={<Shop />} />
-        <Route path="/sklep/:id" element={<ProductDetail />} />
-        <Route path="/o-nas" element={<About />} />
-        <Route path="/kontakt" element={<Contact />} />
-      </Routes>
-      <Footer />
+      <CartProvider>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/sklep" element={<Shop />} />
+          <Route path="/sklep/:id" element={<ProductDetail />} />
+          <Route path="/o-nas" element={<About />} />
+          <Route path="/kontakt" element={<Contact />} />
+          <Route path="/koszyk" element={<Cart />} />
+        </Routes>
+        <Footer />
+      </CartProvider>
     </BrowserRouter>
   );
 }
