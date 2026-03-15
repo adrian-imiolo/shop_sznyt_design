@@ -8,11 +8,13 @@ import ProductDetail from "./pages/ProductDetail";
 import Shop from "./pages/Shop";
 import Cart from "./pages/Cart";
 import { CartProvider } from "./context/CartContext";
+import ScrollOnNav from "./utils/ScrollOnNav";
 
 function App() {
   return (
     <BrowserRouter>
       <CartProvider>
+        <ScrollOnNav />
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
