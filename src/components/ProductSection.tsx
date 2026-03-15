@@ -5,8 +5,8 @@ type ProductSectionProps = {
   tagline: string;
   description: string;
   price: number;
-  studioImage: string;
-  lifestyleImage: string;
+  imageUrl: string;
+  lifestyleImageUrl: string;
   reverse?: boolean;
 };
 
@@ -15,15 +15,16 @@ function ProductSection({
   tagline,
   description,
   price,
-  studioImage,
-  lifestyleImage,
+  imageUrl,
+  lifestyleImageUrl,
   reverse = false,
 }: ProductSectionProps) {
   const [hovered, setHovered] = useState(false);
 
   return (
-    <section className={`flex flex-col ${reverse ? "md:flex-row-reverse" : "md:flex-row"} min-h-screen`}>
-
+    <section
+      className={`flex flex-col ${reverse ? "md:flex-row-reverse" : "md:flex-row"} min-h-screen`}
+    >
       {/* Image side */}
       <div
         className="relative w-full md:w-1/2 min-h-[60vh] md:min-h-screen overflow-hidden cursor-pointer"
@@ -33,12 +34,12 @@ function ProductSection({
         {/* Studio image — visible by default */}
         <div
           className={`absolute inset-0 bg-cover bg-center transition-opacity duration-700 ${hovered ? "opacity-0" : "opacity-100"}`}
-          style={{ backgroundImage: `url(${studioImage})` }}
+          style={{ backgroundImage: `url(${imageUrl})` }}
         />
         {/* Lifestyle image — visible on hover */}
         <div
           className={`absolute inset-0 bg-cover bg-center transition-opacity duration-700 ${hovered ? "opacity-100" : "opacity-0"}`}
-          style={{ backgroundImage: `url(${lifestyleImage})` }}
+          style={{ backgroundImage: `url(${lifestyleImageUrl})` }}
         />
       </div>
 
@@ -68,7 +69,6 @@ function ProductSection({
           </a>
         </div>
       </div>
-
     </section>
   );
 }
