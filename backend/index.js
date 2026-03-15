@@ -3,8 +3,18 @@ import dotenv from "dotenv";
 import { PrismaClient } from "./generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 import cors from "cors";
+import nodemailer from "nodemailer";
 
 dotenv.config();
+
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT),
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
@@ -56,6 +66,25 @@ app.post("/products", async (req, res) => {
     data: { name, description, price, imageUrl, stock },
   });
   res.json(product);
+});
+
+// submit contact form with data
+app.post("/contact", async (req, res) => {
+  const { name, email, message } = req.body;
+  if (!name || !email || !message) {
+    return res.status(400).json({ error: "All fields are required" });
+  }
+
+  const contactMessage = await prisma.contactMessage.create({
+    data: { name, email, message },
+  });
+  await transporter.sendMail({
+    from: process.env.SMTP_USER,
+    to: process.env.CONTACT_RECIPIENT,
+    replyTo: email,
+    text: `Imię: ${name}\nEmail: ${email}\n\nWiadomość:\n${message}`,
+  });
+  res.json(contactMessage);
 });
 
 app.listen(PORT, () => {

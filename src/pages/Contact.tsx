@@ -4,10 +4,33 @@ function Contact() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    console.log({ name, email, message });
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:3000/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, message }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Coś poszło nie tak. Spróbuj ponownie.");
+        return;
+      }
+      setSuccess(true);
+      setName("");
+      setEmail("");
+      setMessage("");
+    } catch (err) {
+      setError("Coś poszło nie tak. Spróbuj ponownie.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -66,12 +89,20 @@ function Contact() {
                 className="font-dm-sans text-sm text-near-black bg-transparent border-b border-borders py-2 outline-none focus:border-near-black transition-colors resize-none"
               />
             </div>
-
+            {success && (
+              <p className="font-dm-sans text-sm text-accent">
+                Wiadomość wysłana. Odezwiemy się wkrótce.
+              </p>
+            )}
+            {error && (
+              <p className="font-dm-sans text-sm text-red-500">{error}</p>
+            )}
             <button
+              disabled={loading}
               type="submit"
               className="self-start font-dm-sans text-sm text-near-black border border-near-black px-10 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300"
             >
-              Wyślij
+              {loading ? "Wysyłanie..." : "Wyślij"}
             </button>
           </form>
         </div>
