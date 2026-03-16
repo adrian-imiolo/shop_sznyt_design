@@ -26,7 +26,7 @@ function Contact() {
       setName("");
       setEmail("");
       setMessage("");
-    } catch (err) {
+    } catch {
       setError("Coś poszło nie tak. Spróbuj ponownie.");
     } finally {
       setLoading(false);
