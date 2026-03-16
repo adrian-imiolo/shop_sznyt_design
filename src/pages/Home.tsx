@@ -27,6 +27,7 @@ function Home() {
   return (
     <>
       <Hero />
+      <div id="kolekcja" />
       {products.map((product, index) => (
         <ProductSection
           key={product.id}

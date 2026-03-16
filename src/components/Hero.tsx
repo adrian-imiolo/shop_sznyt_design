@@ -1,7 +1,6 @@
 function Hero() {
   return (
     <section className="relative min-h-screen flex items-end bg-near-black">
-
       {/* Placeholder — replace with a real photo later */}
       <div className="absolute inset-0 bg-[#2a2420]" />
 
@@ -14,7 +13,9 @@ function Hero() {
           Sznyt Design
         </p>
         <h1 className="font-cormorant text-5xl md:text-7xl text-warm-white font-light leading-tight mb-6">
-          Rama, która<br />staje się sztuką
+          Rama, która
+          <br />
+          staje się sztuką
         </h1>
         <a
           href="#sklep"
@@ -25,7 +26,14 @@ function Hero() {
       </div>
 
       {/* Scroll indicator — bouncing arrow, bottom center */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
+      <div
+        className="cursor-pointer absolute bottom-8 left-1/2 -translate-x-1/2 z-20"
+        onClick={() =>
+          document
+            .getElementById("kolekcja")
+            ?.scrollIntoView({ behavior: "smooth" })
+        }
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"
@@ -39,7 +47,6 @@ function Hero() {
           <path d="M12 5v14M5 13l7 7 7-7" />
         </svg>
       </div>
-
     </section>
   );
 }
