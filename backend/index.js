@@ -72,7 +72,7 @@ app.post("/products", async (req, res) => {
 app.post("/contact", async (req, res) => {
   const { name, email, message } = req.body;
   if (!name || !email || !message) {
-    return res.status(400).json({ error: "All fields are required" });
+    return res.status(400).json({ error: "Wszystkie pola są wymagane." });
   }
 
   const contactMessage = await prisma.contactMessage.create({
