@@ -14,6 +14,8 @@ type Products = {
 
 function AdminProducts() {
   const [products, setProducts] = useState<Products[] | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<number | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -78,7 +80,10 @@ function AdminProducts() {
                   </Link>
                   <button
                     className="text-red-600 hover:text-red-800"
-                    onClick={() => handleDelete(product.id)}
+                    onClick={() => {
+                      setIsDeleteModalOpen(true);
+                      setProductToDelete(product.id);
+                    }}
                   >
                     Usuń
                   </button>
