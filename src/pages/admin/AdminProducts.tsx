@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 type Products = {
   id: number;
@@ -35,52 +36,60 @@ function AdminProducts() {
 
   return (
     <>
-      <div className="flex-col items-center align-center mx-auto mt-5">
-        <h1>Panel admina</h1>
-        {products.map((product) => (
-          <div
-            className="font-dm-sans flex mx-auto items-center my-20 border-borders border-solid border-2 w-1/2 gap-5"
-            key={product.id}
-          >
-            <ul className="border-borders">
-              <li className="p-2 border-solid border-2 border-borders">
-                <strong>Id:</strong> {product.id}
-              </li>
-              <li className="p-2 border-solid border-2 border-borders">
-                <strong>Nazwa:</strong> {product.name}
-              </li>
-              <li className="p-2 border-solid border-2 border-borders">
-                <strong>Slogan:</strong> {product.tagline}
-              </li>
-              <li className="p-2 border-solid border-2 border-borders">
-                <strong>Opis:</strong> {product.description}
-              </li>
-              <li className="p-2 border-solid border-2 border-borders">
-                <strong>Cena:</strong> {product.price}
-              </li>
-              <li className="p-2 border-solid border-2 border-borders">
-                <strong>Zdjęcie studio:</strong> {product.imageUrl}
-              </li>
-              <li className="p-2 border-solid border-2 border-borders">
-                <strong>Zdjęcie lifestyle:</strong> {product.lifestyleImageUrl}
-              </li>
-              <li className="p-2 border-solid border-2 border-borders">
-                <strong>Ilość:</strong> {product.stock}
-              </li>
-            </ul>
-            <button className="px-4 cursor-pointer">Edytuj</button>
-            <button
-              className="px-4 cursor-pointer"
-              onClick={() => handleDelete(product.id)}
-            >
-              Usuń
-            </button>
-          </div>
-        ))}
+      <div className="flex justify-between py-5 w-full bg-near-black text-xl font-dm-sans text-warm-white">
+        <h1 className="p-6">Panel admina</h1>
+        <Link
+          to="/admin/produkty/nowy"
+          className="border-solid border border-white p-6 mr-5 hover:bg-warm-white hover:text-near-black transition-colors duration-300"
+        >
+          Dodaj produkt
+        </Link>
+      </div>
+      <div className="p-4">
+        <table className="w-full border-collapse">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="p-3 text-left">Nazwa</th>
+              <th className="p-3 text-left w-32">Slogan</th>
+              <th className="p-3 text-left">Opis</th>
+              <th className="p-3 text-left w-16">Cena</th>
+              <th className="p-3 text-left">Zdjęcie studio</th>
+              <th className="p-3 text-left">Zdjęcie lifestyle</th>
+              <th className="p-3 text-left w-16">Ilość</th>
+              <th className="p-3 text-left">Akcje</th>
+            </tr>
+          </thead>
+          <tbody>
+            {products.map((product) => (
+              <tr className="border-b border-borders" key={product.id}>
+                <td className="p-3">{product.name}</td>
+                <td className="p-3">{product.tagline}</td>
+                <td className="p-3">{product.description}</td>
+                <td className="p-3">{product.price}</td>
+                <td className="p-3">{product.imageUrl}</td>
+                <td className="p-3">{product.lifestyleImageUrl}</td>
+                <td className="p-3">{product.stock}</td>
+                <td className="gap-3 flex-col p-3">
+                  <Link
+                    className="text-accent hover:underline"
+                    to={`/admin/produkty/${product.id}`}
+                  >
+                    Edytuj
+                  </Link>
+                  <button
+                    className="text-red-600 hover:text-red-800"
+                    onClick={() => handleDelete(product.id)}
+                  >
+                    Usuń
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </>
   );
-  // return console.log(products);
 }
 
 export default AdminProducts;
