@@ -38,6 +38,35 @@ function AdminProducts() {
 
   return (
     <>
+      {isDeleteModalOpen && (
+        <>
+          <div className="fixed inset-0 bg-black opacity-50 z-10"></div>
+
+          <div className="flex flex-col items-center z-20 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/2 bg-warm-white border border-borders p-20">
+            <p className="font-cormorant text-2xl font-light text-near-black">
+              Czy na pewno chcesz usunąć ten produkt?
+            </p>
+            <div className="flex gap-6 mt-4">
+              <button
+                className="border border-near-black px-6 py-2 hover:bg-near-black hover:text-warm-white transition-colors duration-300 font-dm-sans cursor-pointer"
+                onClick={() => setIsDeleteModalOpen(false)}
+              >
+                Anuluj
+              </button>
+              <button
+                className="bg-red-600 text-white px-6 py-2 hover:bg-red-800 transition-colors duration-300 font-dm-sans cursor-pointer"
+                onClick={() => {
+                  handleDelete(productToDelete!);
+                  setIsDeleteModalOpen(false);
+                }}
+              >
+                Usuń
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
       <div className="flex justify-between py-5 w-full bg-near-black text-xl font-dm-sans text-warm-white">
         <h1 className="p-6">Panel admina</h1>
         <Link
@@ -82,6 +111,7 @@ function AdminProducts() {
                     className="text-red-600 hover:text-red-800"
                     onClick={() => {
                       setIsDeleteModalOpen(true);
+
                       setProductToDelete(product.id);
                     }}
                   >
