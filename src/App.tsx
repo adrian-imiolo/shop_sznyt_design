@@ -9,6 +9,7 @@ import { CartProvider } from "./context/CartContext";
 import ScrollOnNav from "./utils/ScrollOnNav";
 import AdminProducts from "./pages/admin/AdminProducts";
 import ShopLayout from "./components/ShopLayout";
+import AdminAddProduct from "./pages/admin/AdminAddProduct";
 
 function App() {
   return (
@@ -25,7 +26,7 @@ function App() {
             <Route path="/koszyk" element={<Cart />} />
           </Route>
           <Route path="/admin" element={<AdminProducts />} />
-          <Route path="/admin/produkty/nowy" element={<AdminProducts />} />
+          <Route path="/admin/produkty/nowy" element={<AdminAddProduct />} />
           <Route path="/admin/produkty/:id" element={<AdminProducts />} />
         </Routes>
       </CartProvider>
