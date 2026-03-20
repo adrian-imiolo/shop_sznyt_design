@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function AdminAddProduct() {
   const [loading, setLoading] = useState(false);
@@ -12,6 +13,8 @@ function AdminAddProduct() {
     lifestyleImageUrl: "",
     stock: "",
   });
+
+  const navigate = useNavigate();
 
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
@@ -41,6 +44,7 @@ function AdminAddProduct() {
         lifestyleImageUrl: "",
         stock: "",
       });
+      navigate("/admin");
     } catch {
       setError("Coś poszło nie tak, spróbuj ponownie");
     } finally {
@@ -55,59 +59,75 @@ function AdminAddProduct() {
       <form onSubmit={handleSubmit} className="flex">
         <label>Nazwa</label>
         <input
+          required
           type="text"
           value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, name: e.target.value }))
+          }
           className="border border-borders text-sm font-dm-sans p-2"
         />
         <label>Slogan</label>
         <input
+          required
           type="text"
           value={formData.tagline}
           onChange={(e) =>
-            setFormData({ ...formData, tagline: e.target.value })
+            setFormData((prev) => ({ ...prev, tagline: e.target.value }))
           }
           className="border border-borders text-sm font-dm-sans p-2"
         />
         <label>Opis</label>
         <textarea
+          required
           rows={5}
           value={formData.description}
           onChange={(e) =>
-            setFormData({ ...formData, description: e.target.value })
+            setFormData((prev) => ({ ...prev, description: e.target.value }))
           }
           className="border border-borders text-sm font-dm-sans p-2"
         />
         <label>Cena</label>
         <input
+          required
           type="text"
           value={formData.price}
-          onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, price: e.target.value }))
+          }
           className="border border-borders text-sm font-dm-sans p-2"
         />
         <label>Zdjęcie studio</label>
         <input
+          required
           type="text"
           value={formData.imageUrl}
           onChange={(e) =>
-            setFormData({ ...formData, imageUrl: e.target.value })
+            setFormData((prev) => ({ ...prev, imageUrl: e.target.value }))
           }
           className="border border-borders text-sm font-dm-sans p-2"
         />
         <label>Zdjęcie lifestyle</label>
         <input
+          required
           type="text"
           value={formData.lifestyleImageUrl}
           onChange={(e) =>
-            setFormData({ ...formData, lifestyleImageUrl: e.target.value })
+            setFormData((prev) => ({
+              ...prev,
+              lifestyleImageUrl: e.target.value,
+            }))
           }
           className="border border-borders text-sm font-dm-sans p-2"
         />
         <label>Ilość</label>
         <input
+          required
           type="text"
           value={formData.stock}
-          onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, stock: e.target.value }))
+          }
           className="border border-borders text-sm font-dm-sans p-2"
         />
         <button className="border border-borders cursor-pointer">

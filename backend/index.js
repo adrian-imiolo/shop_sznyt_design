@@ -51,19 +51,51 @@ app.delete("/products/:id", async (req, res) => {
 
 //update product
 app.put("/products/:id", async (req, res) => {
-  const { name, description, price, imageUrl, stock } = req.body;
+  const {
+    name,
+    tagline,
+    description,
+    price,
+    imageUrl,
+    lifestyleImageUrl,
+    stock,
+  } = req.body;
   const id = Number(req.params.id);
   const update = await prisma.product.update({
     where: { id },
-    data: { name, description, price, imageUrl, stock },
+    data: {
+      name,
+      tagline,
+      description,
+      price,
+      imageUrl,
+      lifestyleImageUrl,
+      stock,
+    },
   });
   res.json(update);
 });
 
 app.post("/products", async (req, res) => {
-  const { name, description, price, imageUrl, stock } = req.body;
+  const {
+    name,
+    tagline,
+    description,
+    price,
+    imageUrl,
+    lifestyleImageUrl,
+    stock,
+  } = req.body;
   const product = await prisma.product.create({
-    data: { name, description, price, imageUrl, stock },
+    data: {
+      name,
+      tagline,
+      description,
+      price,
+      imageUrl,
+      lifestyleImageUrl,
+      stock,
+    },
   });
   res.json(product);
 });
