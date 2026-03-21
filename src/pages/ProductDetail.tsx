@@ -16,6 +16,7 @@ function ProductDetails() {
   const { id } = useParams();
   const [product, setProduct] = useState<ProductDetails>(null);
   const [hovered, setHovered] = useState(false);
+  const [added, setAdded] = useState(false);
   const { addItem } = useCart();
 
   useEffect(() => {
@@ -26,8 +27,23 @@ function ProductDetails() {
 
   if (!product) return <p>Ładowanie...</p>;
 
+  function addedToCart() {
+    setAdded(true);
+    setTimeout(() => {
+      setAdded(false);
+    }, 3000);
+  }
+
   return (
     <main className="flex flex-col md:flex-row min-h-screen">
+      {/* Add to cart feedback popup */}
+      <div
+        className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-near-black text-warm-white font-dm-sans text-sm px-6 py-4 flex items-center gap-3 transition-opacity duration-500 ${added ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+      >
+        <span className="text-accent">✓</span>
+        <p>Dodano do koszyka!</p>
+      </div>
+
       {/* Image side — 60% width, left */}
       <div
         className="relative w-full md:w-3/5 min-h-[60vh] md:min-h-screen overflow-hidden cursor-pointer"
@@ -45,6 +61,7 @@ function ProductDetails() {
       </div>
 
       {/* Text side — 40% width, right */}
+
       <div className="w-full md:w-2/5 flex flex-col justify-between bg-[#F5F3F0] px-10 py-16 md:px-16 md:py-20">
         {/* Top: breadcrumb + product info */}
         <div>
@@ -79,14 +96,15 @@ function ProductDetails() {
             {product.stock > 0 ? `${product.stock} szt.` : "Brak w magazynie"}
           </p>
           <button
-            onClick={() =>
+            onClick={() => {
               addItem({
                 id: Number(id),
                 name: product.name,
                 price: product.price,
                 imageUrl: product.imageUrl,
-              })
-            }
+              });
+              addedToCart();
+            }}
             className="inline-block font-dm-sans text-sm text-near-black border border-near-black px-10 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300"
           >
             Dodaj do koszyka

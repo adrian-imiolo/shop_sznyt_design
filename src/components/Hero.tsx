@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 function Hero() {
   return (
     <section className="relative min-h-screen flex items-end bg-near-black">
@@ -17,12 +19,12 @@ function Hero() {
           <br />
           staje się sztuką
         </h1>
-        <a
-          href="#sklep"
+        <Link
+          to="/sklep"
           className="inline-block font-dm-sans text-sm text-warm-white border border-warm-white/50 px-8 py-3 hover:bg-warm-white hover:text-near-black transition-colors duration-300"
         >
           Zobacz kolekcję
-        </a>
+        </Link>
       </div>
 
       {/* Scroll indicator — bouncing arrow, bottom center */}

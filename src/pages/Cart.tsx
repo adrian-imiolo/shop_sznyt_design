@@ -101,7 +101,7 @@ function Cart() {
             <p className="font-dm-sans text-sm text-secondary-text tracking-widest uppercase">
               Suma
             </p>
-            <p className="font-cormorant text-3xl text-near-black font-light">
+            <p className="font-cormorant text-3xl text-near-black font-light w-48 text-right">
               {subtotal} PLN
             </p>
           </div>
