@@ -50,7 +50,7 @@ app.post(
         data: {
           stripeSessionId: session.id,
           status: "paid",
-          total: session.amount_subtotal_total / 100,
+          total: session.amount_total / 100,
         },
       });
     }
