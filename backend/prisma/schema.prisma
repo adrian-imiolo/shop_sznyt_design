@@ -32,3 +32,11 @@ model ContactMessage {
   message   String
   createdAt DateTime @default(now())
 }
+
+model Order {
+  id              Int      @id @default(autoincrement())
+  stripeSessionId String   @unique
+  status          String   @default("pending")
+  total           Float
+  createdAt       DateTime @default(now())
+}

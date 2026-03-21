@@ -24,8 +24,39 @@ const prisma = new PrismaClient({
 });
 
 const app = express();
+
 app.use(cors());
 const PORT = process.env.PORT || 3000;
+
+app.post(
+  "/webhook",
+  express.raw({ type: "application/json" }),
+  async (req, res) => {
+    const sig = req.headers["stripe-signature"];
+    let event;
+
+    try {
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        sig,
+        process.env.STRIPE_WEBHOOK_SECRET,
+      );
+    } catch (err) {
+      return res.status(400).send(`Webhook error: ${err.message}`);
+    }
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object;
+      await prisma.order.create({
+        data: {
+          stripeSessionId: session.id,
+          status: "paid",
+          total: session.amount_subtotal_total / 100,
+        },
+      });
+    }
+    res.json({ received: true });
+  },
+);
 
 app.use(express.json());
 
