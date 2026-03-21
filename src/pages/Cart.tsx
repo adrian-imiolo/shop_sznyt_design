@@ -4,6 +4,16 @@ import { useCart } from "../context/CartContext";
 function Cart() {
   const { items, removeItem, updateQuantity } = useCart();
 
+  async function handleCheckout() {
+    const res = await fetch("http://localhost:3000/create-checkout-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items }),
+    });
+    const data = await res.json();
+    window.location.href = data.url;
+  }
+
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
   if (items.length === 0) {
@@ -95,7 +105,10 @@ function Cart() {
               {subtotal} PLN
             </p>
           </div>
-          <button className="font-dm-sans text-sm text-near-black border border-near-black px-12 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300">
+          <button
+            onClick={handleCheckout}
+            className="font-dm-sans text-sm text-near-black border border-near-black px-12 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300 cursor-pointer"
+          >
             Przejdź do kasy
           </button>
         </div>

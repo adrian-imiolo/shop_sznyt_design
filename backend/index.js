@@ -1,11 +1,14 @@
-import express from "express";
 import dotenv from "dotenv";
+dotenv.config();
+
+import express from "express";
 import { PrismaClient } from "./generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 import cors from "cors";
 import nodemailer from "nodemailer";
+import Stripe from "stripe";
 
-dotenv.config();
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -121,4 +124,26 @@ app.post("/contact", async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
+});
+
+app.post("/create-checkout-session", async (req, res) => {
+  const { items } = req.body;
+
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ["card", "p24", "blik"],
+    line_items: items.map((item) => ({
+      price_data: {
+        currency: "pln",
+        product_data: {
+          name: item.name,
+        },
+        unit_amount: Math.round(item.price * 100),
+      },
+      quantity: item.quantity,
+    })),
+    mode: "payment",
+    success_url: "https://localhost:5173/sukces",
+    cancel_url: "https://localhost:5173/koszyk",
+  });
+  res.json({ url: session.url });
 });
