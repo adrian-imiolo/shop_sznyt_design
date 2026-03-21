@@ -30,6 +30,7 @@ function Home() {
       <div id="kolekcja" />
       {products.map((product, index) => (
         <ProductSection
+          id={product.id}
           key={product.id}
           name={product.name}
           tagline={product.tagline}
