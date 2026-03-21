@@ -11,6 +11,7 @@ import AdminProducts from "./pages/admin/AdminProducts";
 import ShopLayout from "./components/ShopLayout";
 import AdminAddProduct from "./pages/admin/AdminAddProduct";
 import AdminEditProduct from "./pages/admin/AdminEditProduct";
+import OrderSuccess from "./pages/OrderSuccess";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
             <Route path="/o-nas" element={<About />} />
             <Route path="/kontakt" element={<Contact />} />
             <Route path="/koszyk" element={<Cart />} />
+            <Route path="/sukces" element={<OrderSuccess />} />
           </Route>
           <Route path="/admin" element={<AdminProducts />} />
           <Route path="/admin/produkty/nowy" element={<AdminAddProduct />} />
