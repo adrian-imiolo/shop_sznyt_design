@@ -178,3 +178,9 @@ app.post("/create-checkout-session", async (req, res) => {
   });
   res.json({ url: session.url });
 });
+
+// get orders
+app.get("/orders", async (req, res) => {
+  const orders = await prisma.order.findMany();
+  res.json(orders);
+});

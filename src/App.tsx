@@ -12,6 +12,7 @@ import ShopLayout from "./components/ShopLayout";
 import AdminAddProduct from "./pages/admin/AdminAddProduct";
 import AdminEditProduct from "./pages/admin/AdminEditProduct";
 import OrderSuccess from "./pages/OrderSuccess";
+import AdminOrders from "./pages/admin/AdminOrders";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           <Route path="/admin" element={<AdminProducts />} />
           <Route path="/admin/produkty/nowy" element={<AdminAddProduct />} />
           <Route path="/admin/produkty/:id" element={<AdminEditProduct />} />
+          <Route path="/admin/zamowienia" element={<AdminOrders />} />
         </Routes>
       </CartProvider>
     </BrowserRouter>
