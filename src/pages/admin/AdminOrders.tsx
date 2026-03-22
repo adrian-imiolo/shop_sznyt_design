@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-
+import { Link } from "react-router-dom";
 type Orders = {
   id: number;
   stripeSessionId: string;
@@ -24,8 +24,10 @@ function AdminOrders() {
   return (
     <>
       <div className="flex justify-between py-5 w-full bg-near-black text-xl font-dm-sans text-warm-white">
-        <h1 className="p-6">Panel admina</h1>
-        <p className="text-2xl uppercase p-6 mr-5">Zamówienia</p>
+        <Link to="/admin" className="p-6">
+          Panel admina
+        </Link>
+        <p className="p-6 mr-5">Zamówienia</p>
       </div>
       <div className="p-4">
         <table className="w-full border-collapse">
@@ -34,7 +36,7 @@ function AdminOrders() {
               <th className="p-3 text-left">Id</th>
               <th className="p-3 text-left w-32">Stripe Session Id</th>
               <th className="p-3 text-left">Status</th>
-              <th className="p-3 text-left w-16">Suma zamównienia</th>
+              <th className="p-3 text-left w-16">Suma zamówienia</th>
               <th className="p-3 text-left">Utworzono</th>
             </tr>
           </thead>
