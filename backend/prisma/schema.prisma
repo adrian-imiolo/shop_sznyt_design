@@ -39,4 +39,6 @@ model Order {
   status          String   @default("pending")
   total           Float
   createdAt       DateTime @default(now())
+  customerEmail   String?
+  userId          String?
 }

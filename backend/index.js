@@ -46,12 +46,19 @@ app.post(
     }
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
-      await prisma.order.create({
+      const order = await prisma.order.create({
         data: {
           stripeSessionId: session.id,
           status: "paid",
           total: session.amount_total / 100,
+          customerEmail: session.customer_details?.email,
         },
+      });
+      await transporter.sendMail({
+        from: process.env.SMTP_USER,
+        to: session.customer_details?.email,
+        subject: "Potwierdzenie zamówienia - Sznyt Design",
+        text: `Dziękujemy za złożenie zamówienia!\n\nNumer zamówienia: ${order.id}\nSuma: ${session.amount_total / 100} PLN\n\nSkontaktujemy się wkrótce.`,
       });
     }
     res.json({ received: true });
@@ -153,10 +160,6 @@ app.post("/contact", async (req, res) => {
   res.json(contactMessage);
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
-
 app.post("/create-checkout-session", async (req, res) => {
   const { items } = req.body;
 
@@ -173,8 +176,8 @@ app.post("/create-checkout-session", async (req, res) => {
       quantity: item.quantity,
     })),
     mode: "payment",
-    success_url: "https://localhost:5173/sukces",
-    cancel_url: "https://localhost:5173/koszyk",
+    success_url: "http://localhost:5173/sukces",
+    cancel_url: "http://localhost:5173/koszyk",
   });
   res.json({ url: session.url });
 });
@@ -183,4 +186,8 @@ app.post("/create-checkout-session", async (req, res) => {
 app.get("/orders", async (req, res) => {
   const orders = await prisma.order.findMany();
   res.json(orders);
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });
