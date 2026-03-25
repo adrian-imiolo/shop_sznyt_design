@@ -1,14 +1,16 @@
 import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "@clerk/react";
 
 function Cart() {
   const { items, removeItem, updateQuantity } = useCart();
+  const { userId } = useAuth();
 
   async function handleCheckout() {
     const res = await fetch("http://localhost:3000/create-checkout-session", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items }),
+      body: JSON.stringify({ items, userId }),
     });
     const data = await res.json();
     window.location.href = data.url;

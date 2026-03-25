@@ -13,6 +13,7 @@ import AdminAddProduct from "./pages/admin/AdminAddProduct";
 import AdminEditProduct from "./pages/admin/AdminEditProduct";
 import OrderSuccess from "./pages/OrderSuccess";
 import AdminOrders from "./pages/admin/AdminOrders";
+import MyOrders from "./pages/MyOrders";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
             <Route path="/kontakt" element={<Contact />} />
             <Route path="/koszyk" element={<Cart />} />
             <Route path="/sukces" element={<OrderSuccess />} />
+            <Route path="/moje-zamowienia" element={<MyOrders />} />
           </Route>
           <Route path="/admin" element={<AdminProducts />} />
           <Route path="/admin/produkty/nowy" element={<AdminAddProduct />} />

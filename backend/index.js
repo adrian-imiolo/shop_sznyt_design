@@ -52,6 +52,7 @@ app.post(
           status: "paid",
           total: session.amount_total / 100,
           customerEmail: session.customer_details?.email,
+          userId: session.metadata.userId,
         },
       });
       await transporter.sendMail({
@@ -161,7 +162,7 @@ app.post("/contact", async (req, res) => {
 });
 
 app.post("/create-checkout-session", async (req, res) => {
-  const { items } = req.body;
+  const { items, userId } = req.body;
 
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ["card", "p24", "blik"],
@@ -178,6 +179,7 @@ app.post("/create-checkout-session", async (req, res) => {
     mode: "payment",
     success_url: "http://localhost:5173/sukces",
     cancel_url: "http://localhost:5173/koszyk",
+    metadata: { userId: userId || null },
   });
   res.json({ url: session.url });
 });
@@ -185,6 +187,14 @@ app.post("/create-checkout-session", async (req, res) => {
 // get orders
 app.get("/orders", async (req, res) => {
   const orders = await prisma.order.findMany();
+  res.json(orders);
+});
+
+app.get("/orders/user/:userId", async (req, res) => {
+  const { userId } = req.params;
+  const orders = await prisma.order.findMany({
+    where: { userId },
+  });
   res.json(orders);
 });
 
