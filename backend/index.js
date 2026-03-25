@@ -55,12 +55,16 @@ app.post(
           userId: session.metadata.userId,
         },
       });
-      await transporter.sendMail({
-        from: process.env.SMTP_USER,
-        to: session.customer_details?.email,
-        subject: "Potwierdzenie zamówienia - Sznyt Design",
-        text: `Dziękujemy za złożenie zamówienia!\n\nNumer zamówienia: ${order.id}\nSuma: ${session.amount_total / 100} PLN\n\nSkontaktujemy się wkrótce.`,
-      });
+      try {
+        await transporter.sendMail({
+          from: process.env.SMTP_USER,
+          to: session.customer_details?.email,
+          subject: "Potwierdzenie zamówienia - Sznyt Design",
+          text: `Dziękujemy za złożenie zamówienia!\n\nNumer zamówienia: ${order.id}\nSuma: ${session.amount_total / 100} PLN\n\nSkontaktujemy się wkrótce.`,
+        });
+      } catch (emailErr) {
+        console.error("Błąd wysyłania emaila:", emailErr.message);
+      }
     }
     res.json({ received: true });
   },

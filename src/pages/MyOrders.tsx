@@ -34,17 +34,17 @@ function MyOrders() {
         <table className="w-full border-collapse">
           <thead className="bg-gray-100">
             <tr>
-              <th className="p-3 text-left">Id</th>
-              <th className="p-3 text-left">Status</th>
-              <th className="p-3 text-left w-16">Suma zamówienia</th>
-              <th className="p-3 text-left">Utworzono</th>
+              <th className="p-3 text-left w-1/4">Nr zamówienia</th>
+              <th className="p-3 text-left w-1/4">Status</th>
+              <th className="p-3 text-left w-1/4">Suma zamówienia</th>
+              <th className="p-3 text-left w-1/4">Utworzono</th>
             </tr>
           </thead>
           <tbody>
             {orders.map((order) => (
               <tr className="border-b border-borders" key={order.id}>
                 <td className="p-3">{order.id}</td>
-                <td className="p-3">{order.status}</td>
+                <td className="p-3">{order.status === "paid" ? "Opłacone" : order.status}</td>
                 <td className="p-3">{order.total} PLN</td>
                 <td className="p-3">
                   {new Date(order.createdAt).toLocaleDateString("pl-PL")}
