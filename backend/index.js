@@ -181,7 +181,8 @@ app.post("/create-checkout-session", async (req, res) => {
       quantity: item.quantity,
     })),
     mode: "payment",
-    success_url: "http://localhost:5173/sukces",
+    success_url:
+      "http://localhost:5173/sukces?session_id={CHECKOUT_SESSION_ID}",
     cancel_url: "http://localhost:5173/koszyk",
     metadata: { userId: userId || null },
   });
@@ -200,6 +201,14 @@ app.get("/orders/user/:userId", async (req, res) => {
     where: { userId },
   });
   res.json(orders);
+});
+
+app.get("/orders/by-session/:sessionId", async (req, res) => {
+  const { sessionId } = req.params;
+  const order = await prisma.order.findUnique({
+    where: { stripeSessionId: sessionId },
+  });
+  res.json(order);
 });
 
 app.listen(PORT, () => {
