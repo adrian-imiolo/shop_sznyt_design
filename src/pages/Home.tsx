@@ -2,19 +2,10 @@ import ProductSection from "../components/ProductSection";
 import Hero from "../components/Hero";
 import BrandStatement from "../components/BrandStatement";
 import { useState, useEffect } from "react";
-
-type Products = {
-  id: number;
-  name: string;
-  tagline: string;
-  description: string;
-  price: number;
-  imageUrl: string;
-  lifestyleImageUrl: string;
-};
+import type { Product } from "../types";
 
 function Home() {
-  const [products, setProducts] = useState<Products[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   useEffect(() => {
     async function load() {
       const res = await fetch(`http://localhost:3000/products`);
