@@ -2,6 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useCart } from "../context/CartContext";
 import type { Product } from "../types";
+import Skeleton from "../components/Skeleton";
 
 function ProductDetails() {
   const { id } = useParams();
@@ -11,12 +12,37 @@ function ProductDetails() {
   const { addItem } = useCart();
 
   useEffect(() => {
-    fetch(`http://localhost:3000/products/${id}`)
-      .then((res) => res.json())
-      .then((data) => setProduct(data));
+    async function load() {
+      const res = await fetch(`http://localhost:3000/products/${id}`);
+      const data = await res.json();
+      setProduct(data);
+    }
+    load();
   }, [id]);
 
-  if (!product) return <p>Ładowanie...</p>;
+  if (!product)
+    return (
+      <main className="flex flex-col md:flex-row min-h-screen">
+        {/* Image side — 60% width, left */}
+        <Skeleton className="relative w-full md:w-3/5 min-h-[60vh] md:min-h-screen overflow-hidden"></Skeleton>
+        <div className="w-full bg-[#F5F3F0] md:w-2/5 flex flex-col justify-between px-10 py-16 md:px-16 md:py-20">
+          <div>
+            <Skeleton className="w-1/2 h-6 mb-10"></Skeleton>
+            <Skeleton className="w-1/2 h-6 mb-4"></Skeleton>
+            <Skeleton className="w-5/6 h-12 mb-4"></Skeleton>
+            <Skeleton className="w-3/5 h-8 mb-8"></Skeleton>
+            <Skeleton className="w-full h-20 mb-10"></Skeleton>
+          </div>
+
+          {/* Bottom: price + stock + button */}
+          <div className="border-t border-borders pt-8">
+            <Skeleton className="w-1/3 h-10 mb-2"></Skeleton>
+            <Skeleton className="w-1/3 h-6 mb-8"></Skeleton>
+            <Skeleton className="w-1/2 h-10 inline-block px-10 py-3"></Skeleton>
+          </div>
+        </div>
+      </main>
+    );
 
   function addedToCart() {
     setAdded(true);
