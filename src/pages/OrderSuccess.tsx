@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import type { Order } from "../types";
 
@@ -7,11 +7,9 @@ function OrderSuccess() {
   const [searchParams] = useSearchParams();
   const [order, setOrder] = useState<Order | null>(null);
   const sessionId = searchParams.get("session_id");
-  console.log(sessionId);
 
   useEffect(() => {
     async function load() {
-      if (!sessionId) return;
       const res = await fetch(
         `http://localhost:3000/orders/by-session/${sessionId}`,
       );
@@ -21,7 +19,8 @@ function OrderSuccess() {
     load();
   }, [sessionId]);
 
-  if (!order) return;
+  if (!sessionId) return <Navigate to="/sklep" />;
+  if (!order) return <p>Loading...</p>;
 
   return (
     <div className="flex flex-col gap-6 justify-center items-center p-6 min-h-dvh">
