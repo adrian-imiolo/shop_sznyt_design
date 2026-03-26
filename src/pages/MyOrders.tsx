@@ -1,15 +1,9 @@
 import { useState, useEffect } from "react";
 import { RedirectToSignIn, useAuth } from "@clerk/react";
-
-type Orders = {
-  id: number;
-  status: string;
-  total: number;
-  createdAt: string;
-};
+import type { Order } from "../types";
 
 function MyOrders() {
-  const [orders, setOrders] = useState<Orders[] | null>(null);
+  const [orders, setOrders] = useState<Order[] | null>(null);
   const { userId } = useAuth();
 
   useEffect(() => {
@@ -44,7 +38,9 @@ function MyOrders() {
             {orders.map((order) => (
               <tr className="border-b border-borders" key={order.id}>
                 <td className="p-3">{order.id}</td>
-                <td className="p-3">{order.status === "paid" ? "Opłacone" : order.status}</td>
+                <td className="p-3">
+                  {order.status === "paid" ? "Opłacone" : order.status}
+                </td>
                 <td className="p-3">{order.total} PLN</td>
                 <td className="p-3">
                   {new Date(order.createdAt).toLocaleDateString("pl-PL")}

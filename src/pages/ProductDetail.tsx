@@ -1,20 +1,11 @@
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useCart } from "../context/CartContext";
-
-type ProductDetails = {
-  name: string;
-  tagline: string;
-  description: string;
-  price: number;
-  imageUrl: string;
-  lifestyleImageUrl: string;
-  stock: number;
-} | null;
+import type { Product } from "../types";
 
 function ProductDetails() {
   const { id } = useParams();
-  const [product, setProduct] = useState<ProductDetails>(null);
+  const [product, setProduct] = useState<Product | null>(null);
   const [hovered, setHovered] = useState(false);
   const [added, setAdded] = useState(false);
   const { addItem } = useCart();

@@ -1,16 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-
-type Product = {
-  id: number;
-  name: string;
-  tagline: string;
-  description: string;
-  price: number;
-  imageUrl: string;
-  lifestyleImageUrl: string;
-  stock: number;
-};
+import type { Product } from "../types";
 
 function ProductCard({ product }: { product: Product }) {
   const [hovered, setHovered] = useState(false);
