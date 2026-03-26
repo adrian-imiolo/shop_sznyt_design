@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import type { Order } from "../types";
 
 function OrderSuccess() {
   const [searchParams] = useSearchParams();
-  const [orderId, setOrderId] = useState<number | null>(null);
+  const [order, setOrder] = useState<Order | null>(null);
   const sessionId = searchParams.get("session_id");
   console.log(sessionId);
 
@@ -15,10 +16,12 @@ function OrderSuccess() {
         `http://localhost:3000/orders/by-session/${sessionId}`,
       );
       const data = await res.json();
-      setOrderId(data.id);
+      setOrder(data);
     }
     load();
   }, [sessionId]);
+
+  if (!order) return;
 
   return (
     <div className="flex flex-col gap-6 justify-center items-center p-6 min-h-dvh">
@@ -26,7 +29,16 @@ function OrderSuccess() {
         Dziękujemy za złożenie zamówienia!
       </h1>
       <p className="text-xl font-dm-sans text-near-black">
-        Twój numer zamówienia: {orderId}
+        Twój numer zamówienia: {order.id}
+      </p>
+      <p className="text-xl font-dm-sans text-near-black">
+        Status zamówienia: {order.status}
+      </p>
+      <p className="text-xl font-dm-sans text-near-black">
+        Suma zamówienia: {order.total}
+      </p>
+      <p className="text-xl font-dm-sans text-near-black">
+        Stworzono: {order.createdAt}
       </p>
       <Link
         className="border border-borders text-warm-white text-xl p-6 bg-near-black hover:bg-warm-white hover:text-near-black transition-colors duration-300"
