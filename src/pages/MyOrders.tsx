@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { RedirectToSignIn, useAuth } from "@clerk/react";
 import type { Order } from "../types";
 import Skeleton from "../components/Skeleton";
+import { Link } from "react-router-dom";
 
 function MyOrders() {
   const [orders, setOrders] = useState<Order[] | null>(null);
@@ -9,7 +10,6 @@ function MyOrders() {
 
   useEffect(() => {
     async function load() {
-      await new Promise((resolve) => setTimeout(resolve, 5000));
       const res = await fetch(`http://localhost:3000/orders/user/${userId}`);
       const data = await res.json();
       setOrders(data);
@@ -38,14 +38,42 @@ function MyOrders() {
             <tbody>
               {[1, 2, 3].map((i) => (
                 <tr className="border-b border-borders" key={i}>
-                  <td className="p-3"><Skeleton className="h-5 w-full" /></td>
-                  <td className="p-3"><Skeleton className="h-5 w-full" /></td>
-                  <td className="p-3"><Skeleton className="h-5 w-full" /></td>
-                  <td className="p-3"><Skeleton className="h-5 w-full" /></td>
+                  <td className="p-3">
+                    <Skeleton className="h-5 w-full" />
+                  </td>
+                  <td className="p-3">
+                    <Skeleton className="h-5 w-full" />
+                  </td>
+                  <td className="p-3">
+                    <Skeleton className="h-5 w-full" />
+                  </td>
+                  <td className="p-3">
+                    <Skeleton className="h-5 w-full" />
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      </>
+    );
+
+  if (orders.length === 0)
+    return (
+      <>
+        <div className="flex justify-between py-5 w-full bg-near-black text-xl font-dm-sans text-warm-white">
+          <p className="p-6 mr-5">Zamówienia</p>
+        </div>
+        <div className="flex flex-col gap-8 min-h-screen w-full justify-center items-center">
+          <h2 className="text-2xl text-near-black font-dm-sans">
+            Nie złożono jeszcze żadnych zamówień
+          </h2>
+          <Link
+            to="/sklep"
+            className="block font-dm-sans text-sm text-near-black border border-near-black px-8 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300"
+          >
+            Zobacz kolekcję
+          </Link>
         </div>
       </>
     );
