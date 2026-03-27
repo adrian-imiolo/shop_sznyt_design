@@ -74,7 +74,14 @@ function Cart() {
                   {item.quantity}
                 </span>
                 <button
-                  onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                  onClick={() =>
+                    updateQuantity(
+                      item.id,
+                      item.quantity < item.stock
+                        ? item.quantity + 1
+                        : item.quantity,
+                    )
+                  }
                   className="w-8 h-8 border border-borders text-near-black font-dm-sans text-lg leading-none hover:bg-near-black hover:text-warm-white transition-colors"
                 >
                   +

@@ -11,9 +11,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const existing = prev.find((i) => i.id === newItem.id);
       if (existing) {
         return prev.map((i) =>
-          i.id === newItem.id ? { ...i, quantity: i.quantity + 1 } : i,
+          i.id === newItem.id && i.quantity < i.stock
+            ? { ...i, quantity: i.quantity + 1 }
+            : i,
         );
       }
+      if (newItem.stock === 0) return prev;
       return [...prev, { ...newItem, quantity: 1 }];
     });
   }

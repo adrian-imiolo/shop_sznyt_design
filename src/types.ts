@@ -22,6 +22,7 @@ export type CartItem = {
   price: number;
   imageUrl: string;
   quantity: number;
+  stock: number;
 };
 
 export type CartContextType = {
