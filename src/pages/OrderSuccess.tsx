@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useSearchParams, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import type { Order } from "../types";
+import { Show } from "@clerk/react";
 
 function OrderSuccess() {
   const [searchParams] = useSearchParams();
@@ -20,31 +21,49 @@ function OrderSuccess() {
   }, [sessionId]);
 
   if (!sessionId) return <Navigate to="/sklep" />;
-  if (!order) return <p>Loading...</p>;
+  if (!order) return <p>Ładowanie...</p>;
 
   return (
-    <div className="flex flex-col gap-6 justify-center items-center p-6 min-h-dvh">
-      <h1 className="text-2xl font-dm-sans text-near-black">
-        Dziękujemy za złożenie zamówienia!
+    <div className="flex flex-col gap-8 justify-center items-center p-6 min-h-dvh">
+      <h1 className="font-cormorant font-light text-4xl text-near-black">
+        Dziękujemy za zamówienie!
       </h1>
-      <p className="text-xl font-dm-sans text-near-black">
-        Twój numer zamówienia: {order.id}
-      </p>
-      <p className="text-xl font-dm-sans text-near-black">
-        Status zamówienia: {order.status}
-      </p>
-      <p className="text-xl font-dm-sans text-near-black">
-        Suma zamówienia: {order.total}
-      </p>
-      <p className="text-xl font-dm-sans text-near-black">
-        Stworzono: {order.createdAt}
-      </p>
-      <Link
-        className="border border-borders text-warm-white text-xl p-6 bg-near-black hover:bg-warm-white hover:text-near-black transition-colors duration-300"
-        to="/sklep"
-      >
-        Wróć do sklepu
-      </Link>
+
+      <div className="border border-borders p-8 flex flex-col gap-4 w-full max-w-sm">
+        <div className="flex justify-between font-dm-sans text-near-black">
+          <span className="text-secondary-text">Numer zamówienia</span>
+          <span>#{order.id}</span>
+        </div>
+        <div className="flex justify-between font-dm-sans text-near-black">
+          <span className="text-secondary-text">Status</span>
+          <span>{order.status === "paid" ? "Opłacone" : order.status}</span>
+        </div>
+        <div className="flex justify-between font-dm-sans text-near-black">
+          <span className="text-secondary-text">Suma</span>
+          <span>{order.total} PLN</span>
+        </div>
+        <div className="flex justify-between font-dm-sans text-near-black">
+          <span className="text-secondary-text">Data</span>
+          <span>{new Date(order.createdAt).toLocaleDateString("pl-PL")}</span>
+        </div>
+      </div>
+
+      <div className="flex gap-4">
+        <Show when="signed-in">
+          <Link
+            className="border border-near-black text-near-black font-dm-sans px-6 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300"
+            to="/moje-zamowienia"
+          >
+            Moje zamówienia
+          </Link>
+        </Show>
+        <Link
+          className="bg-near-black text-warm-white font-dm-sans px-6 py-3 hover:bg-accent transition-colors duration-300"
+          to="/sklep"
+        >
+          Wróć do sklepu
+        </Link>
+      </div>
     </div>
   );
 }
