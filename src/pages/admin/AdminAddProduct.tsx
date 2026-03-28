@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function AdminAddProduct() {
   const [loading, setLoading] = useState(false);
@@ -54,15 +54,6 @@ function AdminAddProduct() {
 
   return (
     <>
-      <div className="flex justify-between py-5 w-full bg-near-black font-dm-sans text-warm-white">
-        <h1 className="p-6 text-xl">Stwórz nowy produkt</h1>
-        <Link
-          to="/admin"
-          className="border border-white p-6 mr-5 hover:bg-warm-white hover:text-near-black transition-colors duration-300"
-        >
-          Wróć
-        </Link>
-      </div>
       <div className="max-w-2xl mx-auto py-10 px-6">
         {error && <p className="text-red-600 font-dm-sans mb-4">{error}</p>}
         <form

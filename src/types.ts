@@ -16,6 +16,14 @@ export type Order = {
   createdAt: string;
 };
 
+export type Orders = {
+  id: number;
+  stripeSessionId: string;
+  status: string;
+  total: number;
+  createdAt: string;
+};
+
 export type CartItem = {
   id: number;
   name: string;

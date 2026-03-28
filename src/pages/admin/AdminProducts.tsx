@@ -67,25 +67,8 @@ function AdminProducts() {
         </>
       )}
 
-      <div className="flex justify-between py-5 w-full bg-near-black text-xl font-dm-sans text-warm-white">
-        <Link to="/admin" className="p-6">
-          Panel admina
-        </Link>
-        <Link
-          to="/admin/zamowienia"
-          className="border-solid border border-white p-6 mr-5 hover:bg-warm-white hover:text-near-black transition-colors duration-300"
-        >
-          Zamówienia
-        </Link>
-        <Link
-          to="/admin/produkty/nowy"
-          className="border-solid border border-white p-6 mr-5 hover:bg-warm-white hover:text-near-black transition-colors duration-300"
-        >
-          Dodaj produkt
-        </Link>
-      </div>
-      <div className="p-4">
-        <table className="w-full border-collapse">
+      <div className="flex flex-col items-center p-4">
+        <table className="mt-2 w-full border-collapse">
           <thead className="bg-gray-100">
             <tr>
               <th className="p-3 text-left">Nazwa</th>
