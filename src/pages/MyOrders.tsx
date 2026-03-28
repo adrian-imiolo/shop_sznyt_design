@@ -7,7 +7,11 @@ import { Link } from "react-router-dom";
 function MyOrders() {
   const [orders, setOrders] = useState<Order[] | null>(null);
   const { userId } = useAuth();
-
+  const header = (
+    <div className="flex justify-between py-5 w-full bg-near-black text-xl font-dm-sans text-warm-white">
+      <p className="p-6 mr-5">Zamówienia</p>
+    </div>
+  );
   useEffect(() => {
     async function load() {
       const res = await fetch(`http://localhost:3000/orders/user/${userId}`);
@@ -22,9 +26,7 @@ function MyOrders() {
   if (!orders)
     return (
       <>
-        <div className="flex justify-between py-5 w-full bg-near-black text-xl font-dm-sans text-warm-white">
-          <p className="p-6 mr-5">Zamówienia</p>
-        </div>
+        {header}
         <div className="p-4">
           <table className="w-full border-collapse">
             <thead className="bg-gray-100">
@@ -61,9 +63,7 @@ function MyOrders() {
   if (orders.length === 0)
     return (
       <>
-        <div className="flex justify-between py-5 w-full bg-near-black text-xl font-dm-sans text-warm-white">
-          <p className="p-6 mr-5">Zamówienia</p>
-        </div>
+        {header}
         <div className="flex flex-col gap-8 min-h-screen w-full justify-center items-center">
           <h2 className="text-2xl text-near-black font-dm-sans">
             Nie złożono jeszcze żadnych zamówień
@@ -80,9 +80,7 @@ function MyOrders() {
 
   return (
     <>
-      <div className="flex justify-between py-5 w-full bg-near-black text-xl font-dm-sans text-warm-white">
-        <p className="p-6 mr-5">Zamówienia</p>
-      </div>
+      {header}
       <div className="p-4">
         <table className="w-full border-collapse">
           <thead className="bg-gray-100">
