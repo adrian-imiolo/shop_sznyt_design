@@ -1,16 +1,6 @@
 import { useState } from "react";
 import { useCart } from "../context/CartContext";
-
-type ProductSectionProps = {
-  id: number;
-  name: string;
-  tagline: string;
-  description: string;
-  price: number;
-  imageUrl: string;
-  lifestyleImageUrl: string;
-  reverse?: boolean;
-};
+import type { ProductSectionProps } from "../types";
 
 function ProductSection({
   id,
@@ -21,9 +11,14 @@ function ProductSection({
   imageUrl,
   lifestyleImageUrl,
   reverse = false,
+  stock,
 }: ProductSectionProps) {
   const [hovered, setHovered] = useState(false);
   const [added, setAdded] = useState(false);
+  const { addItem, items } = useCart();
+
+  const cartItem = items.find((i) => i.id === id);
+  const cartQuantity = cartItem ? cartItem.quantity : 0;
 
   function addedToCart() {
     setAdded(true);
@@ -32,7 +27,6 @@ function ProductSection({
     }, 3000);
   }
 
-  const { addItem } = useCart();
   return (
     <>
       {/* Add to cart feedback popup */}
@@ -84,13 +78,18 @@ function ProductSection({
               {price} PLN
             </p>
             <button
+              disabled={cartQuantity >= stock}
               onClick={() => {
-                addItem({ id, name, price, imageUrl });
-                addedToCart();
+                const wasAdded = addItem({ id, name, price, imageUrl, stock });
+                if (wasAdded) {
+                  addedToCart();
+                }
               }}
-              className="inline-block font-dm-sans text-sm text-near-black border border-near-black px-8 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300"
+              className="disabled:opacity-50 disabled:cursor-not-allowed inline-block font-dm-sans text-sm text-near-black border border-near-black px-8 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300"
             >
-              Dodaj do koszyka
+              {cartQuantity >= stock
+                ? "Maksymalna ilość w koszyku"
+                : "Dodaj do koszyka"}
             </button>
           </div>
         </div>

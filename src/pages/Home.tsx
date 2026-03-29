@@ -30,6 +30,7 @@ function Home() {
           imageUrl={product.imageUrl}
           lifestyleImageUrl={product.lifestyleImageUrl}
           reverse={index % 2 !== 0}
+          stock={product.stock}
         />
       ))}
       <BrandStatement />
