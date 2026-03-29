@@ -9,6 +9,18 @@ export type Product = {
   stock: number;
 };
 
+export type ProductSectionProps = {
+  id: number;
+  name: string;
+  tagline: string;
+  description: string;
+  price: number;
+  imageUrl: string;
+  lifestyleImageUrl: string;
+  reverse?: boolean;
+  stock: number;
+};
+
 export type Order = {
   id: number;
   status: string;
@@ -35,7 +47,7 @@ export type CartItem = {
 
 export type CartContextType = {
   items: CartItem[];
-  addItem: (item: Omit<CartItem, "quantity">) => void;
+  addItem: (item: Omit<CartItem, "quantity">) => boolean;
   removeItem: (id: number) => void;
   updateQuantity: (id: number, quantity: number) => void;
   totalItems: number;

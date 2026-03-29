@@ -7,8 +7,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
 
   function addItem(newItem: Omit<CartItem, "quantity">) {
+    const existing = items.find((i) => i.id === newItem.id);
+    if (existing && existing.quantity >= existing.stock) return false;
+    if (newItem.stock === 0) return false;
     setItems((prev) => {
-      const existing = prev.find((i) => i.id === newItem.id);
       if (existing) {
         return prev.map((i) =>
           i.id === newItem.id && i.quantity < i.stock
@@ -19,6 +21,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (newItem.stock === 0) return prev;
       return [...prev, { ...newItem, quantity: 1 }];
     });
+    return true;
   }
 
   function removeItem(id: number) {
