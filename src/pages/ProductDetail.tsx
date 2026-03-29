@@ -9,7 +9,17 @@ function ProductDetails() {
   const [product, setProduct] = useState<Product | null>(null);
   const [hovered, setHovered] = useState(false);
   const [added, setAdded] = useState(false);
-  const { addItem } = useCart();
+  const { addItem, items } = useCart();
+
+  const cartItem = items.find((i) => i.id === Number(id));
+  const cartQuantity = cartItem ? cartItem.quantity : 0;
+
+  function addedToCart() {
+    setAdded(true);
+    setTimeout(() => {
+      setAdded(false);
+    }, 3000);
+  }
 
   useEffect(() => {
     async function load() {
@@ -43,13 +53,6 @@ function ProductDetails() {
         </div>
       </main>
     );
-
-  function addedToCart() {
-    setAdded(true);
-    setTimeout(() => {
-      setAdded(false);
-    }, 3000);
-  }
 
   return (
     <main className="flex flex-col md:flex-row min-h-screen">
@@ -113,19 +116,24 @@ function ProductDetails() {
             {product.stock > 0 ? `${product.stock} szt.` : "Brak w magazynie"}
           </p>
           <button
+            disabled={cartQuantity >= product.stock}
             onClick={() => {
-              addItem({
+              const wasAdded = addItem({
                 id: Number(id),
                 name: product.name,
                 price: product.price,
                 imageUrl: product.imageUrl,
                 stock: product.stock,
               });
-              addedToCart();
+              if (wasAdded) {
+                addedToCart();
+              }
             }}
-            className="inline-block font-dm-sans text-sm text-near-black border border-near-black px-10 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300"
+            className="disabled:opacity-50 disabled:cursor-not-allowed inline-block font-dm-sans text-sm text-near-black border border-near-black px-10 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300"
           >
-            Dodaj do koszyka
+            {cartQuantity >= product.stock
+              ? "Maksymalna ilość w koszyku"
+              : "Dodaj do koszyka"}
           </button>
         </div>
       </div>
