@@ -45,25 +45,60 @@ app.post(
       return res.status(400).send(`Webhook error: ${err.message}`);
     }
     if (event.type === "checkout.session.completed") {
-      const session = event.data.object;
-      const order = await prisma.order.create({
-        data: {
-          stripeSessionId: session.id,
-          status: "paid",
-          total: session.amount_total / 100,
-          customerEmail: session.customer_details?.email,
-          userId: session.metadata.userId,
-        },
-      });
       try {
-        await transporter.sendMail({
-          from: process.env.SMTP_USER,
-          to: session.customer_details?.email,
-          subject: "Potwierdzenie zamówienia - Sznyt Design",
-          text: `Dziękujemy za złożenie zamówienia!\n\nNumer zamówienia: ${order.id}\nSuma: ${session.amount_total / 100} PLN\n\nSkontaktujemy się wkrótce.`,
+        const session = event.data.object;
+
+        const lineItems = await stripe.checkout.sessions.listLineItems(
+          session.id,
+          { expand: ["data.price.product"] },
+        );
+
+        const order = await prisma.$transaction(async (tx) => {
+          const newOrder = await tx.order.create({
+            data: {
+              stripeSessionId: session.id,
+              status: "paid",
+              total: session.amount_total / 100,
+              customerEmail: session.customer_details?.email,
+              userId: session.metadata.userId,
+            },
+          });
+
+          for (const item of lineItems.data) {
+            const productId = Number(item.price.product.metadata.productId);
+            const quantity = item.quantity;
+            const price = item.price.unit_amount / 100;
+
+            await tx.orderItem.create({
+              data: {
+                orderId: newOrder.id,
+                productId,
+                quantity,
+                price,
+              },
+            });
+
+            await tx.product.update({
+              where: { id: productId },
+              data: { stock: { decrement: quantity } },
+            });
+          }
+
+          return newOrder;
         });
-      } catch (emailErr) {
-        console.error("Błąd wysyłania emaila:", emailErr.message);
+
+        try {
+          await transporter.sendMail({
+            from: process.env.SMTP_USER,
+            to: session.customer_details?.email,
+            subject: "Potwierdzenie zamówienia - Sznyt Design",
+            text: `Dziękujemy za złożenie zamówienia!\n\nNumer zamówienia: ${order.id}\nSuma: ${session.amount_total / 100} PLN\n\nSkontaktujemy się wkrótce.`,
+          });
+        } catch (emailErr) {
+          console.error("Błąd wysyłania emaila:", emailErr.message);
+        }
+      } catch (err) {
+        console.error("Błąd przetwarzania zamówienia:", err.message);
       }
     }
     res.json({ received: true });
@@ -175,6 +210,7 @@ app.post("/create-checkout-session", async (req, res) => {
         currency: "pln",
         product_data: {
           name: item.name,
+          metadata: { productId: item.id },
         },
         unit_amount: Math.round(item.price * 100),
       },
@@ -199,6 +235,11 @@ app.get("/orders/user/:userId", async (req, res) => {
   const { userId } = req.params;
   const orders = await prisma.order.findMany({
     where: { userId },
+    include: {
+      items: {
+        include: { product: true },
+      },
+    },
   });
   res.json(orders);
 });
@@ -207,6 +248,11 @@ app.get("/orders/by-session/:sessionId", async (req, res) => {
   const { sessionId } = req.params;
   const order = await prisma.order.findUnique({
     where: { stripeSessionId: sessionId },
+    include: {
+      items: {
+        include: { product: true },
+      },
+    },
   });
   res.json(order);
 });
