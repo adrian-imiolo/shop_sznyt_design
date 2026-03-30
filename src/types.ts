@@ -21,14 +21,26 @@ export type ProductSectionProps = {
   stock: number;
 };
 
+export type OrderItem = {
+  id: number;
+  quantity: number;
+  price: number;
+  productId: number;
+  product: {
+    name: string;
+    imageUrl: string;
+  };
+};
+
 export type Order = {
   id: number;
   status: string;
   total: number;
   createdAt: string;
+  items: OrderItem[];
 };
 
-export type Orders = {
+export type AdminOrder = {
   id: number;
   stripeSessionId: string;
   status: string;

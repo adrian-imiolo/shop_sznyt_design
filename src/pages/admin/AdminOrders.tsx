@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import type { Orders } from "../../types";
+import type { AdminOrder } from "../../types";
 
 function AdminOrders() {
-  const [orders, setOrders] = useState<Orders[] | null>(null);
+  const [orders, setOrders] = useState<AdminOrder[] | null>(null);
   useEffect(() => {
     async function load() {
       const res = await fetch("http://localhost:3000/orders");

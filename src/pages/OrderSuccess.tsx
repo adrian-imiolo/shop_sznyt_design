@@ -39,12 +39,22 @@ function OrderSuccess() {
           <span>{order.status === "paid" ? "Opłacone" : order.status}</span>
         </div>
         <div className="flex justify-between font-dm-sans text-near-black">
-          <span className="text-secondary-text">Suma</span>
-          <span>{order.total} PLN</span>
-        </div>
-        <div className="flex justify-between font-dm-sans text-near-black">
           <span className="text-secondary-text">Data</span>
           <span>{new Date(order.createdAt).toLocaleDateString("pl-PL")}</span>
+        </div>
+
+        <div className="border-t border-borders pt-4 flex flex-col gap-3">
+          {order.items?.map((item) => (
+            <div key={item.id} className="flex justify-between font-dm-sans text-near-black text-sm">
+              <span>{item.product.name} × {item.quantity}</span>
+              <span>{item.price * item.quantity} PLN</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="border-t border-borders pt-4 flex justify-between font-dm-sans text-near-black font-medium">
+          <span>Suma</span>
+          <span>{order.total} PLN</span>
         </div>
       </div>
 
