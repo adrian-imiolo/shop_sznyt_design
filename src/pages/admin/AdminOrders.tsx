@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import type { AdminOrder } from "../../types";
 import { useAuth } from "@clerk/react";
+import Skeleton from "../../components/Skeleton";
 
 function AdminOrders() {
   const { getToken } = useAuth();
@@ -24,7 +25,32 @@ function AdminOrders() {
   }, []);
 
   if (error) return <p className="p-4 text-red-600 font-dm-sans text-sm">{error}</p>;
-  if (!orders) return <p>Ładowanie...</p>;
+
+  if (!orders)
+    return (
+      <div className="flex flex-col items-center p-4">
+        <table className="w-full border-collapse">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="p-3 text-left">Id</th>
+              <th className="p-3 text-left w-32">Stripe Session Id</th>
+              <th className="p-3 text-left">Status</th>
+              <th className="p-3 text-left w-16">Suma zamówienia</th>
+              <th className="p-3 text-left">Utworzono</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[1, 2, 3].map((i) => (
+              <tr className="border-b border-borders" key={i}>
+                {Array.from({ length: 5 }).map((_, j) => (
+                  <td className="p-3" key={j}><Skeleton className="h-5 w-full" /></td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
 
   return (
     <>

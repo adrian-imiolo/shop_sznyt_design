@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@clerk/react";
+import Skeleton from "../../components/Skeleton";
 
 type Products = {
   id: number;
@@ -49,7 +50,35 @@ function AdminProducts() {
   }
 
   if (error) return <p className="p-4 text-red-600 font-dm-sans text-sm">{error}</p>;
-  if (!products) return <p>Ładowanie...</p>;
+
+  if (!products)
+    return (
+      <div className="flex flex-col items-center p-4">
+        <table className="mt-2 w-full border-collapse">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="p-3 text-left">Nazwa</th>
+              <th className="p-3 text-left w-32">Slogan</th>
+              <th className="p-3 text-left">Opis</th>
+              <th className="p-3 text-left w-16">Cena</th>
+              <th className="p-3 text-left">Zdjęcie studio</th>
+              <th className="p-3 text-left">Zdjęcie lifestyle</th>
+              <th className="p-3 text-left w-16">Ilość</th>
+              <th className="p-3 text-left">Akcje</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[1, 2, 3].map((i) => (
+              <tr className="border-b border-borders" key={i}>
+                {Array.from({ length: 8 }).map((_, j) => (
+                  <td className="p-3" key={j}><Skeleton className="h-5 w-full" /></td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
 
   return (
     <>

@@ -78,7 +78,7 @@ function Cart() {
                 <button
                   onClick={() => updateQuantity(item.id, item.quantity - 1)}
                   disabled={item.quantity <= 1}
-                  className="w-8 h-8 border border-borders text-near-black font-dm-sans text-lg leading-none hover:bg-near-black hover:text-warm-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="w-8 h-8 border border-borders text-near-black font-dm-sans text-lg leading-none hover:bg-near-black hover:text-warm-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed select-none"
                 >
                   −
                 </button>
@@ -94,7 +94,7 @@ function Cart() {
                         : item.quantity,
                     )
                   }
-                  className="w-8 h-8 border border-borders text-near-black font-dm-sans text-lg leading-none hover:bg-near-black hover:text-warm-white transition-colors"
+                  className="w-8 h-8 border border-borders text-near-black font-dm-sans text-lg leading-none hover:bg-near-black hover:text-warm-white transition-colors select-none"
                 >
                   +
                 </button>
