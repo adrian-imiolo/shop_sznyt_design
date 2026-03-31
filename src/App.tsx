@@ -15,6 +15,7 @@ import OrderSuccess from "./pages/OrderSuccess";
 import AdminOrders from "./pages/admin/AdminOrders";
 import MyOrders from "./pages/MyOrders";
 import AdminLayout from "./pages/admin/AdminLayout";
+import AdminGuard from "./components/AdminGuard";
 
 function App() {
   return (
@@ -32,7 +33,7 @@ function App() {
             <Route path="/sukces" element={<OrderSuccess />} />
             <Route path="/moje-zamowienia" element={<MyOrders />} />
           </Route>
-          <Route element={<AdminLayout />}>
+          <Route element={<AdminGuard><AdminLayout /></AdminGuard>}>
             <Route path="/admin" element={<AdminProducts />} />
             <Route path="/admin/produkty/nowy" element={<AdminAddProduct />} />
             <Route path="/admin/produkty/:id" element={<AdminEditProduct />} />
