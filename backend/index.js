@@ -33,6 +33,19 @@ app.use(cors({
 app.use(clerkMiddleware());
 const PORT = process.env.PORT || 3000;
 
+const SHIPPING_COSTS = {
+  paczkomat: 20,
+  inpost_kurier: 25,
+  dpd: 25,
+};
+const FREE_SHIPPING_THRESHOLD = 350;
+
+const SHIPPING_LABELS = {
+  paczkomat: "InPost Paczkomat",
+  inpost_kurier: "InPost Kurier",
+  dpd: "DPD Kurier",
+};
+
 function requireAdmin(req, res, next) {
   const { userId } = getAuth(req);
   if (userId !== process.env.ADMIN_USER_ID) {
@@ -67,6 +80,10 @@ app.post(
         );
 
         const order = await prisma.$transaction(async (tx) => {
+          const shippingAddress = session.metadata.shippingAddress
+            ? JSON.parse(session.metadata.shippingAddress)
+            : null;
+
           const newOrder = await tx.order.create({
             data: {
               stripeSessionId: session.id,
@@ -74,11 +91,15 @@ app.post(
               total: session.amount_total / 100,
               customerEmail: session.customer_details?.email,
               userId: session.metadata.userId,
+              shippingMethod: session.metadata.shippingMethod || null,
+              shippingAddress,
             },
           });
 
           for (const item of lineItems.data) {
             const productId = Number(item.price.product.metadata.productId);
+            if (!productId) continue; // skip shipping line item
+
             const quantity = item.quantity;
             const price = item.price.unit_amount / 100;
 
@@ -213,24 +234,52 @@ app.post("/contact", async (req, res) => {
 
 app.post("/create-checkout-session", async (req, res) => {
   try {
-    const { items, userId } = req.body;
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card", "p24", "blik"],
-      line_items: items.map((item) => ({
+    const { items, userId, shippingMethod, shippingAddress } = req.body;
+
+    if (!shippingMethod || !SHIPPING_COSTS[shippingMethod]) {
+      return res.status(400).json({ error: "Wybierz metodę dostawy" });
+    }
+
+    const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const shippingCost = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COSTS[shippingMethod];
+
+    const lineItems = items.map((item) => ({
+      price_data: {
+        currency: "pln",
+        product_data: {
+          name: item.name,
+          metadata: { productId: item.id },
+        },
+        unit_amount: Math.round(item.price * 100),
+      },
+      quantity: item.quantity,
+    }));
+
+    if (shippingCost > 0) {
+      lineItems.push({
         price_data: {
           currency: "pln",
           product_data: {
-            name: item.name,
-            metadata: { productId: item.id },
+            name: `Dostawa — ${SHIPPING_LABELS[shippingMethod]}`,
+            metadata: {},
           },
-          unit_amount: Math.round(item.price * 100),
+          unit_amount: shippingCost * 100,
         },
-        quantity: item.quantity,
-      })),
+        quantity: 1,
+      });
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card", "p24", "blik"],
+      line_items: lineItems,
       mode: "payment",
       success_url: `${process.env.FRONTEND_URL}/sukces?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.FRONTEND_URL}/koszyk`,
-      metadata: { userId: userId || null },
+      metadata: {
+        userId: userId || null,
+        shippingMethod,
+        shippingAddress: JSON.stringify(shippingAddress),
+      },
     });
     res.json({ url: session.url });
   } catch (err) {

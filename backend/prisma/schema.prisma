@@ -42,6 +42,8 @@ model Order {
   createdAt       DateTime    @default(now())
   customerEmail   String?
   userId          String?
+  shippingMethod  String?
+  shippingAddress Json?
   items           OrderItem[]
 }
 

@@ -46,6 +46,8 @@ export type AdminOrder = {
   status: string;
   total: number;
   createdAt: string;
+  shippingMethod: string | null;
+  shippingAddress: Record<string, string> | null;
 };
 
 export type CartItem = {
@@ -55,6 +57,22 @@ export type CartItem = {
   imageUrl: string;
   quantity: number;
   stock: number;
+};
+
+export type ShippingMethod = "paczkomat" | "inpost_kurier" | "dpd";
+
+export type CourierAddress = {
+  firstName: string;
+  lastName: string;
+  street: string;
+  postalCode: string;
+  city: string;
+  phone: string;
+};
+
+export type PaczkomatPoint = {
+  code: string;
+  name: string;
 };
 
 export type CartContextType = {

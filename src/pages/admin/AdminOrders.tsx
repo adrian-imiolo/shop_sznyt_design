@@ -35,14 +35,16 @@ function AdminOrders() {
               <th className="p-3 text-left">Id</th>
               <th className="p-3 text-left w-32">Stripe Session Id</th>
               <th className="p-3 text-left">Status</th>
-              <th className="p-3 text-left w-16">Suma zamówienia</th>
+              <th className="p-3 text-left w-16">Suma</th>
+              <th className="p-3 text-left">Dostawa</th>
+              <th className="p-3 text-left">Adres dostawy</th>
               <th className="p-3 text-left">Utworzono</th>
             </tr>
           </thead>
           <tbody>
             {[1, 2, 3].map((i) => (
               <tr className="border-b border-borders" key={i}>
-                {Array.from({ length: 5 }).map((_, j) => (
+                {Array.from({ length: 7 }).map((_, j) => (
                   <td className="p-3" key={j}><Skeleton className="h-5 w-full" /></td>
                 ))}
               </tr>
@@ -61,7 +63,9 @@ function AdminOrders() {
               <th className="p-3 text-left">Id</th>
               <th className="p-3 text-left w-32">Stripe Session Id</th>
               <th className="p-3 text-left">Status</th>
-              <th className="p-3 text-left w-16">Suma zamówienia</th>
+              <th className="p-3 text-left w-16">Suma</th>
+              <th className="p-3 text-left">Dostawa</th>
+              <th className="p-3 text-left">Adres dostawy</th>
               <th className="p-3 text-left">Utworzono</th>
             </tr>
           </thead>
@@ -72,6 +76,12 @@ function AdminOrders() {
                 <td className="p-3">{order.stripeSessionId}</td>
                 <td className="p-3">{order.status}</td>
                 <td className="p-3">{order.total} PLN</td>
+                <td className="p-3">{order.shippingMethod ?? "—"}</td>
+                <td className="p-3 text-sm">
+                  {order.shippingAddress
+                    ? Object.values(order.shippingAddress).filter(Boolean).join(", ")
+                    : "—"}
+                </td>
                 <td className="p-3">
                   {new Date(order.createdAt).toLocaleDateString("pl-PL")}
                 </td>
