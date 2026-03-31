@@ -45,7 +45,7 @@ function Shop() {
   const [products, setProducts] = useState<Product[]>([]);
 
   useEffect(() => {
-    fetch(`http://localhost:3000/products`)
+    fetch(`${import.meta.env.VITE_API_URL as string}/products`)
       .then((res) => res.json())
       .then((data) => setProducts(data));
   }, []);

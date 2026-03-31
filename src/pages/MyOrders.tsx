@@ -14,7 +14,7 @@ function MyOrders() {
   );
   useEffect(() => {
     async function load() {
-      const res = await fetch(`http://localhost:3000/orders/user/${userId}`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL as string}/orders/user/${userId}`);
       const data = await res.json();
       setOrders(data);
     }

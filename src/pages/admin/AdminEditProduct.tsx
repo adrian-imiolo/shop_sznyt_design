@@ -19,7 +19,7 @@ function AdminEditProduct() {
 
   useEffect(() => {
     async function load() {
-      const res = await fetch(`http://localhost:3000/products/${id}`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL as string}/products/${id}`);
       const data = await res.json();
       setFormData({
         ...data,
@@ -35,7 +35,7 @@ function AdminEditProduct() {
     setError("");
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:3000/products/${id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL as string}/products/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

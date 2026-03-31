@@ -218,8 +218,8 @@ app.post("/create-checkout-session", async (req, res) => {
     })),
     mode: "payment",
     success_url:
-      "http://localhost:5173/sukces?session_id={CHECKOUT_SESSION_ID}",
-    cancel_url: "http://localhost:5173/koszyk",
+      `${process.env.FRONTEND_URL}/sukces?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${process.env.FRONTEND_URL}/koszyk`,
     metadata: { userId: userId || null },
   });
   res.json({ url: session.url });

@@ -19,7 +19,7 @@ function AdminProducts() {
 
   useEffect(() => {
     async function load() {
-      const res = await fetch("http://localhost:3000/products");
+      const res = await fetch(`${import.meta.env.VITE_API_URL as string}/products`);
       const data = await res.json();
       setProducts(data);
     }
@@ -27,7 +27,7 @@ function AdminProducts() {
   }, []);
 
   function handleDelete(id: number) {
-    fetch(`http://localhost:3000/products/${id}`, {
+    fetch(`${import.meta.env.VITE_API_URL as string}/products/${id}`, {
       method: "DELETE",
     })
       .then((res) => res.json())

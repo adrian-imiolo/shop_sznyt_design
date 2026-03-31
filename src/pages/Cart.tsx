@@ -7,7 +7,7 @@ function Cart() {
   const { userId } = useAuth();
 
   async function handleCheckout() {
-    const res = await fetch("http://localhost:3000/create-checkout-session", {
+    const res = await fetch(`${import.meta.env.VITE_API_URL as string}/create-checkout-session`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ items, userId }),

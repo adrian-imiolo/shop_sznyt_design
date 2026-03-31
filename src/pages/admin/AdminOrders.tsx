@@ -5,7 +5,7 @@ function AdminOrders() {
   const [orders, setOrders] = useState<AdminOrder[] | null>(null);
   useEffect(() => {
     async function load() {
-      const res = await fetch("http://localhost:3000/orders");
+      const res = await fetch(`${import.meta.env.VITE_API_URL as string}/orders`);
       const data = await res.json();
       setOrders(data);
     }

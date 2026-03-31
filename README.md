@@ -1,73 +1,95 @@
-# React + TypeScript + Vite
+# Sznyt Design — E-commerce Shop
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A premium e-commerce shop for designer wooden picture frames. Built to replace an existing WooCommerce site at [sznytdesign.pl](https://sznytdesign.pl).
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+**Frontend**
+- React 19 + TypeScript
+- Tailwind CSS v4
+- Vite
+- React Router v7
+- Clerk (authentication)
 
-## React Compiler
+**Backend**
+- Node.js + Express
+- Prisma ORM
+- PostgreSQL
+- Stripe (payments)
+- Nodemailer (transactional email)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Features
 
-## Expanding the ESLint configuration
+- Product catalog with image hover swap
+- Shopping cart with real-time stock validation
+- Stripe checkout (card, BLIK, Przelewy24)
+- Order management with line items and stock decrement on purchase
+- Customer order history (authenticated)
+- Admin panel — product CRUD + order overview
+- Contact form with email notifications
+- Clerk authentication with Polish localization
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Project Structure
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+```
+/                   # React frontend (Vite)
+  src/
+    pages/          # Route-level components
+    components/     # Shared UI components
+    context/        # CartContext
+    lib/            # Utilities (API base URL)
+    types.ts        # Shared TypeScript types
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+backend/            # Express API
+  index.js          # All routes + Stripe webhook
+  prisma/
+    schema.prisma   # DB schema
+    seed.js         # Seed data
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Getting Started
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Prerequisites
+- Node.js 18+
+- PostgreSQL database
+- Stripe account
+- Clerk account
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Frontend setup
+
+```bash
+npm install
+cp .env.example .env
+# Fill in your values in .env
+npm run dev
 ```
+
+### Backend setup
+
+```bash
+cd backend
+npm install
+cp .env.example .env
+# Fill in your values in .env
+npx prisma migrate dev
+npx prisma generate
+npx tsx index.js
+```
+
+### Environment variables
+
+See `.env.example` (frontend) and `backend/.env.example` for all required variables.
+
+### Testing payments locally
+
+Run the Stripe CLI to forward webhook events:
+
+```bash
+stripe listen --forward-to localhost:3000/webhook
+```
+
+## Deployment
+
+- **Frontend** → Vercel
+- **Backend + Database** → Railway
+- **Domain + Email** → cyberfolks.pl (DNS pointing to Vercel/Railway)

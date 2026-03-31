@@ -12,7 +12,7 @@ function OrderSuccess() {
   useEffect(() => {
     async function load() {
       const res = await fetch(
-        `http://localhost:3000/orders/by-session/${sessionId}`,
+        `${import.meta.env.VITE_API_URL as string}/orders/by-session/${sessionId}`,
       );
       const data = await res.json();
       setOrder(data);
