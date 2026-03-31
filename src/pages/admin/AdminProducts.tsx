@@ -14,26 +14,37 @@ type Products = {
 
 function AdminProducts() {
   const [products, setProducts] = useState<Products[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<number | null>(null);
 
   useEffect(() => {
     async function load() {
-      const res = await fetch(`${import.meta.env.VITE_API_URL as string}/products`);
-      const data = await res.json();
-      setProducts(data);
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL as string}/products`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        setProducts(data);
+      } catch {
+        setError("Nie udało się załadować produktów.");
+      }
     }
     load();
   }, []);
 
-  function handleDelete(id: number) {
-    fetch(`${import.meta.env.VITE_API_URL as string}/products/${id}`, {
-      method: "DELETE",
-    })
-      .then((res) => res.json())
-      .then(() => setProducts(products!.filter((p) => p.id !== id)));
+  async function handleDelete(id: number) {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL as string}/products/${id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error();
+      setProducts(products!.filter((p) => p.id !== id));
+    } catch {
+      setError("Nie udało się usunąć produktu.");
+    }
   }
 
+  if (error) return <p className="p-4 text-red-600 font-dm-sans text-sm">{error}</p>;
   if (!products) return <p>Ładowanie...</p>;
 
   return (

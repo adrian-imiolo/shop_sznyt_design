@@ -7,20 +7,27 @@ import { Show } from "@clerk/react";
 function OrderSuccess() {
   const [searchParams] = useSearchParams();
   const [order, setOrder] = useState<Order | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const sessionId = searchParams.get("session_id");
 
   useEffect(() => {
     async function load() {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL as string}/orders/by-session/${sessionId}`,
-      );
-      const data = await res.json();
-      setOrder(data);
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL as string}/orders/by-session/${sessionId}`,
+        );
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        setOrder(data);
+      } catch {
+        setError("Nie udało się załadować zamówienia.");
+      }
     }
     load();
   }, [sessionId]);
 
   if (!sessionId) return <Navigate to="/sklep" />;
+  if (error) return <p className="font-dm-sans text-sm text-red-600 p-6">{error}</p>;
   if (!order) return <p>Ładowanie...</p>;
 
   return (

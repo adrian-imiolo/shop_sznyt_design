@@ -8,9 +8,14 @@ function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   useEffect(() => {
     async function load() {
-      const res = await fetch(`${import.meta.env.VITE_API_URL as string}/products`);
-      const data = await res.json();
-      setProducts(data);
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL as string}/products`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        setProducts(data);
+      } catch {
+        // products stays empty — page still renders with Hero and BrandStatement
+      }
     }
     load();
   }, []);

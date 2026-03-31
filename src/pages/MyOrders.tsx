@@ -6,21 +6,29 @@ import { Link } from "react-router-dom";
 
 function MyOrders() {
   const [orders, setOrders] = useState<Order[] | null>(null);
-  const { userId } = useAuth();
+  const [error, setError] = useState<string | null>(null);
+  const { userId, isLoaded } = useAuth();
   const header = (
     <div className="flex justify-between py-5 w-full bg-near-black text-xl font-dm-sans text-warm-white">
       <p className="p-6 mr-5">Zamówienia</p>
     </div>
   );
   useEffect(() => {
+    if (!userId) return;
     async function load() {
-      const res = await fetch(`${import.meta.env.VITE_API_URL as string}/orders/user/${userId}`);
-      const data = await res.json();
-      setOrders(data);
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL as string}/orders/user/${userId}`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        setOrders(data);
+      } catch {
+        setError("Nie udało się załadować zamówień. Spróbuj ponownie.");
+      }
     }
     load();
   }, [userId]);
 
+  if (!isLoaded) return null;
   if (!userId) return <RedirectToSignIn />;
 
   if (!orders)
@@ -50,6 +58,16 @@ function MyOrders() {
               ))}
             </tbody>
           </table>
+        </div>
+      </>
+    );
+
+  if (error)
+    return (
+      <>
+        {header}
+        <div className="flex justify-center items-center min-h-screen">
+          <p className="font-dm-sans text-sm text-red-600">{error}</p>
         </div>
       </>
     );

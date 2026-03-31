@@ -3,15 +3,22 @@ import type { AdminOrder } from "../../types";
 
 function AdminOrders() {
   const [orders, setOrders] = useState<AdminOrder[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     async function load() {
-      const res = await fetch(`${import.meta.env.VITE_API_URL as string}/orders`);
-      const data = await res.json();
-      setOrders(data);
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL as string}/orders`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        setOrders(data);
+      } catch {
+        setError("Nie udało się załadować zamówień.");
+      }
     }
     load();
   }, []);
 
+  if (error) return <p className="p-4 text-red-600 font-dm-sans text-sm">{error}</p>;
   if (!orders) return <p>Ładowanie...</p>;
 
   return (

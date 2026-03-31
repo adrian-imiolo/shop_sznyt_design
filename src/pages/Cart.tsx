@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "@clerk/react";
@@ -5,15 +6,26 @@ import { useAuth } from "@clerk/react";
 function Cart() {
   const { items, removeItem, updateQuantity } = useCart();
   const { userId } = useAuth();
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   async function handleCheckout() {
-    const res = await fetch(`${import.meta.env.VITE_API_URL as string}/create-checkout-session`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items, userId }),
-    });
-    const data = await res.json();
-    window.location.href = data.url;
+    setCheckoutLoading(true);
+    setCheckoutError(null);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL as string}/create-checkout-session`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items, userId }),
+      });
+      if (!res.ok) throw new Error("Błąd serwera");
+      const data = await res.json();
+      if (!data.url) throw new Error("Nie udało się otworzyć strony płatności");
+      window.location.href = data.url;
+    } catch {
+      setCheckoutError("Nie udało się przejść do płatności. Spróbuj ponownie.");
+      setCheckoutLoading(false);
+    }
   }
 
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
@@ -114,11 +126,15 @@ function Cart() {
               {subtotal} PLN
             </p>
           </div>
+          {checkoutError && (
+            <p className="font-dm-sans text-sm text-red-600">{checkoutError}</p>
+          )}
           <button
             onClick={handleCheckout}
-            className="font-dm-sans text-sm text-near-black border border-near-black px-12 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300 cursor-pointer"
+            disabled={checkoutLoading}
+            className="font-dm-sans text-sm text-near-black border border-near-black px-12 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Przejdź do kasy
+            {checkoutLoading ? "Przekierowywanie..." : "Przejdź do płatności"}
           </button>
         </div>
       </div>

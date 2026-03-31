@@ -108,153 +108,162 @@ app.post(
 app.use(express.json());
 
 app.get("/products", async (req, res) => {
-  const products = await prisma.product.findMany();
-  res.json(products);
+  try {
+    const products = await prisma.product.findMany();
+    res.json(products);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Błąd serwera" });
+  }
 });
 
 // get single product
 app.get("/products/:id", async (req, res) => {
-  const id = Number(req.params.id);
-  const singleProduct = await prisma.product.findUnique({
-    where: { id },
-  });
-  res.json(singleProduct);
+  try {
+    const id = Number(req.params.id);
+    const singleProduct = await prisma.product.findUnique({ where: { id } });
+    if (!singleProduct) return res.status(404).json({ error: "Nie znaleziono produktu" });
+    res.json(singleProduct);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Błąd serwera" });
+  }
 });
 
 // delete product
 app.delete("/products/:id", async (req, res) => {
-  const id = Number(req.params.id);
-  const deleteProduct = await prisma.product.delete({
-    where: { id },
-  });
-  res.json(deleteProduct);
+  try {
+    const id = Number(req.params.id);
+    const deleted = await prisma.product.delete({ where: { id } });
+    res.json(deleted);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Błąd serwera" });
+  }
 });
 
-//update product
+// update product
 app.put("/products/:id", async (req, res) => {
-  const {
-    name,
-    tagline,
-    description,
-    price,
-    imageUrl,
-    lifestyleImageUrl,
-    stock,
-  } = req.body;
-  const id = Number(req.params.id);
-  const update = await prisma.product.update({
-    where: { id },
-    data: {
-      name,
-      tagline,
-      description,
-      price,
-      imageUrl,
-      lifestyleImageUrl,
-      stock,
-    },
-  });
-  res.json(update);
+  try {
+    const { name, tagline, description, price, imageUrl, lifestyleImageUrl, stock } = req.body;
+    const id = Number(req.params.id);
+    const updated = await prisma.product.update({
+      where: { id },
+      data: { name, tagline, description, price, imageUrl, lifestyleImageUrl, stock },
+    });
+    res.json(updated);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Błąd serwera" });
+  }
 });
 
 app.post("/products", async (req, res) => {
-  const {
-    name,
-    tagline,
-    description,
-    price,
-    imageUrl,
-    lifestyleImageUrl,
-    stock,
-  } = req.body;
-  const product = await prisma.product.create({
-    data: {
-      name,
-      tagline,
-      description,
-      price,
-      imageUrl,
-      lifestyleImageUrl,
-      stock,
-    },
-  });
-  res.json(product);
+  try {
+    const { name, tagline, description, price, imageUrl, lifestyleImageUrl, stock } = req.body;
+    const product = await prisma.product.create({
+      data: { name, tagline, description, price, imageUrl, lifestyleImageUrl, stock },
+    });
+    res.json(product);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Błąd serwera" });
+  }
 });
 
-// submit contact form with data
+// submit contact form
 app.post("/contact", async (req, res) => {
   const { name, email, message } = req.body;
   if (!name || !email || !message) {
     return res.status(400).json({ error: "Wszystkie pola są wymagane." });
   }
-
-  const contactMessage = await prisma.contactMessage.create({
-    data: { name, email, message },
-  });
-  await transporter.sendMail({
-    from: process.env.SMTP_USER,
-    to: process.env.CONTACT_RECIPIENT,
-    replyTo: email,
-    text: `Imię: ${name}\nEmail: ${email}\n\nWiadomość:\n${message}`,
-  });
-  res.json(contactMessage);
+  try {
+    const contactMessage = await prisma.contactMessage.create({
+      data: { name, email, message },
+    });
+    try {
+      await transporter.sendMail({
+        from: process.env.SMTP_USER,
+        to: process.env.CONTACT_RECIPIENT,
+        replyTo: email,
+        text: `Imię: ${name}\nEmail: ${email}\n\nWiadomość:\n${message}`,
+      });
+    } catch (emailErr) {
+      console.error("Błąd wysyłania emaila:", emailErr.message);
+    }
+    res.json(contactMessage);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Błąd serwera" });
+  }
 });
 
 app.post("/create-checkout-session", async (req, res) => {
-  const { items, userId } = req.body;
-
-  const session = await stripe.checkout.sessions.create({
-    payment_method_types: ["card", "p24", "blik"],
-    line_items: items.map((item) => ({
-      price_data: {
-        currency: "pln",
-        product_data: {
-          name: item.name,
-          metadata: { productId: item.id },
+  try {
+    const { items, userId } = req.body;
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card", "p24", "blik"],
+      line_items: items.map((item) => ({
+        price_data: {
+          currency: "pln",
+          product_data: {
+            name: item.name,
+            metadata: { productId: item.id },
+          },
+          unit_amount: Math.round(item.price * 100),
         },
-        unit_amount: Math.round(item.price * 100),
-      },
-      quantity: item.quantity,
-    })),
-    mode: "payment",
-    success_url:
-      `${process.env.FRONTEND_URL}/sukces?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${process.env.FRONTEND_URL}/koszyk`,
-    metadata: { userId: userId || null },
-  });
-  res.json({ url: session.url });
+        quantity: item.quantity,
+      })),
+      mode: "payment",
+      success_url: `${process.env.FRONTEND_URL}/sukces?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.FRONTEND_URL}/koszyk`,
+      metadata: { userId: userId || null },
+    });
+    res.json({ url: session.url });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Błąd serwera" });
+  }
 });
 
 // get orders
 app.get("/orders", async (req, res) => {
-  const orders = await prisma.order.findMany();
-  res.json(orders);
+  try {
+    const orders = await prisma.order.findMany();
+    res.json(orders);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Błąd serwera" });
+  }
 });
 
 app.get("/orders/user/:userId", async (req, res) => {
-  const { userId } = req.params;
-  const orders = await prisma.order.findMany({
-    where: { userId },
-    include: {
-      items: {
-        include: { product: true },
-      },
-    },
-  });
-  res.json(orders);
+  try {
+    const { userId } = req.params;
+    const orders = await prisma.order.findMany({
+      where: { userId },
+      include: { items: { include: { product: true } } },
+    });
+    res.json(orders);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Błąd serwera" });
+  }
 });
 
 app.get("/orders/by-session/:sessionId", async (req, res) => {
-  const { sessionId } = req.params;
-  const order = await prisma.order.findUnique({
-    where: { stripeSessionId: sessionId },
-    include: {
-      items: {
-        include: { product: true },
-      },
-    },
-  });
-  res.json(order);
+  try {
+    const { sessionId } = req.params;
+    const order = await prisma.order.findUnique({
+      where: { stripeSessionId: sessionId },
+      include: { items: { include: { product: true } } },
+    });
+    if (!order) return res.status(404).json({ error: "Nie znaleziono zamówienia" });
+    res.json(order);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Błąd serwera" });
+  }
 });
 
 app.listen(PORT, () => {

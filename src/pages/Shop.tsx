@@ -43,11 +43,20 @@ function ProductCard({ product }: { product: Product }) {
 
 function Shop() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL as string}/products`)
-      .then((res) => res.json())
-      .then((data) => setProducts(data));
+    async function load() {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL as string}/products`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        setProducts(data);
+      } catch {
+        setError("Nie udało się załadować produktów. Spróbuj ponownie.");
+      }
+    }
+    load();
   }, []);
 
   return (
@@ -67,9 +76,13 @@ function Shop() {
       {/* Product grid */}
       <section className="bg-warm-white px-6 py-16">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+          {error ? (
+            <p className="font-dm-sans text-sm text-red-600 col-span-2">{error}</p>
+          ) : (
+            products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))
+          )}
         </div>
       </section>
     </main>

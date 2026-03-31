@@ -7,6 +7,7 @@ import Skeleton from "../components/Skeleton";
 function ProductDetails() {
   const { id } = useParams();
   const [product, setProduct] = useState<Product | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [hovered, setHovered] = useState(false);
   const [added, setAdded] = useState(false);
   const { addItem, items } = useCart();
@@ -23,13 +24,19 @@ function ProductDetails() {
 
   useEffect(() => {
     async function load() {
-      const res = await fetch(`${import.meta.env.VITE_API_URL as string}/products/${id}`);
-      const data = await res.json();
-      setProduct(data);
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL as string}/products/${id}`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        setProduct(data);
+      } catch {
+        setError("Nie udało się załadować produktu.");
+      }
     }
     load();
   }, [id]);
 
+  if (error) return <p className="font-dm-sans text-sm text-red-600 p-6">{error}</p>;
   if (!product)
     return (
       <main className="flex flex-col md:flex-row min-h-screen">
