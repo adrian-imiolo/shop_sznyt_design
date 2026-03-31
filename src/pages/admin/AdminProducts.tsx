@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@clerk/react";
 
 type Products = {
   id: number;
@@ -13,6 +14,7 @@ type Products = {
 };
 
 function AdminProducts() {
+  const { getToken } = useAuth();
   const [products, setProducts] = useState<Products[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -34,8 +36,10 @@ function AdminProducts() {
 
   async function handleDelete(id: number) {
     try {
+      const token = await getToken();
       const res = await fetch(`${import.meta.env.VITE_API_URL as string}/products/${id}`, {
         method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error();
       setProducts(products!.filter((p) => p.id !== id));

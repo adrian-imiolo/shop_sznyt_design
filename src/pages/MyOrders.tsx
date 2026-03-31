@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 function MyOrders() {
   const [orders, setOrders] = useState<Order[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const { userId, isLoaded } = useAuth();
+  const { userId, isLoaded, getToken } = useAuth();
   const header = (
     <div className="flex justify-between py-5 w-full bg-near-black text-xl font-dm-sans text-warm-white">
       <p className="p-6 mr-5">Zamówienia</p>
@@ -17,7 +17,10 @@ function MyOrders() {
     if (!userId) return;
     async function load() {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL as string}/orders/user/${userId}`);
+        const token = await getToken();
+        const res = await fetch(`${import.meta.env.VITE_API_URL as string}/orders/user/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         if (!res.ok) throw new Error();
         const data = await res.json();
         setOrders(data);

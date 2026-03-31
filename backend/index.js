@@ -7,6 +7,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import cors from "cors";
 import nodemailer from "nodemailer";
 import Stripe from "stripe";
+import { clerkMiddleware, requireAuth, getAuth } from "@clerk/express";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -25,8 +26,20 @@ const prisma = new PrismaClient({
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: true,
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
+app.use(clerkMiddleware());
 const PORT = process.env.PORT || 3000;
+
+function requireAdmin(req, res, next) {
+  const { userId } = getAuth(req);
+  if (userId !== process.env.ADMIN_USER_ID) {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+  next();
+}
 
 app.post(
   "/webhook",
@@ -131,7 +144,7 @@ app.get("/products/:id", async (req, res) => {
 });
 
 // delete product
-app.delete("/products/:id", async (req, res) => {
+app.delete("/products/:id", requireAuth(), requireAdmin, async (req, res) => {
   try {
     const id = Number(req.params.id);
     const deleted = await prisma.product.delete({ where: { id } });
@@ -143,7 +156,7 @@ app.delete("/products/:id", async (req, res) => {
 });
 
 // update product
-app.put("/products/:id", async (req, res) => {
+app.put("/products/:id", requireAuth(), requireAdmin, async (req, res) => {
   try {
     const { name, tagline, description, price, imageUrl, lifestyleImageUrl, stock } = req.body;
     const id = Number(req.params.id);
@@ -158,7 +171,7 @@ app.put("/products/:id", async (req, res) => {
   }
 });
 
-app.post("/products", async (req, res) => {
+app.post("/products", requireAuth(), requireAdmin, async (req, res) => {
   try {
     const { name, tagline, description, price, imageUrl, lifestyleImageUrl, stock } = req.body;
     const product = await prisma.product.create({
@@ -227,7 +240,7 @@ app.post("/create-checkout-session", async (req, res) => {
 });
 
 // get orders
-app.get("/orders", async (req, res) => {
+app.get("/orders", requireAuth(), requireAdmin, async (req, res) => {
   try {
     const orders = await prisma.order.findMany();
     res.json(orders);
@@ -237,9 +250,12 @@ app.get("/orders", async (req, res) => {
   }
 });
 
-app.get("/orders/user/:userId", async (req, res) => {
+app.get("/orders/user/:userId", requireAuth(), async (req, res) => {
   try {
     const { userId } = req.params;
+    if (getAuth(req).userId !== userId) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
     const orders = await prisma.order.findMany({
       where: { userId },
       include: { items: { include: { product: true } } },

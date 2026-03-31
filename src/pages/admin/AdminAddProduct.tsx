@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@clerk/react";
 
 function AdminAddProduct() {
+  const { getToken } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
@@ -21,9 +23,10 @@ function AdminAddProduct() {
     setError("");
     setLoading(true);
     try {
+      const token = await getToken();
       const res = await fetch(`${import.meta.env.VITE_API_URL as string}/products`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           ...formData,
           price: Number(formData.price),

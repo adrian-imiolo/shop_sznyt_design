@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { useAuth } from "@clerk/react";
 
 function AdminEditProduct() {
+  const { getToken } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     tagline: "",
@@ -35,9 +37,10 @@ function AdminEditProduct() {
     setError("");
     setLoading(true);
     try {
+      const token = await getToken();
       const res = await fetch(`${import.meta.env.VITE_API_URL as string}/products/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           ...formData,
           price: Number(formData.price),

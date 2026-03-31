@@ -1,13 +1,18 @@
 import { useState, useEffect } from "react";
 import type { AdminOrder } from "../../types";
+import { useAuth } from "@clerk/react";
 
 function AdminOrders() {
+  const { getToken } = useAuth();
   const [orders, setOrders] = useState<AdminOrder[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL as string}/orders`);
+        const token = await getToken();
+        const res = await fetch(`${import.meta.env.VITE_API_URL as string}/orders`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         if (!res.ok) throw new Error();
         const data = await res.json();
         setOrders(data);
