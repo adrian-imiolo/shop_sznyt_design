@@ -116,7 +116,7 @@ function MyOrders() {
                 <td className="p-3">
                   {order.items?.map((item) => (
                     <div key={item.id} className="text-sm">
-                      {item.product.name} × {item.quantity}
+                      {item.product?.name ?? "Produkt usunięty"} × {item.quantity}
                     </div>
                   ))}
                 </td>

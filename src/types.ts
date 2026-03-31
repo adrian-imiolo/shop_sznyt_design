@@ -25,11 +25,11 @@ export type OrderItem = {
   id: number;
   quantity: number;
   price: number;
-  productId: number;
+  productId: number | null;
   product: {
     name: string;
     imageUrl: string;
-  };
+  } | null;
 };
 
 export type Order = {
