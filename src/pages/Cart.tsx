@@ -62,7 +62,8 @@ function Cart() {
 
   function canCheckout() {
     if (!shippingMethod) return false;
-    if (shippingMethod === "paczkomat") return paczkomatPoint !== null;
+    if (shippingMethod === "paczkomat")
+      return paczkomatPoint !== null && Object.values(address).every((v) => v.trim() !== "");
     return Object.values(address).every((v) => v.trim() !== "");
   }
 
@@ -70,7 +71,10 @@ function Cart() {
     setCheckoutLoading(true);
     setCheckoutError(null);
     try {
-      const shippingAddress = shippingMethod === "paczkomat" ? paczkomatPoint : address;
+      const shippingAddress =
+        shippingMethod === "paczkomat"
+          ? { ...paczkomatPoint, firstName: address.firstName, lastName: address.lastName, phone: address.phone }
+          : address;
       const res = await fetch(`${import.meta.env.VITE_API_URL as string}/create-checkout-session`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -227,20 +231,37 @@ function Cart() {
 
           {/* Paczkomat picker */}
           {shippingMethod === "paczkomat" && (
-            <div className="flex flex-col gap-3">
-              <button
-                type="button"
-                onClick={openPaczkomatWidget}
-                className="font-dm-sans text-sm border border-near-black px-6 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300 self-start"
-              >
-                {paczkomatPoint ? "Zmień paczkomat" : "Wybierz paczkomat"}
-              </button>
-              {paczkomatPoint && (
-                <p className="font-dm-sans text-sm text-near-black">
-                  Wybrany: <span className="font-medium">{paczkomatPoint.code}</span>
-                  {paczkomatPoint.name !== paczkomatPoint.code && ` — ${paczkomatPoint.name}`}
-                </p>
-              )}
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-3">
+                <button
+                  type="button"
+                  onClick={openPaczkomatWidget}
+                  className="font-dm-sans text-sm border border-near-black px-6 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300 self-start"
+                >
+                  {paczkomatPoint ? "Zmień paczkomat" : "Wybierz paczkomat"}
+                </button>
+                {paczkomatPoint && (
+                  <p className="font-dm-sans text-sm text-near-black">
+                    Wybrany: <span className="font-medium">{paczkomatPoint.code}</span>
+                    {paczkomatPoint.name !== paczkomatPoint.code && ` — ${paczkomatPoint.name}`}
+                  </p>
+                )}
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {ADDRESS_FIELDS.map(({ key, label, full }) => (
+                  <div key={key} className={full ? "sm:col-span-2" : ""}>
+                    <label className="font-dm-sans text-xs text-secondary-text tracking-widest uppercase block mb-1">
+                      {label}
+                    </label>
+                    <input
+                      type="text"
+                      value={address[key]}
+                      onChange={(e) => setAddress((prev) => ({ ...prev, [key]: e.target.value }))}
+                      className="w-full border border-borders font-dm-sans text-sm text-near-black px-3 py-2 focus:outline-none focus:border-near-black"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
