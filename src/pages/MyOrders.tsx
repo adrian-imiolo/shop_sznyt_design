@@ -42,21 +42,21 @@ function MyOrders() {
           <table className="w-full border-collapse">
             <thead className="bg-gray-100">
               <tr>
-                <th className="p-3 text-left w-1/5">Nr zamówienia</th>
-                <th className="p-3 text-left w-1/5">Status</th>
-                <th className="p-3 text-left w-1/5">Produkty</th>
-                <th className="p-3 text-left w-1/5">Suma zamówienia</th>
-                <th className="p-3 text-left w-1/5">Utworzono</th>
+                <th className="p-3 text-left">Nr zamówienia</th>
+                <th className="p-3 text-left">Status</th>
+                <th className="p-3 text-left">Produkty</th>
+                <th className="p-3 text-left">Dostawa</th>
+                <th className="p-3 text-left">Adres dostawy</th>
+                <th className="p-3 text-left">Suma</th>
+                <th className="p-3 text-left">Data</th>
               </tr>
             </thead>
             <tbody>
               {[1, 2, 3].map((i) => (
                 <tr className="border-b border-borders" key={i}>
-                  <td className="p-3"><Skeleton className="h-5 w-full" /></td>
-                  <td className="p-3"><Skeleton className="h-5 w-full" /></td>
-                  <td className="p-3"><Skeleton className="h-5 w-full" /></td>
-                  <td className="p-3"><Skeleton className="h-5 w-full" /></td>
-                  <td className="p-3"><Skeleton className="h-5 w-full" /></td>
+                  {Array.from({ length: 7 }).map((_, j) => (
+                    <td className="p-3" key={j}><Skeleton className="h-5 w-full" /></td>
+                  ))}
                 </tr>
               ))}
             </tbody>
@@ -100,10 +100,13 @@ function MyOrders() {
         <table className="w-full border-collapse">
           <thead className="bg-gray-100">
             <tr>
-              <th className="p-3 text-left w-1/4">Nr zamówienia</th>
-              <th className="p-3 text-left w-1/4">Status</th>
-              <th className="p-3 text-left w-1/4">Suma zamówienia</th>
-              <th className="p-3 text-left w-1/4">Utworzono</th>
+              <th className="p-3 text-left">Nr zamówienia</th>
+              <th className="p-3 text-left">Status</th>
+              <th className="p-3 text-left">Produkty</th>
+              <th className="p-3 text-left">Dostawa</th>
+              <th className="p-3 text-left">Adres dostawy</th>
+              <th className="p-3 text-left">Suma</th>
+              <th className="p-3 text-left">Data</th>
             </tr>
           </thead>
           <tbody>
@@ -119,6 +122,12 @@ function MyOrders() {
                       {item.product?.name ?? "Produkt usunięty"} × {item.quantity}
                     </div>
                   ))}
+                </td>
+                <td className="p-3 text-sm">{order.shippingMethod ?? "—"}</td>
+                <td className="p-3 text-sm">
+                  {order.shippingAddress
+                    ? Object.values(order.shippingAddress).filter(Boolean).join(", ")
+                    : "—"}
                 </td>
                 <td className="p-3">{order.total} PLN</td>
                 <td className="p-3">

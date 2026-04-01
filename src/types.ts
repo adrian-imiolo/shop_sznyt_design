@@ -37,6 +37,8 @@ export type Order = {
   status: string;
   total: number;
   createdAt: string;
+  shippingMethod: string | null;
+  shippingAddress: Record<string, string> | null;
   items: OrderItem[];
 };
 
