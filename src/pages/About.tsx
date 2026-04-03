@@ -2,12 +2,12 @@ function About() {
   return (
     <main>
       {/* Hero — page title */}
-      <section className="bg-near-black px-6 py-32 flex items-end">
+      <section className="bg-near-black px-6 py-16 md:py-32 flex items-end">
         <div className="max-w-6xl mx-auto w-full">
           <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">
             O nas
           </p>
-          <h1 className="font-cormorant text-5xl md:text-7xl text-warm-white font-light leading-tight">
+          <h1 className="font-cormorant text-4xl md:text-6xl lg:text-7xl text-warm-white font-light leading-tight">
             Tworzymy ramy,
             <br />
             nie ozdobniki.
@@ -27,7 +27,7 @@ function About() {
         />
 
         {/* Text */}
-        <div className="w-full md:w-1/2 bg-warm-white flex items-center px-10 py-16 md:px-20">
+        <div className="w-full md:w-1/2 bg-warm-white flex items-center px-6 py-12 md:px-20">
           <div className="max-w-md">
             <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-6">
               Nasza historia
@@ -49,9 +49,9 @@ function About() {
       </section>
 
       {/* Process */}
-      <section className="bg-warm-white border-t border-borders px-6 py-24">
+      <section className="bg-warm-white border-t border-borders px-6 py-12 md:py-24">
         <div className="max-w-3xl mx-auto">
-          <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-16">
+          <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-8 md:mb-16">
             Proces, który ma znaczenie
           </p>
           {[
@@ -89,9 +89,9 @@ function About() {
       </section>
 
       {/* CTA */}
-      <section className="bg-near-black px-6 py-24 text-center">
+      <section className="bg-near-black px-6 py-12 md:py-24 text-center">
         <div className="max-w-xl mx-auto">
-          <h2 className="font-cormorant text-4xl text-warm-white font-light mb-4">
+          <h2 className="font-cormorant text-3xl md:text-4xl text-warm-white font-light mb-4">
             Znajdź ramę dla siebie.
           </h2>
           <p className="font-dm-sans text-sm text-secondary-text mb-8">

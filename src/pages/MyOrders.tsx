@@ -64,7 +64,7 @@ function MyOrders() {
     return (
       <main className="min-h-screen bg-warm-white px-6 py-16">
         <div className="max-w-3xl mx-auto">
-          <h1 className="font-cormorant text-5xl text-near-black font-light mb-12">
+          <h1 className="font-cormorant text-3xl md:text-5xl text-near-black font-light mb-8 md:mb-12">
             Moje zamówienia
           </h1>
           <div className="flex flex-col divide-y divide-borders">
@@ -115,7 +115,7 @@ function MyOrders() {
                 className="py-8 flex flex-col gap-4 group"
               >
                 {/* Header row */}
-                <div className="flex justify-between items-start">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 sm:gap-0">
                   <div>
                     <p className="font-cormorant text-2xl text-near-black font-light group-hover:text-accent transition-colors">
                       Zamówienie #{order.id}

@@ -87,7 +87,7 @@ function OrderDetail() {
           ← Moje zamówienia
         </Link>
 
-        <h1 className="font-cormorant text-5xl text-near-black font-light mb-2">
+        <h1 className="font-cormorant text-3xl md:text-5xl text-near-black font-light mb-2">
           Zamówienie #{order.id}
         </h1>
         <p className="font-dm-sans text-sm text-secondary-text mb-12">
@@ -97,31 +97,31 @@ function OrderDetail() {
         {/* Products */}
         <div className="flex flex-col divide-y divide-borders mb-12">
           {order.items?.map((item) => (
-            <div key={item.id} className="flex gap-6 py-6 items-center">
+            <div key={item.id} className="flex gap-4 md:gap-6 py-6 items-center">
               {item.product?.imageUrl ? (
                 <div
-                  className="w-20 h-20 bg-cover bg-center shrink-0"
+                  className="w-14 h-14 md:w-20 md:h-20 bg-cover bg-center shrink-0"
                   style={{ backgroundImage: `url(${item.product.imageUrl})` }}
                 />
               ) : (
-                <div className="w-20 h-20 bg-borders shrink-0" />
+                <div className="w-14 h-14 md:w-20 md:h-20 bg-borders shrink-0" />
               )}
-              <div className="flex-1">
-                <p className="font-cormorant text-xl text-near-black font-light">
+              <div className="flex-1 min-w-0">
+                <p className="font-cormorant text-lg md:text-xl text-near-black font-light">
                   {item.product?.name ?? "Produkt usunięty"}
                 </p>
                 <p className="font-dm-sans text-sm text-secondary-text">
                   {item.quantity} szt. × {item.price} PLN
                 </p>
               </div>
-              <p className="font-cormorant text-xl text-near-black font-light w-28 text-right">
+              <p className="font-cormorant text-lg md:text-xl text-near-black font-light w-20 md:w-28 text-right">
                 {item.price * item.quantity} PLN
               </p>
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-10">
           {/* Payment method */}
           {order.paymentMethod && (
             <div className="sm:col-span-2">

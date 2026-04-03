@@ -37,7 +37,7 @@ function Navbar() {
           </ul>
           <div className="flex items-center gap-6">
             <Show when="signed-out">
-              <div className="border border-borders px-6">
+              <div className="border border-borders px-3 md:px-6">
                 <SignInButton mode="modal">
                   <button className="font-dm-sans text-sm text-near-black hover:text-accent tracking-widest uppercase cursor-pointer">
                     Zaloguj
@@ -112,6 +112,7 @@ function Navbar() {
               <li key={link.label}>
                 <Link
                   to={link.to}
+                  onClick={() => setToggleMenu(false)}
                   className="font-dm-sans text-sm text-near-black hover:text-accent tracking-widest uppercase"
                 >
                   {link.label}

@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 function Hero() {
   return (
-    <section className="relative min-h-screen flex items-end bg-near-black">
+    <section className="relative min-h-[60vh] md:min-h-screen flex items-end bg-near-black">
       {/* Placeholder — replace with a real photo later */}
       <div className="absolute inset-0 bg-[#2a2420]" />
 
@@ -14,7 +14,7 @@ function Hero() {
         <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">
           Sznyt Design
         </p>
-        <h1 className="font-cormorant text-5xl md:text-7xl text-warm-white font-light leading-tight mb-6">
+        <h1 className="font-cormorant text-4xl md:text-6xl lg:text-7xl text-warm-white font-light leading-tight mb-6">
           Rama, która
           <br />
           staje się sztuką

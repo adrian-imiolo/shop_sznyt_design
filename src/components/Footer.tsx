@@ -5,7 +5,7 @@ function Footer() {
     <footer className="bg-warm-white border-t border-borders px-6 py-12 md:py-20">
       <div className="max-w-6xl mx-auto">
         {/* Main row */}
-        <div className="flex flex-col md:flex-row justify-between gap-8 md:gap-16 mb-8 md:mb-16 items-center md:items-start">
+        <div className="flex flex-col md:flex-row justify-between gap-8 md:gap-16 mb-8 md:mb-16 items-center md:items-start text-center md:text-left">
           {/* Brand */}
           <div className="max-w-xs">
             <Link

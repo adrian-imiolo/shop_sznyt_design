@@ -36,19 +36,19 @@ function Contact() {
   return (
     <main>
       {/* Hero header */}
-      <section className="bg-near-black px-6 py-32 flex items-end">
+      <section className="bg-near-black px-6 py-16 md:py-32 flex items-end">
         <div className="max-w-6xl mx-auto w-full">
           <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">
             Kontakt
           </p>
-          <h1 className="font-cormorant text-5xl md:text-7xl text-warm-white font-light leading-tight">
+          <h1 className="font-cormorant text-4xl md:text-6xl lg:text-7xl text-warm-white font-light leading-tight">
             Porozmawiajmy.
           </h1>
         </div>
       </section>
 
       {/* Form section */}
-      <section className="bg-warm-white px-6 py-24">
+      <section className="bg-warm-white px-6 py-12 md:py-24">
         <div className="max-w-xl mx-auto">
           <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-10">
             Napisz do nas

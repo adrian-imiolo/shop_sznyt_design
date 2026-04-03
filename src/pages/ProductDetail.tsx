@@ -42,7 +42,7 @@ function ProductDetails() {
       <main className="flex flex-col md:flex-row md:h-screen md:max-h-240">
         {/* Image side — 60% width, left */}
         <Skeleton className="relative w-full md:w-3/5 min-h-[60vh] md:h-full overflow-hidden"></Skeleton>
-        <div className="w-full bg-[#F5F3F0] md:w-2/5 flex flex-col justify-between px-10 py-16 md:px-16 md:py-20">
+        <div className="w-full bg-[#F5F3F0] md:w-2/5 flex flex-col justify-between px-6 py-12 md:px-16 md:py-20">
           <div>
             <Skeleton className="w-1/2 h-6 mb-10"></Skeleton>
             <Skeleton className="w-1/2 h-6 mb-4"></Skeleton>
@@ -89,7 +89,7 @@ function ProductDetails() {
 
       {/* Text side — 40% width, right */}
 
-      <div className="w-full md:w-2/5 flex flex-col justify-between bg-[#F5F3F0] px-10 py-16 md:px-16 md:py-20">
+      <div className="w-full md:w-2/5 flex flex-col justify-between bg-[#F5F3F0] px-6 py-12 md:px-16 md:py-20">
         {/* Top: breadcrumb + product info */}
         <div>
           <p className="font-dm-sans text-xs text-secondary-text tracking-widest uppercase mb-10">
@@ -102,7 +102,7 @@ function ProductDetails() {
           <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">
             Sznyt Design
           </p>
-          <h1 className="font-cormorant text-5xl text-near-black font-light leading-tight mb-4">
+          <h1 className="font-cormorant text-3xl md:text-5xl text-near-black font-light leading-tight mb-4">
             {product.name}
           </h1>
           <p className="font-cormorant text-lg text-secondary-text italic mb-8">

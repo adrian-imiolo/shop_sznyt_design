@@ -60,12 +60,12 @@ function ProductSection({
         </div>
 
         {/* Text side */}
-        <div className="w-full md:w-1/2 flex items-center bg-warm-white px-10 py-16 md:px-20">
+        <div className="w-full md:w-1/2 flex items-center bg-warm-white px-6 py-12 md:px-20">
           <div className="max-w-md">
             <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">
               Sznyt Design
             </p>
-            <h2 className="font-cormorant text-4xl md:text-5xl text-near-black font-light mb-4">
+            <h2 className="font-cormorant text-3xl md:text-4xl lg:text-5xl text-near-black font-light mb-4">
               {name}
             </h2>
             <p className="font-cormorant text-xl text-secondary-text italic mb-6">

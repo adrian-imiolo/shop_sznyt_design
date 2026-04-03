@@ -13,7 +13,7 @@ function ProductCard({ product }: { product: Product }) {
         onMouseLeave={() => setHovered(false)}
       >
         {/* Image with hover swap */}
-        <div className="relative h-125">
+        <div className="relative h-72 md:h-125">
           <div
             className={`absolute inset-0 bg-cover bg-center transition-opacity duration-700 ${hovered ? "opacity-0" : "opacity-100"}`}
             style={{ backgroundImage: `url(${product.imageUrl})` }}
@@ -62,20 +62,20 @@ function Shop() {
   return (
     <main>
       {/* Page header */}
-      <section className="bg-near-black px-6 py-32 flex items-end">
+      <section className="bg-near-black px-6 py-16 md:py-32 flex items-end">
         <div className="max-w-6xl mx-auto w-full">
           <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">
             Sklep
           </p>
-          <h1 className="font-cormorant text-5xl md:text-7xl text-warm-white font-light leading-tight">
+          <h1 className="font-cormorant text-4xl md:text-6xl lg:text-7xl text-warm-white font-light leading-tight">
             Poznaj nasze ramy.
           </h1>
         </div>
       </section>
 
       {/* Product grid */}
-      <section className="bg-warm-white px-6 py-16">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10">
+      <section className="bg-warm-white px-6 py-8 md:py-16">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
           {error ? (
             <p className="font-dm-sans text-sm text-red-600 col-span-2">{error}</p>
           ) : (
