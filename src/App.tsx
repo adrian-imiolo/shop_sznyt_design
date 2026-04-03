@@ -14,6 +14,7 @@ import AdminEditProduct from "./pages/admin/AdminEditProduct";
 import OrderSuccess from "./pages/OrderSuccess";
 import AdminOrders from "./pages/admin/AdminOrders";
 import MyOrders from "./pages/MyOrders";
+import OrderDetail from "./pages/OrderDetail";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminGuard from "./components/AdminGuard";
 
@@ -32,6 +33,7 @@ function App() {
             <Route path="/koszyk" element={<Cart />} />
             <Route path="/sukces" element={<OrderSuccess />} />
             <Route path="/moje-zamowienia" element={<MyOrders />} />
+            <Route path="/moje-zamowienia/:id" element={<OrderDetail />} />
           </Route>
           <Route element={<AdminGuard><AdminLayout /></AdminGuard>}>
             <Route path="/admin" element={<AdminProducts />} />

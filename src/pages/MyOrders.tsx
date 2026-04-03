@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import { RedirectToSignIn, useAuth } from "@clerk/react";
 import type { Order } from "../types";
 import Skeleton from "../components/Skeleton";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function MyOrders() {
   const [orders, setOrders] = useState<Order[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { userId, isLoaded, getToken } = useAuth();
+  const navigate = useNavigate();
   const header = (
     <div className="flex justify-between py-5 w-full bg-near-black text-xl font-dm-sans text-warm-white">
       <p className="p-6 mr-5">Zamówienia</p>
@@ -111,7 +112,11 @@ function MyOrders() {
           </thead>
           <tbody>
             {orders.map((order) => (
-              <tr className="border-b border-borders" key={order.id}>
+              <tr
+                className="border-b border-borders hover:bg-gray-50 cursor-pointer"
+                key={order.id}
+                onClick={() => navigate(`/moje-zamowienia/${order.id}`)}
+              >
                 <td className="p-3">{order.id}</td>
                 <td className="p-3">
                   {order.status === "paid" ? "Opłacone" : order.status}
