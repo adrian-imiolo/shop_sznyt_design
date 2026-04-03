@@ -54,7 +54,11 @@ function Cart() {
     easyPack.modalMap(
       (point: any, modal: any) => {
         modal.closeModal();
-        setPaczkomatPoint({ code: point.name, name: point.address?.line1 ?? point.name });
+        setPaczkomatPoint({
+          code: point.name,
+          name: point.address?.line1 ?? point.name,
+          city: point.address?.city,
+        });
       },
       { width: 500, height: 600 },
     );
@@ -73,7 +77,7 @@ function Cart() {
     try {
       const shippingAddress =
         shippingMethod === "paczkomat"
-          ? { ...paczkomatPoint, firstName: address.firstName, lastName: address.lastName, phone: address.phone }
+          ? { ...paczkomatPoint, ...address }
           : address;
       const res = await fetch(`${import.meta.env.VITE_API_URL as string}/create-checkout-session`, {
         method: "POST",

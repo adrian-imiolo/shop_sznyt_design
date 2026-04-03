@@ -79,6 +79,18 @@ app.post(
           { expand: ["data.price.product"] },
         );
 
+        let paymentMethod = null;
+        if (session.payment_intent) {
+          try {
+            const pi = await stripe.paymentIntents.retrieve(session.payment_intent, {
+              expand: ["latest_charge"],
+            });
+            paymentMethod = pi.latest_charge?.payment_method_details?.type ?? null;
+          } catch {
+            // non-blocking — order still saves without it
+          }
+        }
+
         const order = await prisma.$transaction(async (tx) => {
           const shippingAddress = session.metadata.shippingAddress
             ? JSON.parse(session.metadata.shippingAddress)
@@ -93,6 +105,7 @@ app.post(
               userId: session.metadata.userId,
               shippingMethod: session.metadata.shippingMethod || null,
               shippingAddress,
+              paymentMethod,
             },
           });
 
@@ -135,6 +148,39 @@ app.post(
         console.error("Błąd przetwarzania zamówienia:", err.message);
       }
     }
+
+    if (event.type === "checkout.session.expired") {
+      try {
+        const session = event.data.object;
+        await prisma.order.updateMany({
+          where: { stripeSessionId: session.id, status: "pending" },
+          data: { status: "cancelled" },
+        });
+      } catch (err) {
+        console.error("Błąd aktualizacji statusu (expired):", err.message);
+      }
+    }
+
+    if (event.type === "payment_intent.payment_failed") {
+      try {
+        const paymentIntent = event.data.object;
+        // find order by matching stripeSessionId via payment intent — look up the session
+        const sessions = await stripe.checkout.sessions.list({
+          payment_intent: paymentIntent.id,
+          limit: 1,
+        });
+        const sessionId = sessions.data[0]?.id;
+        if (sessionId) {
+          await prisma.order.updateMany({
+            where: { stripeSessionId: sessionId, status: "pending" },
+            data: { status: "failed" },
+          });
+        }
+      } catch (err) {
+        console.error("Błąd aktualizacji statusu (failed):", err.message);
+      }
+    }
+
     res.json({ received: true });
   },
 );
@@ -143,7 +189,7 @@ app.use(express.json());
 
 app.get("/products", async (req, res) => {
   try {
-    const products = await prisma.product.findMany();
+    const products = await prisma.product.findMany({ orderBy: { sortOrder: "asc" } });
     res.json(products);
   } catch (err) {
     console.error(err);
@@ -186,6 +232,22 @@ app.put("/products/:id", requireAuth(), requireAdmin, async (req, res) => {
       data: { name, tagline, description, price, imageUrl, lifestyleImageUrl, stock },
     });
     res.json(updated);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Błąd serwera" });
+  }
+});
+
+// reorder products — accepts [{id, sortOrder}, ...]
+app.patch("/products/reorder", requireAuth(), requireAdmin, async (req, res) => {
+  try {
+    const updates = req.body;
+    await Promise.all(
+      updates.map(({ id, sortOrder }) =>
+        prisma.product.update({ where: { id }, data: { sortOrder } })
+      )
+    );
+    res.json({ ok: true });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Błąd serwera" });
@@ -310,6 +372,24 @@ app.get("/orders/user/:userId", requireAuth(), async (req, res) => {
       include: { items: { include: { product: true } } },
     });
     res.json(orders);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Błąd serwera" });
+  }
+});
+
+app.get("/orders/:id", requireAuth(), async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const order = await prisma.order.findUnique({
+      where: { id },
+      include: { items: { include: { product: true } } },
+    });
+    if (!order) return res.status(404).json({ error: "Nie znaleziono zamówienia" });
+    if (order.userId && order.userId !== getAuth(req).userId) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+    res.json(order);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Błąd serwera" });

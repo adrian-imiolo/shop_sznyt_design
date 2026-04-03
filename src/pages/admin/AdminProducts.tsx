@@ -12,6 +12,7 @@ type Products = {
   imageUrl: string;
   lifestyleImageUrl: string;
   stock: number;
+  sortOrder: number;
 };
 
 function AdminProducts() {
@@ -49,6 +50,36 @@ function AdminProducts() {
     }
   }
 
+  async function move(index: number, direction: "up" | "down") {
+    if (!products) return;
+    const swapIndex = direction === "up" ? index - 1 : index + 1;
+    if (swapIndex < 0 || swapIndex >= products.length) return;
+
+    const updated = [...products];
+    const aOrder = updated[index].sortOrder;
+    const bOrder = updated[swapIndex].sortOrder;
+    updated[index] = { ...updated[index], sortOrder: bOrder };
+    updated[swapIndex] = { ...updated[swapIndex], sortOrder: aOrder };
+
+    // swap positions in array too
+    [updated[index], updated[swapIndex]] = [updated[swapIndex], updated[index]];
+    setProducts(updated);
+
+    try {
+      const token = await getToken();
+      await fetch(`${import.meta.env.VITE_API_URL as string}/products/reorder`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify([
+          { id: updated[index].id, sortOrder: updated[index].sortOrder },
+          { id: updated[swapIndex].id, sortOrder: updated[swapIndex].sortOrder },
+        ]),
+      });
+    } catch {
+      setError("Nie udało się zapisać kolejności.");
+    }
+  }
+
   if (error) return <p className="p-4 text-red-600 font-dm-sans text-sm">{error}</p>;
 
   if (!products)
@@ -57,6 +88,7 @@ function AdminProducts() {
         <table className="mt-2 w-full border-collapse">
           <thead className="bg-gray-100">
             <tr>
+              <th className="p-3 text-left w-16">Kolejność</th>
               <th className="p-3 text-left">Nazwa</th>
               <th className="p-3 text-left w-32">Slogan</th>
               <th className="p-3 text-left">Opis</th>
@@ -70,7 +102,7 @@ function AdminProducts() {
           <tbody>
             {[1, 2, 3].map((i) => (
               <tr className="border-b border-borders" key={i}>
-                {Array.from({ length: 8 }).map((_, j) => (
+                {Array.from({ length: 9 }).map((_, j) => (
                   <td className="p-3" key={j}><Skeleton className="h-5 w-full" /></td>
                 ))}
               </tr>
@@ -85,7 +117,6 @@ function AdminProducts() {
       {isDeleteModalOpen && (
         <>
           <div className="fixed inset-0 bg-black opacity-50 z-10"></div>
-
           <div className="flex flex-col items-center z-20 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/2 bg-warm-white border border-borders p-20">
             <p className="font-cormorant text-2xl font-light text-near-black">
               Czy na pewno chcesz usunąć ten produkt?
@@ -115,6 +146,7 @@ function AdminProducts() {
         <table className="mt-2 w-full border-collapse">
           <thead className="bg-gray-100">
             <tr>
+              <th className="p-3 text-left w-16">Kolejność</th>
               <th className="p-3 text-left">Nazwa</th>
               <th className="p-3 text-left w-32">Slogan</th>
               <th className="p-3 text-left">Opis</th>
@@ -126,8 +158,28 @@ function AdminProducts() {
             </tr>
           </thead>
           <tbody>
-            {products.map((product) => (
+            {products.map((product, index) => (
               <tr className="border-b border-borders" key={product.id}>
+                <td className="p-3">
+                  <div className="flex flex-col gap-1">
+                    <button
+                      onClick={() => move(index, "up")}
+                      disabled={index === 0}
+                      className="text-secondary-text hover:text-near-black disabled:opacity-20 disabled:cursor-not-allowed leading-none text-base"
+                      title="Przesuń wyżej"
+                    >
+                      ▲
+                    </button>
+                    <button
+                      onClick={() => move(index, "down")}
+                      disabled={index === products.length - 1}
+                      className="text-secondary-text hover:text-near-black disabled:opacity-20 disabled:cursor-not-allowed leading-none text-base"
+                      title="Przesuń niżej"
+                    >
+                      ▼
+                    </button>
+                  </div>
+                </td>
                 <td className="p-3">{product.name}</td>
                 <td className="p-3">{product.tagline}</td>
                 <td className="p-3">{product.description}</td>
@@ -146,7 +198,6 @@ function AdminProducts() {
                     className="text-red-600 hover:text-red-800"
                     onClick={() => {
                       setIsDeleteModalOpen(true);
-
                       setProductToDelete(product.id);
                     }}
                   >

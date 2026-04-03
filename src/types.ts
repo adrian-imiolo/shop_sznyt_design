@@ -39,6 +39,7 @@ export type Order = {
   createdAt: string;
   shippingMethod: string | null;
   shippingAddress: Record<string, string> | null;
+  paymentMethod: string | null;
   items: OrderItem[];
 };
 
@@ -75,6 +76,7 @@ export type CourierAddress = {
 export type PaczkomatPoint = {
   code: string;
   name: string;
+  city?: string;
 };
 
 export type CartContextType = {

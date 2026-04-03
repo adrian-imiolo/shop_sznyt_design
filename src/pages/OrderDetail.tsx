@@ -9,6 +9,29 @@ const SHIPPING_LABELS: Record<string, string> = {
   dpd: "DPD Kurier",
 };
 
+const PAYMENT_LABELS: Record<string, string> = {
+  card: "Karta płatnicza",
+  p24: "Przelewy24",
+  blik: "BLIK",
+};
+
+const STATUS_CONFIG: Record<string, { label: string; dot: string }> = {
+  paid:      { label: "Opłacone",               dot: "bg-green-500" },
+  pending:   { label: "Oczekuje na płatność",   dot: "bg-amber-400" },
+  cancelled: { label: "Anulowane",              dot: "bg-red-500" },
+  failed:    { label: "Nieudane",               dot: "bg-red-500" },
+};
+
+function StatusBadge({ status }: { status: string }) {
+  const config = STATUS_CONFIG[status] ?? { label: status, dot: "bg-gray-400" };
+  return (
+    <span className="inline-flex items-center gap-2">
+      <span className={`w-2 h-2 rounded-full shrink-0 ${config.dot}`} />
+      <span>{config.label}</span>
+    </span>
+  );
+}
+
 function OrderDetail() {
   const { id } = useParams();
   const { userId, isLoaded, getToken } = useAuth();
@@ -68,7 +91,7 @@ function OrderDetail() {
           Zamówienie #{order.id}
         </h1>
         <p className="font-dm-sans text-sm text-secondary-text mb-12">
-          {new Date(order.createdAt).toLocaleDateString("pl-PL")} · {order.status === "paid" ? "Opłacone" : order.status}
+          {new Date(order.createdAt).toLocaleDateString("pl-PL")} · <StatusBadge status={order.status} />
         </p>
 
         {/* Products */}
@@ -99,6 +122,18 @@ function OrderDetail() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+          {/* Payment method */}
+          {order.paymentMethod && (
+            <div className="sm:col-span-2">
+              <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">
+                Płatność
+              </p>
+              <p className="font-dm-sans text-sm text-near-black font-medium">
+                {PAYMENT_LABELS[order.paymentMethod] ?? order.paymentMethod}
+              </p>
+            </div>
+          )}
+
           {/* Shipping info */}
           <div>
             <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">
@@ -109,6 +144,12 @@ function OrderDetail() {
                 <p className="font-medium">{SHIPPING_LABELS[order.shippingMethod] ?? order.shippingMethod}</p>
                 {order.shippingMethod === "paczkomat" && address?.code && (
                   <p>Paczkomat: {address.code}{address.city ? `, ${address.city}` : ""}</p>
+                )}
+                {order.shippingMethod !== "paczkomat" && address && (
+                  <>
+                    {address.street && <p>{address.street}</p>}
+                    {address.postalCode && <p>{address.postalCode} {address.city}</p>}
+                  </>
                 )}
               </div>
             ) : (

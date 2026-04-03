@@ -10,6 +10,23 @@ const SHIPPING_LABELS: Record<string, string> = {
   dpd: "DPD Kurier",
 };
 
+const STATUS_CONFIG: Record<string, { label: string; dot: string }> = {
+  paid:      { label: "Opłacone",               dot: "bg-green-500" },
+  pending:   { label: "Oczekuje na płatność",   dot: "bg-amber-400" },
+  cancelled: { label: "Anulowane",              dot: "bg-red-500" },
+  failed:    { label: "Nieudane",               dot: "bg-red-500" },
+};
+
+function StatusBadge({ status }: { status: string }) {
+  const config = STATUS_CONFIG[status] ?? { label: status, dot: "bg-gray-400" };
+  return (
+    <span className="inline-flex items-center gap-2">
+      <span className={`w-2 h-2 rounded-full shrink-0 ${config.dot}`} />
+      <span>{config.label}</span>
+    </span>
+  );
+}
+
 function MyOrders() {
   const [orders, setOrders] = useState<Order[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -66,21 +83,16 @@ function MyOrders() {
 
   if (orders.length === 0)
     return (
-      <main className="min-h-screen bg-warm-white px-6 py-16">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="font-cormorant text-5xl text-near-black font-light mb-12">
-            Moje zamówienia
-          </h1>
-          <p className="font-dm-sans text-sm text-secondary-text mb-8">
-            Nie złożono jeszcze żadnych zamówień.
-          </p>
-          <Link
-            to="/sklep"
-            className="font-dm-sans text-sm text-near-black border border-near-black px-8 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300"
-          >
-            Zobacz kolekcję
-          </Link>
-        </div>
+      <main className="min-h-screen bg-warm-white flex flex-col items-center justify-center px-6 gap-8">
+        <h2 className="font-cormorant text-4xl text-near-black font-light">
+          Nie złożono jeszcze żadnych zamówień.
+        </h2>
+        <Link
+          to="/sklep"
+          className="font-dm-sans text-sm text-near-black border border-near-black px-8 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300"
+        >
+          Zobacz kolekcję
+        </Link>
       </main>
     );
 
@@ -109,8 +121,7 @@ function MyOrders() {
                       Zamówienie #{order.id}
                     </p>
                     <p className="font-dm-sans text-sm text-secondary-text mt-1">
-                      {new Date(order.createdAt).toLocaleDateString("pl-PL")} ·{" "}
-                      {order.status === "paid" ? "Opłacone" : order.status}
+                      {new Date(order.createdAt).toLocaleDateString("pl-PL")} · <StatusBadge status={order.status} />
                     </p>
                   </div>
                   <p className="font-cormorant text-2xl text-near-black font-light">
@@ -120,11 +131,22 @@ function MyOrders() {
 
                 {/* Products */}
                 {order.items && order.items.length > 0 && (
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-2">
                     {order.items.map((item) => (
-                      <p key={item.id} className="font-dm-sans text-sm text-secondary-text">
-                        {item.product?.name ?? "Produkt usunięty"} × {item.quantity}
-                      </p>
+                      <div key={item.id} className="flex items-center gap-3">
+                        {item.product?.imageUrl ? (
+                          <div
+                            className="w-10 h-10 bg-cover bg-center shrink-0"
+                            style={{ backgroundImage: `url(${item.product.imageUrl})` }}
+                          />
+                        ) : (
+                          <div className="w-10 h-10 bg-borders shrink-0" />
+                        )}
+                        <p className="font-dm-sans text-sm text-secondary-text">
+                          {item.product?.name ?? "Produkt usunięty"}{" "}
+                          <span className="text-near-black">× {item.quantity}</span>
+                        </p>
+                      </div>
                     ))}
                   </div>
                 )}
