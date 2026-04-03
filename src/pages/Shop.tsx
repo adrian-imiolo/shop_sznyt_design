@@ -12,7 +12,6 @@ function ProductCard({ product }: { product: Product }) {
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
-        {/* Image with hover swap */}
         <div className="relative h-72 md:h-125">
           <div
             className={`absolute inset-0 bg-cover bg-center transition-opacity duration-700 ${hovered ? "opacity-0" : "opacity-100"}`}
@@ -23,8 +22,6 @@ function ProductCard({ product }: { product: Product }) {
             style={{ backgroundImage: `url(${product.lifestyleImageUrl})` }}
           />
         </div>
-
-        {/* Card text */}
         <div className="pt-4 pb-6">
           <h2 className="font-cormorant text-2xl text-near-black font-light mb-1">
             {product.name}
@@ -73,6 +70,28 @@ function Shop() {
         </div>
       </section>
 
+      {/* Philosophy strip */}
+      <section className="bg-warm-white border-b border-borders px-6 py-12 md:py-16">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-center gap-10 md:gap-20">
+          <div className="md:w-1/2">
+            <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">
+              Nasze podejście
+            </p>
+            <h2 className="font-cormorant text-3xl md:text-4xl text-near-black font-light leading-snug">
+              Każda rama powstaje z jednego kawałka litego dębu.
+            </h2>
+          </div>
+          <div className="md:w-1/2 flex flex-col gap-4">
+            <p className="font-dm-sans text-sm text-secondary-text leading-relaxed">
+              Nie produkujemy masowo. Każdy projekt to świadoma decyzja o formie, proporcjach i materiale. Dąb, który wybieramy, starzeje się z godnością — z czasem nabiera charakteru, a nie go traci.
+            </p>
+            <p className="font-dm-sans text-sm text-secondary-text leading-relaxed">
+              Projektujemy ramy, które nie wychodzą z mody, bo nigdy do niej nie należały.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Product grid */}
       <section className="bg-warm-white px-6 py-8 md:py-16">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
@@ -83,6 +102,41 @@ function Shop() {
               <ProductCard key={product.id} product={product} />
             ))
           )}
+        </div>
+      </section>
+
+      {/* Materials strip */}
+      <section className="bg-near-black px-6 py-12 md:py-20">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-16">
+          {[
+            {
+              label: "Materiał",
+              title: "Lity dąb",
+              text: "Wybieramy drewno, które ma historię. Żadnych fornirów, żadnych skrótów.",
+            },
+            {
+              label: "Wykończenie",
+              title: "Olejowanie ręczne",
+              text: "Każda rama jest olejowana ręcznie, co podkreśla naturalny rysunek drewna.",
+            },
+            {
+              label: "Trwałość",
+              title: "Na lata",
+              text: "Zaprojektowane tak, by służyć dekadami — nie sezonami.",
+            },
+          ].map((item) => (
+            <div key={item.label}>
+              <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-3">
+                {item.label}
+              </p>
+              <h3 className="font-cormorant text-2xl text-warm-white font-light mb-3">
+                {item.title}
+              </h3>
+              <p className="font-dm-sans text-sm text-secondary-text leading-relaxed">
+                {item.text}
+              </p>
+            </div>
+          ))}
         </div>
       </section>
     </main>
