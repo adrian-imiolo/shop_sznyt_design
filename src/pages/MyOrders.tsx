@@ -2,18 +2,19 @@ import { useState, useEffect } from "react";
 import { RedirectToSignIn, useAuth } from "@clerk/react";
 import type { Order } from "../types";
 import Skeleton from "../components/Skeleton";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+
+const SHIPPING_LABELS: Record<string, string> = {
+  paczkomat: "InPost Paczkomat",
+  inpost_kurier: "InPost Kurier",
+  dpd: "DPD Kurier",
+};
 
 function MyOrders() {
   const [orders, setOrders] = useState<Order[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { userId, isLoaded, getToken } = useAuth();
-  const navigate = useNavigate();
-  const header = (
-    <div className="flex justify-between py-5 w-full bg-near-black text-xl font-dm-sans text-warm-white">
-      <p className="p-6 mr-5">Zamówienia</p>
-    </div>
-  );
+
   useEffect(() => {
     if (!userId) return;
     async function load() {
@@ -35,115 +36,142 @@ function MyOrders() {
   if (!isLoaded) return null;
   if (!userId) return <RedirectToSignIn />;
 
-  if (!orders)
-    return (
-      <>
-        {header}
-        <div className="p-4">
-          <table className="w-full border-collapse">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="p-3 text-left">Nr zamówienia</th>
-                <th className="p-3 text-left">Status</th>
-                <th className="p-3 text-left">Produkty</th>
-                <th className="p-3 text-left">Dostawa</th>
-                <th className="p-3 text-left">Adres dostawy</th>
-                <th className="p-3 text-left">Suma</th>
-                <th className="p-3 text-left">Data</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[1, 2, 3].map((i) => (
-                <tr className="border-b border-borders" key={i}>
-                  {Array.from({ length: 7 }).map((_, j) => (
-                    <td className="p-3" key={j}><Skeleton className="h-5 w-full" /></td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </>
-    );
-
   if (error)
     return (
-      <>
-        {header}
-        <div className="flex justify-center items-center min-h-screen">
-          <p className="font-dm-sans text-sm text-red-600">{error}</p>
+      <main className="min-h-screen bg-warm-white px-6 py-16 flex justify-center items-center">
+        <p className="font-dm-sans text-sm text-red-600">{error}</p>
+      </main>
+    );
+
+  if (!orders)
+    return (
+      <main className="min-h-screen bg-warm-white px-6 py-16">
+        <div className="max-w-3xl mx-auto">
+          <h1 className="font-cormorant text-5xl text-near-black font-light mb-12">
+            Moje zamówienia
+          </h1>
+          <div className="flex flex-col divide-y divide-borders">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="py-8 flex flex-col gap-3">
+                <Skeleton className="h-7 w-48" />
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-4 w-64" />
+                <Skeleton className="h-4 w-52" />
+              </div>
+            ))}
+          </div>
         </div>
-      </>
+      </main>
     );
 
   if (orders.length === 0)
     return (
-      <>
-        {header}
-        <div className="flex flex-col gap-8 min-h-screen w-full justify-center items-center">
-          <h2 className="text-2xl text-near-black font-dm-sans">
-            Nie złożono jeszcze żadnych zamówień
-          </h2>
+      <main className="min-h-screen bg-warm-white px-6 py-16">
+        <div className="max-w-3xl mx-auto">
+          <h1 className="font-cormorant text-5xl text-near-black font-light mb-12">
+            Moje zamówienia
+          </h1>
+          <p className="font-dm-sans text-sm text-secondary-text mb-8">
+            Nie złożono jeszcze żadnych zamówień.
+          </p>
           <Link
             to="/sklep"
-            className="block font-dm-sans text-sm text-near-black border border-near-black px-8 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300"
+            className="font-dm-sans text-sm text-near-black border border-near-black px-8 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300"
           >
             Zobacz kolekcję
           </Link>
         </div>
-      </>
+      </main>
     );
 
   return (
-    <>
-      {header}
-      <div className="p-4">
-        <table className="w-full border-collapse">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="p-3 text-left">Nr zamówienia</th>
-              <th className="p-3 text-left">Status</th>
-              <th className="p-3 text-left">Produkty</th>
-              <th className="p-3 text-left">Dostawa</th>
-              <th className="p-3 text-left">Adres dostawy</th>
-              <th className="p-3 text-left">Suma</th>
-              <th className="p-3 text-left">Data</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders.map((order) => (
-              <tr
-                className="border-b border-borders hover:bg-gray-50 cursor-pointer"
+    <main className="min-h-screen bg-warm-white px-6 py-16">
+      <div className="max-w-3xl mx-auto">
+        <h1 className="font-cormorant text-5xl text-near-black font-light mb-12">
+          Moje zamówienia
+        </h1>
+
+        <div className="flex flex-col divide-y divide-borders">
+          {orders.map((order) => {
+            const address = order.shippingAddress;
+            const isPaczkomat = order.shippingMethod === "paczkomat";
+
+            return (
+              <Link
                 key={order.id}
-                onClick={() => navigate(`/moje-zamowienia/${order.id}`)}
+                to={`/moje-zamowienia/${order.id}`}
+                className="py-8 flex flex-col gap-4 group"
               >
-                <td className="p-3">{order.id}</td>
-                <td className="p-3">
-                  {order.status === "paid" ? "Opłacone" : order.status}
-                </td>
-                <td className="p-3">
-                  {order.items?.map((item) => (
-                    <div key={item.id} className="text-sm">
-                      {item.product?.name ?? "Produkt usunięty"} × {item.quantity}
-                    </div>
-                  ))}
-                </td>
-                <td className="p-3 text-sm">{order.shippingMethod ?? "—"}</td>
-                <td className="p-3 text-sm">
-                  {order.shippingAddress
-                    ? Object.values(order.shippingAddress).filter(Boolean).join(", ")
-                    : "—"}
-                </td>
-                <td className="p-3">{order.total} PLN</td>
-                <td className="p-3">
-                  {new Date(order.createdAt).toLocaleDateString("pl-PL")}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                {/* Header row */}
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="font-cormorant text-2xl text-near-black font-light group-hover:text-accent transition-colors">
+                      Zamówienie #{order.id}
+                    </p>
+                    <p className="font-dm-sans text-sm text-secondary-text mt-1">
+                      {new Date(order.createdAt).toLocaleDateString("pl-PL")} ·{" "}
+                      {order.status === "paid" ? "Opłacone" : order.status}
+                    </p>
+                  </div>
+                  <p className="font-cormorant text-2xl text-near-black font-light">
+                    {order.total} PLN
+                  </p>
+                </div>
+
+                {/* Products */}
+                {order.items && order.items.length > 0 && (
+                  <div className="flex flex-col gap-1">
+                    {order.items.map((item) => (
+                      <p key={item.id} className="font-dm-sans text-sm text-secondary-text">
+                        {item.product?.name ?? "Produkt usunięty"} × {item.quantity}
+                      </p>
+                    ))}
+                  </div>
+                )}
+
+                {/* Shipping */}
+                {order.shippingMethod && (
+                  <div className="flex flex-col gap-1">
+                    <p className="font-dm-sans text-xs text-accent tracking-[0.2em] uppercase">
+                      {SHIPPING_LABELS[order.shippingMethod] ?? order.shippingMethod}
+                    </p>
+                    {address && (
+                      <>
+                        {isPaczkomat ? (
+                          <p className="font-dm-sans text-sm text-near-black">
+                            Paczkomat: {address.code}
+                            {address.city ? `, ${address.city}` : ""}
+                          </p>
+                        ) : (
+                          <p className="font-dm-sans text-sm text-near-black">
+                            {[
+                              address.firstName && address.lastName
+                                ? `${address.firstName} ${address.lastName}`
+                                : null,
+                              address.street,
+                              address.postalCode && address.city
+                                ? `${address.postalCode} ${address.city}`
+                                : address.city,
+                              address.phone,
+                            ]
+                              .filter(Boolean)
+                              .join(", ")}
+                          </p>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+
+                <p className="font-dm-sans text-xs text-secondary-text tracking-widest uppercase group-hover:text-accent transition-colors self-end">
+                  Szczegóły →
+                </p>
+              </Link>
+            );
+          })}
+        </div>
       </div>
-    </>
+    </main>
   );
 }
 
