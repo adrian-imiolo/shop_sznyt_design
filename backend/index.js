@@ -411,6 +411,48 @@ app.get("/orders/by-session/:sessionId", async (req, res) => {
   }
 });
 
+// submit return form
+app.post("/zwrot", async (req, res) => {
+  const { orderNumber, name, email, reason, bankAccount } = req.body;
+  if (!orderNumber || !name || !email || !reason || !bankAccount) {
+    return res.status(400).json({ error: "Wszystkie pola są wymagane." });
+  }
+  try {
+    await transporter.sendMail({
+      from: process.env.SMTP_USER,
+      to: process.env.CONTACT_RECIPIENT,
+      replyTo: email,
+      subject: `Zwrot towaru — zamówienie #${orderNumber}`,
+      text: `ZGŁOSZENIE ZWROTU\n\nNumer zamówienia: #${orderNumber}\nImię i nazwisko: ${name}\nEmail: ${email}\nNumer konta do zwrotu: ${bankAccount}\n\nPowód zwrotu:\n${reason}`,
+    });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("Błąd wysyłania zwrotu:", err.message);
+    res.status(500).json({ error: "Błąd serwera. Spróbuj ponownie lub napisz bezpośrednio na kontakt@sznytdesign.pl." });
+  }
+});
+
+// submit complaint form
+app.post("/reklamacja", async (req, res) => {
+  const { orderNumber, name, email, description } = req.body;
+  if (!orderNumber || !name || !email || !description) {
+    return res.status(400).json({ error: "Wszystkie pola są wymagane." });
+  }
+  try {
+    await transporter.sendMail({
+      from: process.env.SMTP_USER,
+      to: process.env.CONTACT_RECIPIENT,
+      replyTo: email,
+      subject: `Reklamacja — zamówienie #${orderNumber}`,
+      text: `ZGŁOSZENIE REKLAMACJI\n\nNumer zamówienia: #${orderNumber}\nImię i nazwisko: ${name}\nEmail: ${email}\n\nOpis problemu:\n${description}\n\nKlient zostanie poproszony o przesłanie zdjęć jako odpowiedź na ten email.`,
+    });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("Błąd wysyłania reklamacji:", err.message);
+    res.status(500).json({ error: "Błąd serwera. Spróbuj ponownie lub napisz bezpośrednio na kontakt@sznytdesign.pl." });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

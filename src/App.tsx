@@ -15,6 +15,10 @@ import OrderSuccess from "./pages/OrderSuccess";
 import AdminOrders from "./pages/admin/AdminOrders";
 import MyOrders from "./pages/MyOrders";
 import OrderDetail from "./pages/OrderDetail";
+import Regulamin from "./pages/Regulamin";
+import PolitykaPrywatnosci from "./pages/PolitykaPrywatnosci";
+import Zwroty from "./pages/Zwroty";
+import FAQ from "./pages/FAQ";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminGuard from "./components/AdminGuard";
 
@@ -34,6 +38,10 @@ function App() {
             <Route path="/sukces" element={<OrderSuccess />} />
             <Route path="/moje-zamowienia" element={<MyOrders />} />
             <Route path="/moje-zamowienia/:id" element={<OrderDetail />} />
+            <Route path="/regulamin" element={<Regulamin />} />
+            <Route path="/polityka-prywatnosci" element={<PolitykaPrywatnosci />} />
+            <Route path="/zwroty" element={<Zwroty />} />
+            <Route path="/faq" element={<FAQ />} />
           </Route>
           <Route element={<AdminGuard><AdminLayout /></AdminGuard>}>
             <Route path="/admin" element={<AdminProducts />} />

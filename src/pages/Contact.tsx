@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 function Contact() {
   const [name, setName] = useState("");
@@ -126,16 +127,21 @@ function Contact() {
                 Czas odpowiedzi
               </p>
               <p className="font-dm-sans text-sm text-secondary-text leading-relaxed">
-                Odpowiadamy w ciągu 1–2 dni roboczych. W wiadomości możesz zapytać o produkt, zamówienie indywidualne lub współpracę.
+                Odpowiadamy w ciągu 1–2 dni roboczych. W wiadomości możesz zapytać o produkt, zamówienie lub współpracę.
               </p>
             </div>
             <div>
               <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">
-                Zamówienia indywidualne
+                Pomocne linki
               </p>
-              <p className="font-dm-sans text-sm text-secondary-text leading-relaxed">
-                Realizujemy zamówienia na wymiar. Jeśli szukasz ramy o niestandardowych wymiarach lub wykończeniu — napisz, chętnie porozmawiamy.
-              </p>
+              <div className="flex flex-col gap-2">
+                <Link to="/faq" className="font-dm-sans text-sm text-near-black hover:text-accent transition-colors">
+                  Najczęściej zadawane pytania →
+                </Link>
+                <Link to="/zwroty" className="font-dm-sans text-sm text-near-black hover:text-accent transition-colors">
+                  Zwroty i reklamacje →
+                </Link>
+              </div>
             </div>
           </div>
 

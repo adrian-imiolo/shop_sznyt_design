@@ -16,7 +16,7 @@ function Footer() {
               Sznyt Design
             </Link>
             <p className="font-dm-sans text-sm text-secondary-text leading-relaxed mb-4">
-              Ramy z litego dębu. Projektowane z myślą o trwałości, nie trendach.
+              Ramy z charakterem. Projektowane z myślą o trwałości, nie trendach.
             </p>
             <a
               href="mailto:kontakt@sznytdesign.pl"
@@ -55,24 +55,30 @@ function Footer() {
               <p className="font-dm-sans text-xs text-accent tracking-[0.2em] uppercase mb-1">
                 Informacje
               </p>
-              <a
-                href="#"
+              <Link
+                to="/regulamin"
                 className="font-dm-sans text-sm text-secondary-text hover:text-warm-white transition-colors"
               >
                 Regulamin
-              </a>
-              <a
-                href="#"
+              </Link>
+              <Link
+                to="/polityka-prywatnosci"
                 className="font-dm-sans text-sm text-secondary-text hover:text-warm-white transition-colors"
               >
                 Polityka prywatności
-              </a>
-              <a
-                href="#"
+              </Link>
+              <Link
+                to="/zwroty"
                 className="font-dm-sans text-sm text-secondary-text hover:text-warm-white transition-colors"
               >
                 Zwroty
-              </a>
+              </Link>
+              <Link
+                to="/faq"
+                className="font-dm-sans text-sm text-secondary-text hover:text-warm-white transition-colors"
+              >
+                FAQ
+              </Link>
             </div>
             <div className="flex flex-col gap-4">
               <p className="font-dm-sans text-xs text-accent tracking-[0.2em] uppercase mb-1">
