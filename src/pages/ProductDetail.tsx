@@ -39,9 +39,9 @@ function ProductDetails() {
   if (error) return <p className="font-dm-sans text-sm text-red-600 p-6">{error}</p>;
   if (!product)
     return (
-      <main className="flex flex-col md:flex-row min-h-screen">
+      <main className="flex flex-col md:flex-row md:h-screen md:max-h-240">
         {/* Image side — 60% width, left */}
-        <Skeleton className="relative w-full md:w-3/5 min-h-[60vh] md:min-h-screen overflow-hidden"></Skeleton>
+        <Skeleton className="relative w-full md:w-3/5 min-h-[60vh] md:h-full overflow-hidden"></Skeleton>
         <div className="w-full bg-[#F5F3F0] md:w-2/5 flex flex-col justify-between px-10 py-16 md:px-16 md:py-20">
           <div>
             <Skeleton className="w-1/2 h-6 mb-10"></Skeleton>
@@ -62,7 +62,7 @@ function ProductDetails() {
     );
 
   return (
-    <main className="flex flex-col md:flex-row min-h-screen">
+    <main className="flex flex-col md:flex-row md:h-screen md:max-h-240">
       {/* Add to cart feedback popup */}
       <div
         className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-near-black text-warm-white font-dm-sans text-sm px-6 py-4 flex items-center gap-3 transition-opacity duration-500 ${added ? "opacity-100" : "opacity-0 pointer-events-none"}`}
@@ -73,16 +73,16 @@ function ProductDetails() {
 
       {/* Image side — 60% width, left */}
       <div
-        className="relative w-full md:w-3/5 min-h-[60vh] md:min-h-screen overflow-hidden cursor-pointer"
+        className="relative w-full md:w-3/5 min-h-[60vh] md:h-full overflow-hidden cursor-pointer bg-warm-white p-6 md:p-10"
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
         <div
-          className={`absolute inset-0 bg-cover bg-center transition-opacity duration-700 ${hovered ? "opacity-0" : "opacity-100"}`}
+          className={`absolute inset-6 md:inset-10 bg-cover bg-center transition-opacity duration-700 ${hovered ? "opacity-0" : "opacity-100"}`}
           style={{ backgroundImage: `url(${product.imageUrl})` }}
         />
         <div
-          className={`absolute inset-0 bg-cover bg-center transition-opacity duration-700 ${hovered ? "opacity-100" : "opacity-0"}`}
+          className={`absolute inset-6 md:inset-10 bg-cover bg-center transition-opacity duration-700 ${hovered ? "opacity-100" : "opacity-0"}`}
           style={{ backgroundImage: `url(${product.lifestyleImageUrl})` }}
         />
       </div>
@@ -142,6 +142,14 @@ function ProductDetails() {
               ? "Maksymalna ilość w koszyku"
               : "Dodaj do koszyka"}
           </button>
+          <div className="mt-6">
+            <Link
+              to="/sklep"
+              className="font-dm-sans text-xs text-secondary-text tracking-widest uppercase hover:text-accent transition-colors"
+            >
+              ← Odkryj całą kolekcję
+            </Link>
+          </div>
         </div>
       </div>
     </main>
