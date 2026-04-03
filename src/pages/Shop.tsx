@@ -78,12 +78,12 @@ function Shop() {
               Nasze podejście
             </p>
             <h2 className="font-cormorant text-3xl md:text-4xl text-near-black font-light leading-snug">
-              Każda rama powstaje z jednego kawałka litego dębu.
+              Każda rama to świadoma decyzja o formie i materiale.
             </h2>
           </div>
           <div className="md:w-1/2 flex flex-col gap-4">
             <p className="font-dm-sans text-sm text-secondary-text leading-relaxed">
-              Nie produkujemy masowo. Każdy projekt to świadoma decyzja o formie, proporcjach i materiale. Dąb, który wybieramy, starzeje się z godnością — z czasem nabiera charakteru, a nie go traci.
+              Nie produkujemy masowo. Wybieramy materiały, które starzeją się z godnością — z czasem nabierają charakteru, a nie go tracą.
             </p>
             <p className="font-dm-sans text-sm text-secondary-text leading-relaxed">
               Projektujemy ramy, które nie wychodzą z mody, bo nigdy do niej nie należały.
@@ -111,13 +111,13 @@ function Shop() {
           {[
             {
               label: "Materiał",
-              title: "Lity dąb",
-              text: "Wybieramy drewno, które ma historię. Żadnych fornirów, żadnych skrótów.",
+              title: "Wysoka jakość",
+              text: "Wybieramy materiały, które mają charakter. Każdy detal jest decyzją, nie przypadkiem.",
             },
             {
               label: "Wykończenie",
-              title: "Olejowanie ręczne",
-              text: "Każda rama jest olejowana ręcznie, co podkreśla naturalny rysunek drewna.",
+              title: "Precyzja wykonania",
+              text: "Stawiamy na rzemiosło — każda rama przechodzi kontrolę jakości zanim trafi do klienta.",
             },
             {
               label: "Trwałość",

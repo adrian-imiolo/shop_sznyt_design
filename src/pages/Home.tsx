@@ -46,13 +46,13 @@ function Home() {
           {[
             {
               label: "Materiał",
-              title: "Lity dąb",
-              text: "Żadnych fornirów, żadnych skrótów. Wybieramy drewno, które z wiekiem nabiera charakteru.",
+              title: "Wysoka jakość",
+              text: "Wybieramy materiały z charakterem. Każdy detal jest decyzją, nie przypadkiem.",
             },
             {
               label: "Wykonanie",
-              title: "Ręczne wykończenie",
-              text: "Każda rama jest olejowana i wykańczana ręcznie. Precyzja, której nie zastąpi maszyna.",
+              title: "Precyzja rzemiosła",
+              text: "Każda rama przechodzi kontrolę jakości zanim trafi do klienta. Precyzja, której nie zastąpi masa.",
             },
             {
               label: "Projekt",

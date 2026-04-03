@@ -95,14 +95,22 @@ function About() {
             Znajdź ramę dla siebie.
           </h2>
           <p className="font-dm-sans text-sm text-secondary-text mb-8">
-            Dwie kolekcje. Każda z charakterem.
+            Dwie kolekcje. Każda z charakterem. Masz pytania — napisz do nas.
           </p>
-          <a
-            href="/sklep"
-            className="inline-block font-dm-sans text-sm text-warm-white border border-warm-white/50 px-10 py-3 hover:bg-warm-white hover:text-near-black transition-colors duration-300"
-          >
-            Zobacz kolekcję
-          </a>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <a
+              href="/sklep"
+              className="inline-block font-dm-sans text-sm text-warm-white border border-warm-white/50 px-10 py-3 hover:bg-warm-white hover:text-near-black transition-colors duration-300"
+            >
+              Zobacz kolekcję
+            </a>
+            <a
+              href="/kontakt"
+              className="inline-block font-dm-sans text-sm text-accent border border-accent/50 px-10 py-3 hover:bg-accent hover:text-near-black transition-colors duration-300"
+            >
+              Skontaktuj się
+            </a>
+          </div>
         </div>
       </section>
     </main>
