@@ -32,6 +32,7 @@ function Cart() {
   const { userId } = useAuth();
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [regulaminAccepted, setRegulaminAccepted] = useState(false);
   const [shippingMethod, setShippingMethod] = useState<ShippingMethod | null>(null);
   const [paczkomatPoint, setPaczkomatPoint] = useState<PaczkomatPoint | null>(null);
   const [address, setAddress] = useState<CourierAddress>({
@@ -328,12 +329,30 @@ function Cart() {
               Wybierz metodę dostawy, aby kontynuować.
             </p>
           )}
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={regulaminAccepted}
+              onChange={(e) => setRegulaminAccepted(e.target.checked)}
+              className="mt-0.5 shrink-0 accent-near-black w-4 h-4"
+            />
+            <span className="font-dm-sans text-xs text-secondary-text leading-relaxed">
+              Akceptuję{" "}
+              <Link to="/regulamin" className="text-near-black hover:text-accent underline" target="_blank">
+                Regulamin sklepu
+              </Link>{" "}
+              oraz{" "}
+              <Link to="/polityka-prywatnosci" className="text-near-black hover:text-accent underline" target="_blank">
+                Politykę prywatności
+              </Link>
+            </span>
+          </label>
           {checkoutError && (
             <p className="font-dm-sans text-sm text-red-600">{checkoutError}</p>
           )}
           <button
             onClick={handleCheckout}
-            disabled={checkoutLoading || !canCheckout()}
+            disabled={checkoutLoading || !canCheckout() || !regulaminAccepted}
             className="font-dm-sans text-sm text-near-black border border-near-black px-12 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {checkoutLoading ? "Przekierowywanie..." : "Przejdź do płatności"}
