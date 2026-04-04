@@ -5,18 +5,20 @@ function Contact() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [honeypot, setHoneypot] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
+    if (honeypot) { setSuccess(true); return; }
     setLoading(true);
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL as string}/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, message }),
+        body: JSON.stringify({ name, email, message, _hp: honeypot }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -58,6 +60,15 @@ function Contact() {
               Napisz do nas
             </p>
             <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+              <input
+                type="text"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+                aria-hidden="true"
+                tabIndex={-1}
+                autoComplete="off"
+                style={{ display: "none" }}
+              />
               <div className="flex flex-col gap-2">
                 <label className="font-dm-sans text-xs text-secondary-text tracking-widest uppercase">
                   Imię i nazwisko

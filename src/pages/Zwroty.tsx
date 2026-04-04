@@ -7,19 +7,21 @@ function ZwrotForm() {
   const [email, setEmail] = useState("");
   const [reason, setReason] = useState("");
   const [bankAccount, setBankAccount] = useState("");
+  const [honeypot, setHoneypot] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
+    if (honeypot) { setSuccess(true); return; }
     setLoading(true);
     setError(null);
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL as string}/zwrot`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderNumber, name, email, reason, bankAccount }),
+        body: JSON.stringify({ orderNumber, name, email, reason, bankAccount, _hp: honeypot }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error); return; }
@@ -41,6 +43,7 @@ function ZwrotForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+      <input type="text" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} aria-hidden="true" tabIndex={-1} autoComplete="off" style={{ display: "none" }} />
       <p className="font-dm-sans text-sm text-secondary-text leading-relaxed">
         Wypełnij formularz, a my odeślemy Ci potwierdzenie z instrukcją zwrotu. Produkt odeślij na adres podany w potwierdzeniu.
       </p>
@@ -89,19 +92,21 @@ function ReklamacjaForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [description, setDescription] = useState("");
+  const [honeypot, setHoneypot] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
+    if (honeypot) { setSuccess(true); return; }
     setLoading(true);
     setError(null);
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL as string}/reklamacja`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderNumber, name, email, description }),
+        body: JSON.stringify({ orderNumber, name, email, description, _hp: honeypot }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error); return; }
@@ -123,6 +128,7 @@ function ReklamacjaForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+      <input type="text" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} aria-hidden="true" tabIndex={-1} autoComplete="off" style={{ display: "none" }} />
       <p className="font-dm-sans text-sm text-secondary-text leading-relaxed">
         Opisz problem i wyślij formularz. W odpowiedzi poprosimy o przesłanie dokumentacji zdjęciowej. Reklamację rozpatrzymy w ciągu 14 dni roboczych.
       </p>

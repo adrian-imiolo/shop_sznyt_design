@@ -269,7 +269,8 @@ app.post("/products", requireAuth(), requireAdmin, async (req, res) => {
 
 // submit contact form
 app.post("/contact", async (req, res) => {
-  const { name, email, message } = req.body;
+  const { name, email, message, _hp } = req.body;
+  if (_hp) return res.json({ ok: true });
   if (!name || !email || !message) {
     return res.status(400).json({ error: "Wszystkie pola są wymagane." });
   }
@@ -455,7 +456,8 @@ app.get("/orders/by-session/:sessionId", async (req, res) => {
 
 // submit return form
 app.post("/zwrot", async (req, res) => {
-  const { orderNumber, name, email, reason, bankAccount } = req.body;
+  const { orderNumber, name, email, reason, bankAccount, _hp } = req.body;
+  if (_hp) return res.json({ ok: true });
   if (!orderNumber || !name || !email || !reason || !bankAccount) {
     return res.status(400).json({ error: "Wszystkie pola są wymagane." });
   }
@@ -476,7 +478,8 @@ app.post("/zwrot", async (req, res) => {
 
 // submit complaint form
 app.post("/reklamacja", async (req, res) => {
-  const { orderNumber, name, email, description } = req.body;
+  const { orderNumber, name, email, description, _hp } = req.body;
+  if (_hp) return res.json({ ok: true });
   if (!orderNumber || !name || !email || !description) {
     return res.status(400).json({ error: "Wszystkie pola są wymagane." });
   }
