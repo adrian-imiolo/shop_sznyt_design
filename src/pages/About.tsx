@@ -89,9 +89,9 @@ function About() {
       </section>
 
       {/* CTA */}
-      <section className="bg-near-black px-6 py-12 md:py-24 text-center">
+      <section className="bg-warm-white border-t border-borders px-6 py-12 md:py-24 text-center">
         <div className="max-w-xl mx-auto">
-          <h2 className="font-cormorant text-3xl md:text-4xl text-warm-white font-light mb-4">
+          <h2 className="font-cormorant text-3xl md:text-4xl text-near-black font-light mb-4">
             Znajdź ramę dla siebie.
           </h2>
           <p className="font-dm-sans text-sm text-secondary-text mb-8">
@@ -100,13 +100,13 @@ function About() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="/sklep"
-              className="inline-block font-dm-sans text-sm text-warm-white border border-warm-white/50 px-10 py-3 hover:bg-warm-white hover:text-near-black transition-colors duration-300"
+              className="inline-block font-dm-sans text-sm text-near-black border border-near-black px-10 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300"
             >
               Zobacz kolekcję
             </a>
             <a
               href="/kontakt"
-              className="inline-block font-dm-sans text-sm text-accent border border-accent/50 px-10 py-3 hover:bg-accent hover:text-near-black transition-colors duration-300"
+              className="inline-block font-dm-sans text-sm text-accent border border-accent px-10 py-3 hover:bg-accent hover:text-near-black transition-colors duration-300"
             >
               Skontaktuj się
             </a>

@@ -106,7 +106,7 @@ function Shop() {
       </section>
 
       {/* Materials strip */}
-      <section className="bg-near-black px-6 py-12 md:py-20">
+      <section className="bg-warm-white border-t border-borders px-6 py-12 md:py-20">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-16">
           {[
             {
@@ -129,7 +129,7 @@ function Shop() {
               <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-3">
                 {item.label}
               </p>
-              <h3 className="font-cormorant text-2xl text-warm-white font-light mb-3">
+              <h3 className="font-cormorant text-2xl text-near-black font-light mb-3">
                 {item.title}
               </h3>
               <p className="font-dm-sans text-sm text-secondary-text leading-relaxed">
