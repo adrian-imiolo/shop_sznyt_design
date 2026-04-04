@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import type { ReactNode } from "react";
 
 const faqs = [
   {
@@ -53,7 +54,7 @@ const faqs = [
       },
       {
         q: "Co zrobić, jeśli paczka przyszła uszkodzona?",
-        a: "Prosimy o: sprawdzenie paczki przy odbiorze, wykonanie dokumentacji zdjęciowej uszkodzenia oraz sporządzenie protokołu szkody w obecności kuriera lub pracownika punktu odbioru (jeśli to możliwe). Następnie wypełnij formularz reklamacyjny na stronie /zwroty lub napisz na kontakt@sznytdesign.pl — rozpatrzymy zgłoszenie w ciągu 14 dni roboczych.",
+        a: <>Prosimy o: sprawdzenie paczki przy odbiorze, wykonanie dokumentacji zdjęciowej uszkodzenia oraz sporządzenie protokołu szkody w obecności kuriera lub pracownika punktu odbioru (jeśli to możliwe). Następnie wypełnij <Link to="/zwroty" className="text-accent hover:underline">formularz reklamacyjny</Link> lub napisz na kontakt@sznytdesign.pl — rozpatrzymy zgłoszenie w ciągu 14 dni roboczych.</>,
       },
     ],
   },
@@ -74,13 +75,13 @@ const faqs = [
       },
       {
         q: "Jak złożyć reklamację?",
-        a: "Wypełnij formularz reklamacyjny na stronie /zwroty lub wyślij e-mail na kontakt@sznytdesign.pl, opisując problem i załączając zdjęcia. Reklamacja zostanie rozpatrzona w ciągu 14 dni roboczych od zgłoszenia.",
+        a: <>Wypełnij <Link to="/zwroty" className="text-accent hover:underline">formularz reklamacyjny</Link> lub wyślij e-mail na kontakt@sznytdesign.pl, opisując problem i załączając zdjęcia. Reklamacja zostanie rozpatrzona w ciągu 14 dni roboczych od zgłoszenia.</>,
       },
     ],
   },
 ];
 
-function FAQItem({ q, a }: { q: string; a: string }) {
+function FAQItem({ q, a }: { q: string; a: ReactNode }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="border-t border-borders py-5">
