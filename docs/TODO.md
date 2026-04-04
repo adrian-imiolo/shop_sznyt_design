@@ -11,6 +11,12 @@
 7. **SEO** — react-helmet-async for per-page titles/meta, Google Search Console + sitemap
 8. **Deployment** — Vercel (frontend) + Railway (backend + DB) + cyberfolks DNS
 
+## TODO — Testing
+
+- [ ] **Add unit tests** — test individual components and utility functions in isolation
+- [ ] **Add integration tests** — test API endpoints, database interactions, and service integrations
+- [ ] **Add end-to-end tests** — test full user flows (checkout, auth, order tracking) with a tool like Playwright or Cypress
+
 ## TODO — Functionality
 
 - [ ] **Order note** — customer note at checkout (delivery instructions); needs Cart UI field + Order model field + Stripe metadata
