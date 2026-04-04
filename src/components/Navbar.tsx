@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { Show, SignInButton, UserButton } from "@clerk/react";
@@ -11,10 +11,17 @@ const navLinks = [
 
 function Navbar() {
   const [toggleMenu, setToggleMenu] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { totalItems } = useCart();
 
+  useEffect(() => {
+    function onScroll() { setScrolled(window.scrollY > 8); }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
-    <nav className="bg-warm-white border-b border-borders px-6 py-4">
+    <nav className={`sticky top-0 z-40 bg-warm-white border-b border-borders px-6 py-4 transition-shadow duration-300 ${scrolled ? "shadow-sm" : ""}`}>
       <div className="flex items-center justify-between max-w-6xl mx-auto">
         <Link
           to="/"
@@ -98,12 +105,13 @@ function Navbar() {
               )}
             </Link>
             <button
-              className="md:hidden flex flex-col gap-1"
+              className="md:hidden flex flex-col justify-center gap-1.25 w-6 h-6"
               onClick={() => setToggleMenu(!toggleMenu)}
+              aria-label={toggleMenu ? "Zamknij menu" : "Otwórz menu"}
             >
-              <span className="block w-6 h-px bg-near-black"></span>
-              <span className="block w-6 h-px bg-near-black"></span>
-              <span className="block w-6 h-px bg-near-black"></span>
+              <span className={`block w-6 h-[1.5px] bg-near-black transition-all duration-300 origin-center ${toggleMenu ? "translate-y-[6.5px] rotate-45" : ""}`} />
+              <span className={`block w-6 h-[1.5px] bg-near-black transition-all duration-300 ${toggleMenu ? "opacity-0" : ""}`} />
+              <span className={`block w-6 h-[1.5px] bg-near-black transition-all duration-300 origin-center ${toggleMenu ? "-translate-y-[6.5px] -rotate-45" : ""}`} />
             </button>
           </div>
         </div>
