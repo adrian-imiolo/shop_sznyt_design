@@ -22,12 +22,29 @@ const STATUS_CONFIG: Record<string, { label: string; dot: string }> = {
   failed:    { label: "Nieudane",               dot: "bg-red-500" },
 };
 
+const FULFILLMENT_CONFIG: Record<string, { label: string; dot: string }> = {
+  received:   { label: "Zamówienie przyjęte",   dot: "bg-amber-400" },
+  processing: { label: "W realizacji",          dot: "bg-blue-400" },
+  shipped:    { label: "Wysłane",               dot: "bg-green-500" },
+  delivered:  { label: "Dostarczone",           dot: "bg-green-700" },
+};
+
 function StatusBadge({ status }: { status: string }) {
   const config = STATUS_CONFIG[status] ?? { label: status, dot: "bg-gray-400" };
   return (
     <span className="inline-flex items-center gap-2">
       <span className={`w-2 h-2 rounded-full shrink-0 ${config.dot}`} />
       <span>{config.label}</span>
+    </span>
+  );
+}
+
+function FulfillmentBadge({ status }: { status: string }) {
+  const config = FULFILLMENT_CONFIG[status] ?? { label: status, dot: "bg-gray-400" };
+  return (
+    <span className="inline-flex items-center gap-2">
+      <span className={`w-2 h-2 rounded-full shrink-0 ${config.dot}`} />
+      <span className="font-dm-sans text-sm text-near-black">{config.label}</span>
     </span>
   );
 }
@@ -90,9 +107,17 @@ function OrderDetail() {
         <h1 className="font-cormorant text-3xl md:text-5xl text-near-black font-light mb-2">
           Zamówienie #{order.id}
         </h1>
-        <p className="font-dm-sans text-sm text-secondary-text mb-12">
+        <p className="font-dm-sans text-sm text-secondary-text mb-4">
           {new Date(order.createdAt).toLocaleDateString("pl-PL")} · <StatusBadge status={order.status} />
         </p>
+        <div className="flex flex-col gap-1 mb-12">
+          <FulfillmentBadge status={order.fulfillmentStatus} />
+          {order.trackingNumber && (
+            <p className="font-dm-sans text-xs text-secondary-text">
+              Nr przesyłki: <span className="text-near-black font-medium">{order.trackingNumber}</span>
+            </p>
+          )}
+        </div>
 
         {/* Products */}
         <div className="flex flex-col divide-y divide-borders mb-12">

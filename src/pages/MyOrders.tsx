@@ -17,6 +17,13 @@ const STATUS_CONFIG: Record<string, { label: string; dot: string }> = {
   failed:    { label: "Nieudane",               dot: "bg-red-500" },
 };
 
+const FULFILLMENT_CONFIG: Record<string, { label: string; dot: string }> = {
+  received:   { label: "Zamówienie przyjęte",   dot: "bg-amber-400" },
+  processing: { label: "W realizacji",          dot: "bg-blue-400" },
+  shipped:    { label: "Wysłane",               dot: "bg-green-500" },
+  delivered:  { label: "Dostarczone",           dot: "bg-green-700" },
+};
+
 function StatusBadge({ status }: { status: string }) {
   const config = STATUS_CONFIG[status] ?? { label: status, dot: "bg-gray-400" };
   return (
@@ -123,6 +130,15 @@ function MyOrders() {
                     <p className="font-dm-sans text-sm text-secondary-text mt-1">
                       {new Date(order.createdAt).toLocaleDateString("pl-PL")} · <StatusBadge status={order.status} />
                     </p>
+                    {(() => {
+                      const fc = FULFILLMENT_CONFIG[order.fulfillmentStatus] ?? { label: order.fulfillmentStatus, dot: "bg-gray-400" };
+                      return (
+                        <span className="inline-flex items-center gap-2 font-dm-sans text-sm text-secondary-text mt-0.5">
+                          <span className={`w-2 h-2 rounded-full shrink-0 ${fc.dot}`} />
+                          {fc.label}
+                        </span>
+                      );
+                    })()}
                   </div>
                   <p className="font-cormorant text-2xl text-near-black font-light">
                     {order.total} PLN
