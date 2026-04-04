@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { Show, SignInButton, UserButton } from "@clerk/react";
 
@@ -26,12 +26,16 @@ function Navbar() {
           <ul className="hidden md:flex gap-8">
             {navLinks.map((link) => (
               <li key={link.label}>
-                <Link
+                <NavLink
                   to={link.to}
-                  className="font-dm-sans text-sm text-near-black hover:text-accent tracking-widest uppercase"
+                  className={({ isActive }) =>
+                    `font-dm-sans text-sm tracking-widest uppercase transition-colors ${
+                      isActive ? "text-accent" : "text-near-black hover:text-accent"
+                    }`
+                  }
                 >
                   {link.label}
-                </Link>
+                </NavLink>
               </li>
             ))}
           </ul>
@@ -110,13 +114,17 @@ function Navbar() {
           <ul className="flex flex-col gap-4">
             {navLinks.map((link) => (
               <li key={link.label}>
-                <Link
+                <NavLink
                   to={link.to}
                   onClick={() => setToggleMenu(false)}
-                  className="font-dm-sans text-sm text-near-black hover:text-accent tracking-widest uppercase"
+                  className={({ isActive }) =>
+                    `font-dm-sans text-sm tracking-widest uppercase transition-colors ${
+                      isActive ? "text-accent" : "text-near-black hover:text-accent"
+                    }`
+                  }
                 >
                   {link.label}
-                </Link>
+                </NavLink>
               </li>
             ))}
           </ul>
