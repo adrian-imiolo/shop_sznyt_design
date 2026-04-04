@@ -45,8 +45,10 @@ model Order {
   userId          String?
   shippingMethod  String?
   shippingAddress Json?
-  paymentMethod   String?
-  items           OrderItem[]
+  paymentMethod     String?
+  fulfillmentStatus String  @default("received")
+  trackingNumber    String?
+  items             OrderItem[]
 }
 
 model OrderItem {

@@ -331,10 +331,13 @@ app.post("/create-checkout-session", async (req, res) => {
       });
     }
 
+    const customerEmail = shippingAddress?.email || undefined;
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card", "p24", "blik"],
       line_items: lineItems,
       mode: "payment",
+      customer_email: customerEmail,
       success_url: `${process.env.FRONTEND_URL}/sukces?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.FRONTEND_URL}/koszyk`,
       metadata: {
@@ -353,8 +356,47 @@ app.post("/create-checkout-session", async (req, res) => {
 // get orders
 app.get("/orders", requireAuth(), requireAdmin, async (req, res) => {
   try {
-    const orders = await prisma.order.findMany();
+    const orders = await prisma.order.findMany({
+      orderBy: { createdAt: "desc" },
+    });
     res.json(orders);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Błąd serwera" });
+  }
+});
+
+// update fulfillment status + tracking number
+app.patch("/orders/:id/fulfillment", requireAuth(), requireAdmin, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { fulfillmentStatus, trackingNumber } = req.body;
+
+    const VALID_STATUSES = ["received", "processing", "shipped", "delivered"];
+    if (!VALID_STATUSES.includes(fulfillmentStatus)) {
+      return res.status(400).json({ error: "Nieprawidłowy status" });
+    }
+
+    const order = await prisma.order.update({
+      where: { id },
+      data: { fulfillmentStatus, trackingNumber: trackingNumber || null },
+    });
+
+    // send shipping email when status set to shipped and we have customer email + tracking number
+    if (fulfillmentStatus === "shipped" && order.customerEmail && trackingNumber) {
+      try {
+        await transporter.sendMail({
+          from: process.env.SMTP_USER,
+          to: order.customerEmail,
+          subject: "Twoje zamówienie zostało wysłane — Sznyt Design",
+          text: `Twoje zamówienie #${order.id} zostało wysłane.\n\nNumer przesyłki: ${trackingNumber}\n\nDziękujemy za zakup!`,
+        });
+      } catch (emailErr) {
+        console.error("Błąd wysyłania emaila o wysyłce:", emailErr.message);
+      }
+    }
+
+    res.json(order);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Błąd serwera" });

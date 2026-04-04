@@ -21,6 +21,7 @@ const SHIPPING_OPTIONS: { id: ShippingMethod; label: string }[] = [
 const ADDRESS_FIELDS: { key: keyof CourierAddress; label: string; full?: boolean }[] = [
   { key: "firstName", label: "Imię" },
   { key: "lastName", label: "Nazwisko" },
+  { key: "email", label: "Adres e-mail", full: true },
   { key: "street", label: "Ulica i numer", full: true },
   { key: "postalCode", label: "Kod pocztowy" },
   { key: "city", label: "Miasto" },
@@ -36,7 +37,7 @@ function Cart() {
   const [shippingMethod, setShippingMethod] = useState<ShippingMethod | null>(null);
   const [paczkomatPoint, setPaczkomatPoint] = useState<PaczkomatPoint | null>(null);
   const [address, setAddress] = useState<CourierAddress>({
-    firstName: "", lastName: "", street: "", postalCode: "", city: "", phone: "",
+    firstName: "", lastName: "", street: "", postalCode: "", city: "", phone: "", email: "",
   });
 
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
