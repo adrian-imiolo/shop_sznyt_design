@@ -311,6 +311,7 @@ app.post("/create-checkout-session", async (req, res) => {
         currency: "pln",
         product_data: {
           name: item.name,
+          ...(item.imageUrl ? { images: [item.imageUrl] } : {}),
           metadata: { productId: item.id },
         },
         unit_amount: Math.round(item.price * 100),
@@ -350,6 +351,9 @@ app.post("/create-checkout-session", async (req, res) => {
     res.json({ url: session.url });
   } catch (err) {
     console.error(err);
+    if (err.code === "email_invalid") {
+      return res.status(400).json({ error: "Podaj poprawny adres e-mail." });
+    }
     res.status(500).json({ error: "Błąd serwera" });
   }
 });

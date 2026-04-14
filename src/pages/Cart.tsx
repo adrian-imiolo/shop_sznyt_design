@@ -18,10 +18,10 @@ const SHIPPING_OPTIONS: { id: ShippingMethod; label: string }[] = [
   { id: "dpd", label: "DPD Kurier" },
 ];
 
-const ADDRESS_FIELDS: { key: keyof CourierAddress; label: string; full?: boolean }[] = [
+const ADDRESS_FIELDS: { key: keyof CourierAddress; label: string; full?: boolean; type?: string }[] = [
   { key: "firstName", label: "Imię" },
   { key: "lastName", label: "Nazwisko" },
-  { key: "email", label: "Adres e-mail", full: true },
+  { key: "email", label: "Adres e-mail", full: true, type: "email" },
   { key: "street", label: "Ulica i numer", full: true },
   { key: "postalCode", label: "Kod pocztowy" },
   { key: "city", label: "Miasto" },
@@ -33,6 +33,7 @@ function Cart() {
   const { userId } = useAuth();
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [addressErrors, setAddressErrors] = useState<Partial<Record<keyof CourierAddress, string>>>({});
   const [regulaminAccepted, setRegulaminAccepted] = useState(false);
   const [shippingMethod, setShippingMethod] = useState<ShippingMethod | null>(null);
   const [paczkomatPoint, setPaczkomatPoint] = useState<PaczkomatPoint | null>(null);
@@ -74,6 +75,18 @@ function Cart() {
   }
 
   async function handleCheckout() {
+    const errors: Partial<Record<keyof CourierAddress, string>> = {};
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address.email))
+      errors.email = "Podaj poprawny adres e-mail";
+    if (!/^\d{2}-\d{3}$/.test(address.postalCode))
+      errors.postalCode = "Kod pocztowy powinien mieć format XX-XXX";
+    if (!/^(\+48\s?)?(\d[\s-]?){9}$/.test(address.phone.replace(/\s|-/g, "")))
+      errors.phone = "Podaj poprawny numer telefonu (9 cyfr)";
+    if (Object.keys(errors).length > 0) {
+      setAddressErrors(errors);
+      return;
+    }
+    setAddressErrors({});
     setCheckoutLoading(true);
     setCheckoutError(null);
     try {
@@ -260,17 +273,23 @@ function Cart() {
                 )}
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {ADDRESS_FIELDS.map(({ key, label, full }) => (
+                {ADDRESS_FIELDS.map(({ key, label, full, type }) => (
                   <div key={key} className={full ? "sm:col-span-2" : ""}>
                     <label className="font-dm-sans text-xs text-secondary-text tracking-widest uppercase block mb-1">
                       {label}
                     </label>
                     <input
-                      type="text"
+                      type={type ?? "text"}
                       value={address[key]}
-                      onChange={(e) => setAddress((prev) => ({ ...prev, [key]: e.target.value }))}
-                      className="w-full border border-borders font-dm-sans text-sm text-near-black px-3 py-2 focus:outline-none focus:border-near-black"
+                      onChange={(e) => {
+                        setAddress((prev) => ({ ...prev, [key]: e.target.value }));
+                        if (addressErrors[key]) setAddressErrors((prev) => ({ ...prev, [key]: undefined }));
+                      }}
+                      className={`w-full border font-dm-sans text-sm text-near-black px-3 py-2 focus:outline-none focus:border-near-black ${addressErrors[key] ? "border-red-400" : "border-borders"}`}
                     />
+                    {addressErrors[key] && (
+                      <p className="font-dm-sans text-xs text-red-500 mt-1">{addressErrors[key]}</p>
+                    )}
                   </div>
                 ))}
               </div>
@@ -280,17 +299,23 @@ function Cart() {
           {/* Courier address form */}
           {(shippingMethod === "inpost_kurier" || shippingMethod === "dpd") && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {ADDRESS_FIELDS.map(({ key, label, full }) => (
+              {ADDRESS_FIELDS.map(({ key, label, full, type }) => (
                 <div key={key} className={full ? "sm:col-span-2" : ""}>
                   <label className="font-dm-sans text-xs text-secondary-text tracking-widest uppercase block mb-1">
                     {label}
                   </label>
                   <input
-                    type="text"
+                    type={type ?? "text"}
                     value={address[key]}
-                    onChange={(e) => setAddress((prev) => ({ ...prev, [key]: e.target.value }))}
-                    className="w-full border border-borders font-dm-sans text-sm text-near-black px-3 py-2 focus:outline-none focus:border-near-black"
+                    onChange={(e) => {
+                      setAddress((prev) => ({ ...prev, [key]: e.target.value }));
+                      if (addressErrors[key]) setAddressErrors((prev) => ({ ...prev, [key]: undefined }));
+                    }}
+                    className={`w-full border font-dm-sans text-sm text-near-black px-3 py-2 focus:outline-none focus:border-near-black ${addressErrors[key] ? "border-red-400" : "border-borders"}`}
                   />
+                  {addressErrors[key] && (
+                    <p className="font-dm-sans text-xs text-red-500 mt-1">{addressErrors[key]}</p>
+                  )}
                 </div>
               ))}
             </div>

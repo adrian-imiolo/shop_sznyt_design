@@ -21,6 +21,8 @@
 
 - [ ] **Order note** — customer note at checkout (delivery instructions); needs Cart UI field + Order model field + Stripe metadata
 - [ ] **Abandoned checkout recovery email** — needs job scheduler (node-cron/BullMQ); skip until post-launch
+- [ ] **Cart max stock UX** — when quantity reaches max stock, the + button should visually indicate it's disabled (greyed out, cursor change etc.), not just stop working silently
+- [ ] **Business shipping option** — add option to ship to a company; extra fields: company name, NIP; relevant when business registration is done
 
 ## TODO — SEO & Analytics
 
