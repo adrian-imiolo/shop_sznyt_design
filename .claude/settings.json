@@ -1,0 +1,93 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run dev)",
+      "Bash(npm run dev:frontend)",
+      "Bash(npm run dev:backend)",
+      "Bash(npm run build)",
+      "Bash(npm run lint)",
+      "Bash(npm run preview)",
+      "Bash(npm install)",
+      "Bash(npm install:*)",
+      "Bash(npm test)",
+      "Bash(npm test:*)",
+      "Bash(npx tsx:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx prisma:*)",
+      "Bash(npx stripe:*)",
+      "Bash(npx vitest:*)",
+      "Bash(cd backend && npm run dev)",
+      "Bash(cd backend && npx tsx:*)",
+      "Bash(cd backend && npx prisma:*)",
+      "Bash(cd backend && npm install)",
+      "Bash(cd backend && npm install:*)",
+      "Bash(git status)",
+      "Bash(git diff)",
+      "Bash(git diff:*)",
+      "Bash(git log)",
+      "Bash(git log:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push)",
+      "Bash(git push:*)",
+      "Bash(git pull)",
+      "Bash(git pull:*)",
+      "Bash(git branch)",
+      "Bash(git branch:*)",
+      "Bash(git checkout:*)",
+      "Bash(git switch:*)",
+      "Bash(git stash:*)",
+      "Bash(git restore:*)",
+      "Bash(gh pr:*)",
+      "Bash(gh issue:*)",
+      "Bash(gh run:*)",
+      "Bash(gh repo view)",
+      "WebFetch(domain:docs.stripe.com)",
+      "WebFetch(domain:stripe.com)",
+      "WebFetch(domain:clerk.com)",
+      "WebFetch(domain:prisma.io)",
+      "WebFetch(domain:tailwindcss.com)",
+      "WebFetch(domain:vitejs.dev)",
+      "WebFetch(domain:react.dev)",
+      "WebFetch(domain:developer.mozilla.org)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/load-context.cjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"process.stdin.on('data',d=>{try{const j=JSON.parse(d);const p=(j.tool_input||{}).file_path||(j.tool_response||{}).filePath||'';if(/\\.(ts|tsx|js|jsx)$/.test(p))process.stdout.write(p)}catch(e){}})\" | { read -r f; [ -n \"$f\" ] && cd \"$CLAUDE_PROJECT_DIR\" && npx eslint --max-warnings 0 \"$f\"; } || true",
+            "timeout": 30,
+            "statusMessage": "Linting edited file..."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && npm run lint || true",
+            "timeout": 30,
+            "statusMessage": "Running full lint..."
+          }
+        ]
+      }
+    ]
+  }
+}

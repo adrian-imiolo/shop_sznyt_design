@@ -25,4 +25,12 @@ dist-ssr
 
 .env
 
-.claude/
+# Claude Code: ignore personal/cache only — commit team-shared config (settings.json, agents/, commands/, hooks)
+.claude/settings.local.json
+.claude/.credentials.json
+.claude/projects/
+.claude/todos/
+.claude/.shell-snapshots/
+.claude/statsig/
+.claude/history.jsonl
+.claude/ide/
