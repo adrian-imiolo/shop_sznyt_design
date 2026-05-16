@@ -11,3 +11,13 @@ this file will be made to make a plan and tasks and these tasks wil be created a
 we need to automate order workflow somehow. Let's analyze how it loks now, how others do this. I thjink it sdhould be automated 100%. Emails should be seny to the cusotmer after creating the order and also we should have some dashboard that can be reached from anywhere, which will allow us to update status of the order and update client side also
 
 that's all that comes to my mind now, but we need to find out what else can be added to make myy site based on best practices. we should do a big brainstorming session to tackle all of it
+
+i am also thinking about adding some analytics, i mean probably i will have payments analytics on strip, but some traffic done on 
+
+This is stack from youtuber i follow. It looks easy and nice and it would be good to use it for all the data aply it for all my apps and not change it too ofter. For AI i use Claude for now and let's stick it for some time. maybe i will try codex in future
+
+Maybe use skill /grill-me to find out more inforamtion how we should handle design, plan, next steps of sznyt design
+
+![alt text](image.png)
+
+https://newsletter.marclou.com/p/the-tech-stack-i-use-to-make-usd-52600-month
