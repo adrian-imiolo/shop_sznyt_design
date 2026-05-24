@@ -2,7 +2,7 @@
 
 > Premium e-commerce for designer wooden picture frames.
 
-**Live demo:** _(will be filled in after deploy — `https://sznyt-design.vercel.app`)_
+**Live demo:** [shop-sznyt-design.vercel.app](https://shop-sznyt-design.vercel.app/) (read-only — checkout and admin disabled)
 **Production:** [sznytdesign.pl](https://sznytdesign.pl) _(post-cutover)_
 
 A custom React + Express + Postgres e-commerce stack built and operated end-to-end by one developer. No Shopify, no WooCommerce — full control over brand presentation, checkout flow, and admin tooling.
