@@ -12,6 +12,8 @@ const SHIPPING_COSTS: Record<ShippingMethod, number> = {
 
 const FREE_SHIPPING_THRESHOLD = 350;
 
+const IS_DEMO_MODE = import.meta.env.VITE_DEMO_MODE === "true";
+
 const SHIPPING_OPTIONS: { id: ShippingMethod; label: string }[] = [
   { id: "paczkomat", label: "InPost Paczkomat" },
   { id: "inpost_kurier", label: "InPost Kurier" },
@@ -376,12 +378,23 @@ function Cart() {
           {checkoutError && (
             <p className="font-dm-sans text-sm text-red-600">{checkoutError}</p>
           )}
+          {IS_DEMO_MODE && (
+            <p className="font-dm-sans text-xs text-secondary-text text-right max-w-sm">
+              Checkout is disabled in this portfolio demo. The full flow (Stripe
+              payment, order email, stock decrement) is wired up but requires a
+              configured payment provider.
+            </p>
+          )}
           <button
             onClick={handleCheckout}
-            disabled={checkoutLoading || !canCheckout() || !regulaminAccepted}
+            disabled={checkoutLoading || !canCheckout() || !regulaminAccepted || IS_DEMO_MODE}
             className="font-dm-sans text-sm text-near-black border border-near-black px-12 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {checkoutLoading ? "Przekierowywanie..." : "Przejdź do płatności"}
+            {IS_DEMO_MODE
+              ? "Demo — checkout disabled"
+              : checkoutLoading
+                ? "Przekierowywanie..."
+                : "Przejdź do płatności"}
           </button>
         </div>
       </div>
