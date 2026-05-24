@@ -45,8 +45,11 @@ Stack: **Vercel** (frontend) + **Render** (backend) + **Neon** (Postgres) + **Cl
    | Key | Value |
    |---|---|
    | `DATABASE_URL` | (paste from Neon) |
-   | `CLERK_SECRET_KEY` | (paste from Clerk) |
+   | `CLERK_PUBLISHABLE_KEY` | (paste from Clerk — same `pk_test_...` you'll use on Vercel) |
+   | `CLERK_SECRET_KEY` | (paste from Clerk — `sk_test_...`) |
    | `FRONTEND_URL` | leave empty for now (set in step 6) |
+
+   > `CLERK_PUBLISHABLE_KEY` is required by `@clerk/express` middleware even though it's a "public" key. Without it, every request hits a `Publishable key is missing` 500.
 
 5. **Create Web Service**. Wait ~3–5 min for the first build.
 6. When the status turns green, copy the public URL (e.g. `https://sznyt-design-backend.onrender.com`). You'll paste it as `VITE_API_URL` in Vercel.
@@ -55,13 +58,34 @@ Stack: **Vercel** (frontend) + **Render** (backend) + **Neon** (Postgres) + **Cl
 
 ### Seed the database (one-off)
 
-Inside the Render service dashboard, click **Shell** in the sidebar and run:
+Render's free tier doesn't include Shell access. Seed via **Neon's SQL Editor** instead (no Render upgrade required):
 
-```bash
-npm run seed
-```
+1. Neon dashboard → **SQL Editor**
+2. Paste and run:
 
-You should see `Seeded 2 products.`
+   ```sql
+   TRUNCATE TABLE "Product" RESTART IDENTITY CASCADE;
+
+   INSERT INTO "Product" (name, tagline, description, price, "imageUrl", "lifestyleImageUrl", stock, "sortOrder", "createdAt") VALUES
+   ('Ramka Szachownica',
+    'Dwa kolory, jeden charakter.',
+    'Rama wykonana z litego dębu, w której naprzemienne kwadraty jasnego i ciemnego drewna tworzą wzór szachownicy. Każdy element precyzyjnie dopasowany — kontrast kolorów nadaje jej wyrazisty, a zarazem ponadczasowy charakter.',
+    299,
+    'https://placehold.co/800x1000/2a2420/FAFAF8?text=Studio',
+    'https://placehold.co/800x1000/4a3f35/FAFAF8?text=Lifestyle',
+    10, 0, NOW()),
+   ('Ramka Corner Cut',
+    'Minimalizm w każdym detalu.',
+    'Dębowa rama z charakterystycznymi nacięciami na narożnikach, w które wpuszczono kontrastowy materiał. Połączenie drewna i wyraźnego detalu na rogach tworzy subtelny, nowoczesny akcent bez zbędnej ozdobności.',
+    349,
+    'https://placehold.co/800x1000/1a1a1a/FAFAF8?text=Studio',
+    'https://placehold.co/800x1000/2d2d2d/FAFAF8?text=Lifestyle',
+    8, 0, NOW());
+   ```
+
+3. Verify with `SELECT id, name FROM "Product";` — should return 2 rows.
+
+> If you have a paid Render plan, you can run `npm run seed` from the Render Shell tab instead.
 
 ---
 
