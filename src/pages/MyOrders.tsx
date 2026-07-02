@@ -55,7 +55,7 @@ function MyOrders() {
       }
     }
     load();
-  }, [userId]);
+  }, [userId, getToken]);
 
   if (!isLoaded) return null;
   if (!userId) return <RedirectToSignIn />;

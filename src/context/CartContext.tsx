@@ -1,8 +1,7 @@
-import { createContext, useContext, useState, useEffect } from "react";
-import type { CartItem, CartContextType } from "../types";
-import { useCookieConsent } from "./CookieConsentContext";
-
-const CartContext = createContext<CartContextType | null>(null);
+import { useState, useEffect, useCallback } from "react";
+import type { CartItem } from "../types";
+import { CartContext } from "./cart-context";
+import { useCookieConsent } from "../hooks/useCookieConsent";
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const { consent } = useCookieConsent();
@@ -52,19 +51,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems((prev) => prev.map((i) => (i.id === id ? { ...i, quantity } : i)));
   }
 
+  // stable identity — consumed by effects (e.g. OrderSuccess clears the cart once paid)
+  const clearCart = useCallback(() => {
+    setItems((prev) => (prev.length === 0 ? prev : []));
+  }, []);
+
   const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
 
   return (
     <CartContext.Provider
-      value={{ items, addItem, removeItem, updateQuantity, totalItems }}
+      value={{ items, addItem, removeItem, updateQuantity, clearCart, totalItems }}
     >
       {children}
     </CartContext.Provider>
   );
-}
-
-export function useCart() {
-  const context = useContext(CartContext);
-  if (!context) throw new Error("useCart must be used inside CartProvider");
-  return context;
 }

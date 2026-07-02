@@ -30,7 +30,7 @@ function AdminEditProduct() {
       });
     }
     load();
-  }, []);
+  }, [id]);
 
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();

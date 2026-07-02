@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { useCart } from "../context/CartContext";
+import { useCart } from "../hooks/useCart";
 import type { Product } from "../types";
 import Skeleton from "../components/Skeleton";
 

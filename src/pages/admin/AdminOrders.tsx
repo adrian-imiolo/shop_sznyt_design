@@ -81,7 +81,7 @@ function AdminOrders() {
       }
     }
     load();
-  }, []);
+  }, [getToken]);
 
   if (error) return <p className="p-4 text-red-600 font-dm-sans text-sm">{error}</p>;
 

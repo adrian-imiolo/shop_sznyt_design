@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useCart } from "../context/CartContext";
+import { useCart } from "../hooks/useCart";
 import { useAuth } from "@clerk/react";
 import type { ShippingMethod, CourierAddress, PaczkomatPoint } from "../types";
 
@@ -49,15 +49,13 @@ function Cart() {
   const total = subtotal + shippingCost;
 
   useEffect(() => {
-    const easyPack = (window as any).easyPack;
-    if (easyPack) easyPack.init({ defaultLocale: "pl" });
+    window.easyPack?.init({ defaultLocale: "pl" });
   }, []);
 
   function openPaczkomatWidget() {
-    const easyPack = (window as any).easyPack;
-    if (!easyPack) return;
-    easyPack.modalMap(
-      (point: any, modal: any) => {
+    if (!window.easyPack) return;
+    window.easyPack.modalMap(
+      (point, modal) => {
         modal.closeModal();
         setPaczkomatPoint({
           code: point.name,
@@ -65,7 +63,11 @@ function Cart() {
           city: point.address?.city,
         });
       },
-      { width: 500, height: 600 },
+      // the widget hard-codes its size — cap it so the map fits a 375px phone viewport
+      {
+        width: Math.min(500, window.innerWidth - 32),
+        height: Math.min(600, window.innerHeight - 32),
+      },
     );
   }
 
@@ -99,7 +101,13 @@ function Cart() {
       const res = await fetch(`${import.meta.env.VITE_API_URL as string}/create-checkout-session`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items, userId, shippingMethod, shippingAddress }),
+        body: JSON.stringify({
+          // backend prices from the DB — it only needs ids and quantities
+          items: items.map(({ id, quantity }) => ({ id, quantity })),
+          userId,
+          shippingMethod,
+          shippingAddress,
+        }),
       });
       if (!res.ok) {
         const data = await res.json();
@@ -108,8 +116,12 @@ function Cart() {
       const data = await res.json();
       if (!data.url) throw new Error("Nie udało się otworzyć strony płatności");
       window.location.href = data.url;
-    } catch (err: any) {
-      setCheckoutError(err.message ?? "Nie udało się przejść do płatności. Spróbuj ponownie.");
+    } catch (err) {
+      setCheckoutError(
+        err instanceof Error && err.message
+          ? err.message
+          : "Nie udało się przejść do płatności. Spróbuj ponownie.",
+      );
       setCheckoutLoading(false);
     }
   }

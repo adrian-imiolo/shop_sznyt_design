@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useCart } from "../context/CartContext";
+import { useCart } from "../hooks/useCart";
 import type { ProductSectionProps } from "../types";
 
 function ProductSection({

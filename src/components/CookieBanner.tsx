@@ -1,4 +1,4 @@
-import { useCookieConsent } from "../context/CookieConsentContext";
+import { useCookieConsent } from "../hooks/useCookieConsent";
 
 function CookieBanner() {
   const { consent, accept, decline } = useCookieConsent();

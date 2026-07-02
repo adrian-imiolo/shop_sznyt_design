@@ -71,7 +71,7 @@ function OrderDetail() {
       }
     }
     load();
-  }, [userId, id]);
+  }, [userId, id, getToken]);
 
   if (!isLoaded) return null;
   if (!userId) return <Navigate to="/moje-zamowienia" />;

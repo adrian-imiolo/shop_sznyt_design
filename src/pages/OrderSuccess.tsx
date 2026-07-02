@@ -3,32 +3,69 @@ import { useSearchParams, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import type { Order } from "../types";
 import { Show } from "@clerk/react";
+import { useCart } from "../hooks/useCart";
 
 function OrderSuccess() {
   const [searchParams] = useSearchParams();
   const [order, setOrder] = useState<Order | null>(null);
   const [error, setError] = useState<string | null>(null);
   const sessionId = searchParams.get("session_id");
+  const { clearCart } = useCart();
 
   useEffect(() => {
+    if (!sessionId) return;
+    let cancelled = false;
+
     async function load() {
-      try {
-        const res = await fetch(
-          `${import.meta.env.VITE_API_URL as string}/orders/by-session/${sessionId}`,
+      // The webhook that records the order can land after Stripe redirects here —
+      // poll briefly before assuming anything is wrong.
+      for (let attempt = 1; attempt <= 5; attempt++) {
+        try {
+          const res = await fetch(
+            `${import.meta.env.VITE_API_URL as string}/orders/by-session/${sessionId}`,
+          );
+          if (res.ok) {
+            const data = await res.json();
+            if (cancelled) return;
+            setOrder(data);
+            clearCart();
+            return;
+          }
+        } catch {
+          // network hiccup — fall through to retry
+        }
+        await new Promise((resolve) => setTimeout(resolve, attempt * 1500));
+      }
+      if (!cancelled) {
+        setError(
+          "Płatność została przyjęta, a zamówienie wciąż się przetwarza. Potwierdzenie wyślemy e-mailem — w razie pytań napisz na kontakt@sznytdesign.pl.",
         );
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        setOrder(data);
-      } catch {
-        setError("Nie udało się załadować zamówienia.");
       }
     }
+
     load();
-  }, [sessionId]);
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionId, clearCart]);
 
   if (!sessionId) return <Navigate to="/sklep" />;
-  if (error) return <p className="font-dm-sans text-sm text-red-600 p-6">{error}</p>;
-  if (!order) return <p>Ładowanie...</p>;
+  if (error) {
+    return (
+      <div className="min-h-dvh flex items-center justify-center p-6">
+        <p className="font-dm-sans text-sm text-near-black max-w-md text-center leading-relaxed">
+          {error}
+        </p>
+      </div>
+    );
+  }
+  if (!order) {
+    return (
+      <div className="min-h-dvh flex items-center justify-center p-6">
+        <p className="font-dm-sans text-sm text-secondary-text">Przetwarzamy Twoje zamówienie...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-8 justify-center items-center p-6 min-h-dvh">
@@ -65,7 +102,7 @@ function OrderSuccess() {
         </div>
       </div>
 
-      <div className="flex gap-4">
+      <div className="flex flex-col sm:flex-row gap-4">
         <Show when="signed-in">
           <Link
             className="border border-near-black text-near-black font-dm-sans px-6 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300"
