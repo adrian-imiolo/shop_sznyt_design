@@ -319,20 +319,45 @@ app.post("/create-checkout-session", async (req, res) => {
       return res.status(400).json({ error: "Wybierz metodę dostawy" });
     }
 
-    const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: "Koszyk jest pusty" });
+    }
+
+    // Prices, names and images come from the DB — the client only chooses ids and quantities.
+    const products = await prisma.product.findMany({
+      where: { id: { in: items.map((item) => Number(item.id)) } },
+    });
+    const productsById = new Map(products.map((p) => [p.id, p]));
+
+    const orderLines = [];
+    for (const item of items) {
+      const product = productsById.get(Number(item.id));
+      const quantity = Number(item.quantity);
+      if (!product || !Number.isInteger(quantity) || quantity < 1) {
+        return res.status(400).json({ error: "Nieprawidłowy produkt w koszyku" });
+      }
+      if (quantity > product.stock) {
+        return res.status(409).json({
+          error: `Niewystarczająca ilość produktu „${product.name}" — dostępne sztuki: ${product.stock}`,
+        });
+      }
+      orderLines.push({ product, quantity });
+    }
+
+    const subtotal = orderLines.reduce((sum, line) => sum + line.product.price * line.quantity, 0);
     const shippingCost = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COSTS[shippingMethod];
 
-    const lineItems = items.map((item) => ({
+    const lineItems = orderLines.map(({ product, quantity }) => ({
       price_data: {
         currency: "pln",
         product_data: {
-          name: item.name,
-          ...(item.imageUrl ? { images: [item.imageUrl] } : {}),
-          metadata: { productId: item.id },
+          name: product.name,
+          ...(product.imageUrl ? { images: [product.imageUrl] } : {}),
+          metadata: { productId: product.id },
         },
-        unit_amount: Math.round(item.price * 100),
+        unit_amount: Math.round(product.price * 100),
       },
-      quantity: item.quantity,
+      quantity,
     }));
 
     if (shippingCost > 0) {
@@ -359,7 +384,7 @@ app.post("/create-checkout-session", async (req, res) => {
       success_url: `${process.env.FRONTEND_URL}/sukces?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.FRONTEND_URL}/koszyk`,
       metadata: {
-        userId: userId || null,
+        ...(userId ? { userId } : {}),
         shippingMethod,
         shippingAddress: JSON.stringify(shippingAddress),
       },
