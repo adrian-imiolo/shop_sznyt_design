@@ -8,6 +8,7 @@ import cors from "cors";
 import nodemailer from "nodemailer";
 import Stripe from "stripe";
 import { clerkMiddleware, requireAuth, getAuth } from "@clerk/express";
+import { rateLimit } from "express-rate-limit";
 
 const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY)
@@ -44,6 +45,27 @@ const prisma = new PrismaClient({
 });
 
 const app = express();
+
+// Render/Railway sit behind exactly one proxy hop — required for
+// express-rate-limit to see real client IPs instead of the proxy's.
+app.set("trust proxy", 1);
+
+// Public forms trigger outbound SMTP + DB writes; checkout calls Stripe.
+// The honeypot filters dumb bots, this stops dumb loops.
+const formLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 5,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: { error: "Zbyt wiele prób. Spróbuj ponownie za chwilę." },
+});
+const checkoutLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 10,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: { error: "Zbyt wiele prób. Spróbuj ponownie za chwilę." },
+});
 
 // FRONTEND_URL in prod, localhost in dev, *.vercel.app for preview deployments
 const allowedOrigins = [
@@ -270,7 +292,7 @@ app.post("/products", requireAuth(), requireAdmin, async (req, res) => {
 });
 
 // submit contact form
-app.post("/contact", async (req, res) => {
+app.post("/contact", formLimiter, async (req, res) => {
   const { name, email, message, _hp } = req.body;
   if (_hp) return res.json({ ok: true });
   if (!name || !email || !message) {
@@ -297,7 +319,7 @@ app.post("/contact", async (req, res) => {
   }
 });
 
-app.post("/create-checkout-session", async (req, res) => {
+app.post("/create-checkout-session", checkoutLimiter, async (req, res) => {
   try {
     if (!stripe) {
       return res.status(503).json({ error: "Checkout disabled in demo mode" });
@@ -490,7 +512,7 @@ app.get("/orders/by-session/:sessionId", async (req, res) => {
 });
 
 // submit return form
-app.post("/zwrot", async (req, res) => {
+app.post("/zwrot", formLimiter, async (req, res) => {
   const { orderNumber, name, email, reason, bankAccount, _hp } = req.body;
   if (_hp) return res.json({ ok: true });
   if (!orderNumber || !name || !email || !reason || !bankAccount) {
@@ -511,7 +533,7 @@ app.post("/zwrot", async (req, res) => {
 });
 
 // submit complaint form
-app.post("/reklamacja", async (req, res) => {
+app.post("/reklamacja", formLimiter, async (req, res) => {
   const { orderNumber, name, email, description, _hp } = req.body;
   if (_hp) return res.json({ ok: true });
   if (!orderNumber || !name || !email || !description) {
