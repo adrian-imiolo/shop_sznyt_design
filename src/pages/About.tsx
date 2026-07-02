@@ -1,6 +1,12 @@
+import Seo from "../components/Seo";
+
 function About() {
   return (
     <main>
+      <Seo
+        title="O nas"
+        description="Sznyt Design tworzy ręcznie robione ramki z litego dębu. Poznaj historię pracowni i filozofię projektowania designerskich prezentów, które trwają."
+      />
       {/* Hero — page title */}
       <section className="bg-near-black px-6 py-16 md:py-32 flex items-end">
         <div className="max-w-6xl mx-auto w-full">

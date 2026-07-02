@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { Order } from "../types";
 import { Show } from "@clerk/react";
 import { useCart } from "../hooks/useCart";
+import Seo from "../components/Seo";
 
 function OrderSuccess() {
   const [searchParams] = useSearchParams();
@@ -53,6 +54,10 @@ function OrderSuccess() {
   if (error) {
     return (
       <div className="min-h-dvh flex items-center justify-center p-6">
+        <Seo
+          title="Dziękujemy za zamówienie"
+          description="Twoje zamówienie w Sznyt Design zostało przyjęte. Za chwilę otrzymasz potwierdzenie e-mail ze szczegółami dostawy."
+        />
         <p className="font-dm-sans text-sm text-near-black max-w-md text-center leading-relaxed">
           {error}
         </p>
@@ -62,6 +67,10 @@ function OrderSuccess() {
   if (!order) {
     return (
       <div className="min-h-dvh flex items-center justify-center p-6">
+        <Seo
+          title="Dziękujemy za zamówienie"
+          description="Twoje zamówienie w Sznyt Design zostało przyjęte. Za chwilę otrzymasz potwierdzenie e-mail ze szczegółami dostawy."
+        />
         <p className="font-dm-sans text-sm text-secondary-text">Przetwarzamy Twoje zamówienie...</p>
       </div>
     );
@@ -69,6 +78,10 @@ function OrderSuccess() {
 
   return (
     <div className="flex flex-col gap-8 justify-center items-center p-6 min-h-dvh">
+      <Seo
+        title="Dziękujemy za zamówienie"
+        description="Twoje zamówienie w Sznyt Design zostało przyjęte. Za chwilę otrzymasz potwierdzenie e-mail ze szczegółami dostawy."
+      />
       <h1 className="font-cormorant font-light text-4xl text-near-black">
         Dziękujemy za zamówienie!
       </h1>

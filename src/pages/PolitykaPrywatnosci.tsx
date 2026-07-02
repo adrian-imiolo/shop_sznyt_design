@@ -1,6 +1,12 @@
+import Seo from "../components/Seo";
+
 function PolitykaPrywatnosci() {
   return (
     <main className="bg-warm-white px-6 py-16 md:py-24">
+      <Seo
+        title="Polityka prywatności"
+        description="Polityka prywatności sznytdesign.pl — jak Sznyt Design chroni Twoje dane osobowe, do czego je wykorzystuje i jakie masz prawa jako Kupujący."
+      />
       <div className="max-w-3xl mx-auto">
         <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">Informacje prawne</p>
         <h1 className="font-cormorant text-4xl md:text-5xl text-near-black font-light mb-2">Polityka prywatności</h1>

@@ -3,6 +3,10 @@ import { RedirectToSignIn, useAuth } from "@clerk/react";
 import type { Order } from "../types";
 import Skeleton from "../components/Skeleton";
 import { Link } from "react-router-dom";
+import Seo from "../components/Seo";
+
+const MY_ORDERS_DESCRIPTION =
+  "Historia i status Twoich zamówień w Sznyt Design — sprawdź szczegóły dostawy i numer śledzenia przesyłki.";
 
 const SHIPPING_LABELS: Record<string, string> = {
   paczkomat: "InPost Paczkomat",
@@ -63,6 +67,7 @@ function MyOrders() {
   if (error)
     return (
       <main className="min-h-screen bg-warm-white px-6 py-16 flex justify-center items-center">
+        <Seo title="Moje zamówienia" description={MY_ORDERS_DESCRIPTION} />
         <p className="font-dm-sans text-sm text-red-600">{error}</p>
       </main>
     );
@@ -70,6 +75,7 @@ function MyOrders() {
   if (!orders)
     return (
       <main className="min-h-screen bg-warm-white px-6 py-16">
+        <Seo title="Moje zamówienia" description={MY_ORDERS_DESCRIPTION} />
         <div className="max-w-3xl mx-auto">
           <h1 className="font-cormorant text-3xl md:text-5xl text-near-black font-light mb-8 md:mb-12">
             Moje zamówienia
@@ -91,6 +97,7 @@ function MyOrders() {
   if (orders.length === 0)
     return (
       <main className="min-h-screen bg-warm-white flex flex-col items-center justify-center px-6 gap-8">
+        <Seo title="Moje zamówienia" description={MY_ORDERS_DESCRIPTION} />
         <h2 className="font-cormorant text-4xl text-near-black font-light">
           Nie złożono jeszcze żadnych zamówień.
         </h2>
@@ -105,6 +112,7 @@ function MyOrders() {
 
   return (
     <main className="min-h-screen bg-warm-white px-6 py-16">
+      <Seo title="Moje zamówienia" description={MY_ORDERS_DESCRIPTION} />
       <div className="max-w-3xl mx-auto">
         <h1 className="font-cormorant text-5xl text-near-black font-light mb-12">
           Moje zamówienia

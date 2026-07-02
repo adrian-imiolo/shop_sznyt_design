@@ -2,6 +2,10 @@ import { useState, useEffect } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useAuth } from "@clerk/react";
 import type { Order } from "../types";
+import Seo from "../components/Seo";
+
+const ORDER_DETAIL_DESCRIPTION =
+  "Podgląd zamówienia w Sznyt Design — pozycje, adres dostawy, sposób płatności i status realizacji.";
 
 const SHIPPING_LABELS: Record<string, string> = {
   paczkomat: "InPost Paczkomat",
@@ -79,6 +83,7 @@ function OrderDetail() {
   if (error)
     return (
       <main className="min-h-screen bg-warm-white px-6 py-16 flex justify-center items-center">
+        <Seo title="Szczegóły zamówienia" description={ORDER_DETAIL_DESCRIPTION} />
         <p className="font-dm-sans text-sm text-red-600">{error}</p>
       </main>
     );
@@ -86,6 +91,7 @@ function OrderDetail() {
   if (!order)
     return (
       <main className="min-h-screen bg-warm-white px-6 py-16 flex justify-center items-center">
+        <Seo title="Szczegóły zamówienia" description={ORDER_DETAIL_DESCRIPTION} />
         <p className="font-dm-sans text-sm text-secondary-text">Ładowanie...</p>
       </main>
     );
@@ -94,6 +100,7 @@ function OrderDetail() {
 
   return (
     <main className="min-h-screen bg-warm-white px-6 py-16">
+      <Seo title={`Zamówienie #${order.id}`} description={ORDER_DETAIL_DESCRIPTION} />
       <div className="max-w-3xl mx-auto">
 
         {/* Back */}

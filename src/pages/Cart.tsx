@@ -5,6 +5,7 @@ import { useAuth } from "@clerk/react";
 import type { ShippingMethod, CourierAddress, PaczkomatPoint } from "../types";
 import { SHIPPING_COSTS, FREE_SHIPPING_THRESHOLD, calcShippingCost } from "../lib/shipping";
 import { validateAddress } from "../lib/checkout-validation";
+import Seo from "../components/Seo";
 
 const IS_DEMO_MODE = import.meta.env.VITE_DEMO_MODE === "true";
 
@@ -117,6 +118,10 @@ function Cart() {
   if (items.length === 0) {
     return (
       <main className="min-h-screen bg-warm-white flex flex-col items-center justify-center px-6">
+        <Seo
+          title="Koszyk"
+          description="Twój koszyk w sklepie Sznyt Design — sprawdź wybrane ramki i przejdź do bezpiecznej płatności."
+        />
         <p className="font-cormorant text-4xl text-near-black font-light mb-4">
           Twój koszyk jest pusty.
         </p>
@@ -132,6 +137,10 @@ function Cart() {
 
   return (
     <main className="min-h-screen bg-warm-white px-6 py-16">
+      <Seo
+        title="Koszyk"
+        description="Twój koszyk w sklepie Sznyt Design — sprawdź wybrane ramki i przejdź do bezpiecznej płatności."
+      />
       <div className="max-w-4xl mx-auto">
         <h1 className="font-cormorant text-3xl md:text-5xl text-near-black font-light mb-8 md:mb-12">
           Koszyk
