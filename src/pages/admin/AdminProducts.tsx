@@ -84,8 +84,8 @@ function AdminProducts() {
 
   if (!products)
     return (
-      <div className="flex flex-col items-center p-4">
-        <table className="mt-2 w-full border-collapse">
+      <div className="flex flex-col items-center p-4 w-full overflow-x-auto">
+        <table className="mt-2 w-full border-collapse min-w-[900px]">
           <thead className="bg-gray-100">
             <tr>
               <th className="p-3 text-left w-16">Kolejność</th>
@@ -117,7 +117,7 @@ function AdminProducts() {
       {isDeleteModalOpen && (
         <>
           <div className="fixed inset-0 bg-black opacity-50 z-10"></div>
-          <div className="flex flex-col items-center z-20 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/2 bg-warm-white border border-borders p-20">
+          <div className="flex flex-col items-center z-20 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-md bg-warm-white border border-borders p-6 md:p-12">
             <p className="font-cormorant text-2xl font-light text-near-black">
               Czy na pewno chcesz usunąć ten produkt?
             </p>
@@ -142,8 +142,8 @@ function AdminProducts() {
         </>
       )}
 
-      <div className="flex flex-col items-center p-4">
-        <table className="mt-2 w-full border-collapse">
+      <div className="flex flex-col items-center p-4 w-full overflow-x-auto">
+        <table className="mt-2 w-full border-collapse min-w-[900px]">
           <thead className="bg-gray-100">
             <tr>
               <th className="p-3 text-left w-16">Kolejność</th>
@@ -161,20 +161,22 @@ function AdminProducts() {
             {products.map((product, index) => (
               <tr className="border-b border-borders" key={product.id}>
                 <td className="p-3">
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-1 -my-1">
                     <button
                       onClick={() => move(index, "up")}
                       disabled={index === 0}
-                      className="text-secondary-text hover:text-near-black disabled:opacity-20 disabled:cursor-not-allowed leading-none text-base"
+                      className="text-secondary-text hover:text-near-black disabled:opacity-20 disabled:cursor-not-allowed leading-none text-base p-2 -m-1 min-h-[40px] min-w-[40px] flex items-center justify-center"
                       title="Przesuń wyżej"
+                      aria-label="Przesuń wyżej"
                     >
                       ▲
                     </button>
                     <button
                       onClick={() => move(index, "down")}
                       disabled={index === products.length - 1}
-                      className="text-secondary-text hover:text-near-black disabled:opacity-20 disabled:cursor-not-allowed leading-none text-base"
+                      className="text-secondary-text hover:text-near-black disabled:opacity-20 disabled:cursor-not-allowed leading-none text-base p-2 -m-1 min-h-[40px] min-w-[40px] flex items-center justify-center"
                       title="Przesuń niżej"
+                      aria-label="Przesuń niżej"
                     >
                       ▼
                     </button>
@@ -182,12 +184,13 @@ function AdminProducts() {
                 </td>
                 <td className="p-3">{product.name}</td>
                 <td className="p-3">{product.tagline}</td>
-                <td className="p-3">{product.description}</td>
+                <td className="p-3 max-w-[12rem] truncate" title={product.description}>{product.description}</td>
                 <td className="p-3">{product.price}</td>
-                <td className="p-3">{product.imageUrl}</td>
-                <td className="p-3">{product.lifestyleImageUrl}</td>
+                <td className="p-3 max-w-[12rem] truncate" title={product.imageUrl}>{product.imageUrl}</td>
+                <td className="p-3 max-w-[12rem] truncate" title={product.lifestyleImageUrl}>{product.lifestyleImageUrl}</td>
                 <td className="p-3">{product.stock}</td>
-                <td className="gap-3 flex-col p-3">
+                <td className="p-3">
+                  <div className="flex flex-col gap-3">
                   <Link
                     className="text-accent hover:underline"
                     to={`/admin/produkty/${product.id}`}
@@ -203,6 +206,7 @@ function AdminProducts() {
                   >
                     Usuń
                   </button>
+                  </div>
                 </td>
               </tr>
             ))}

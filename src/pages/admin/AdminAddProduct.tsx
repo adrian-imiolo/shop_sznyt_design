@@ -61,7 +61,7 @@ function AdminAddProduct() {
         {error && <p className="text-red-600 font-dm-sans mb-4">{error}</p>}
         <form
           onSubmit={handleSubmit}
-          className="grid grid-cols-[auto_1fr] gap-4 items-center"
+          className="grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-4 sm:items-center"
         >
           <label>Nazwa</label>
           <input

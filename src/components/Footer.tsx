@@ -27,7 +27,7 @@ function Footer() {
           </div>
 
           {/* Links */}
-          <div className="flex justify-center md:justify-end gap-16 md:gap-24">
+          <div className="flex flex-wrap justify-center md:justify-end gap-8 md:gap-24">
             <div className="flex flex-col gap-4">
               <p className="font-dm-sans text-xs text-accent tracking-[0.2em] uppercase mb-1">
                 Sklep
