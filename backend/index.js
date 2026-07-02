@@ -9,7 +9,9 @@ import nodemailer from "nodemailer";
 import Stripe from "stripe";
 import { clerkMiddleware, requireAuth, getAuth } from "@clerk/express";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = process.env.STRIPE_SECRET_KEY
+  ? new Stripe(process.env.STRIPE_SECRET_KEY)
+  : null;
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -19,6 +21,16 @@ const transporter = nodemailer.createTransport({
     pass: process.env.SMTP_PASS,
   },
 });
+
+const isDemoMode = !stripe || !process.env.SMTP_HOST;
+
+async function sendMail(opts) {
+  if (!process.env.SMTP_HOST) {
+    console.log(`[demo] sendMail skipped — to=${opts.to} subject=${opts.subject ?? "(no subject)"}`);
+    return;
+  }
+  return transporter.sendMail({ from: process.env.SMTP_USER, ...opts });
+}
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
@@ -58,6 +70,9 @@ app.post(
   "/webhook",
   express.raw({ type: "application/json" }),
   async (req, res) => {
+    if (!stripe) {
+      return res.status(503).json({ error: "Stripe not configured (demo mode)" });
+    }
     const sig = req.headers["stripe-signature"];
     let event;
 
@@ -135,8 +150,7 @@ app.post(
         });
 
         try {
-          await transporter.sendMail({
-            from: process.env.SMTP_USER,
+          await sendMail({
             to: session.customer_details?.email,
             subject: "Potwierdzenie zamówienia - Sznyt Design",
             text: `Dziękujemy za złożenie zamówienia!\n\nNumer zamówienia: ${order.id}\nSuma: ${session.amount_total / 100} PLN\n\nSkontaktujemy się wkrótce.`,
@@ -279,8 +293,7 @@ app.post("/contact", async (req, res) => {
       data: { name, email, message },
     });
     try {
-      await transporter.sendMail({
-        from: process.env.SMTP_USER,
+      await sendMail({
         to: process.env.CONTACT_RECIPIENT,
         replyTo: email,
         text: `Imię: ${name}\nEmail: ${email}\n\nWiadomość:\n${message}`,
@@ -297,6 +310,9 @@ app.post("/contact", async (req, res) => {
 
 app.post("/create-checkout-session", async (req, res) => {
   try {
+    if (!stripe) {
+      return res.status(503).json({ error: "Checkout disabled in demo mode" });
+    }
     const { items, userId, shippingMethod, shippingAddress } = req.body;
 
     if (!shippingMethod || !SHIPPING_COSTS[shippingMethod]) {
@@ -390,8 +406,7 @@ app.patch("/orders/:id/fulfillment", requireAuth(), requireAdmin, async (req, re
     // send shipping email when status set to shipped and we have customer email + tracking number
     if (fulfillmentStatus === "shipped" && order.customerEmail && trackingNumber) {
       try {
-        await transporter.sendMail({
-          from: process.env.SMTP_USER,
+        await sendMail({
           to: order.customerEmail,
           subject: "Twoje zamówienie zostało wysłane — Sznyt Design",
           text: `Twoje zamówienie #${order.id} zostało wysłane.\n\nNumer przesyłki: ${trackingNumber}\n\nDziękujemy za zakup!`,
@@ -466,8 +481,7 @@ app.post("/zwrot", async (req, res) => {
     return res.status(400).json({ error: "Wszystkie pola są wymagane." });
   }
   try {
-    await transporter.sendMail({
-      from: process.env.SMTP_USER,
+    await sendMail({
       to: process.env.CONTACT_RECIPIENT,
       replyTo: email,
       subject: `Zwrot towaru — zamówienie #${orderNumber}`,
@@ -488,8 +502,7 @@ app.post("/reklamacja", async (req, res) => {
     return res.status(400).json({ error: "Wszystkie pola są wymagane." });
   }
   try {
-    await transporter.sendMail({
-      from: process.env.SMTP_USER,
+    await sendMail({
       to: process.env.CONTACT_RECIPIENT,
       replyTo: email,
       subject: `Reklamacja — zamówienie #${orderNumber}`,
@@ -503,5 +516,9 @@ app.post("/reklamacja", async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  if (isDemoMode) {
+    console.log(`[DEMO MODE] Backend on :${PORT} — Stripe: ${stripe ? "on" : "off"}, SMTP: ${process.env.SMTP_HOST ? "on" : "off"}`);
+  } else {
+    console.log(`Server running on http://localhost:${PORT}`);
+  }
 });
