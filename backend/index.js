@@ -24,6 +24,13 @@ const transporter = nodemailer.createTransport({
 
 const isDemoMode = !stripe || !process.env.SMTP_HOST;
 
+// When Stripe is live, a missing webhook secret means payments succeed but orders
+// are never recorded, and a missing FRONTEND_URL 500s every checkout. Fail at boot.
+if (stripe && (!process.env.STRIPE_WEBHOOK_SECRET || !process.env.FRONTEND_URL)) {
+  console.error("FATAL: STRIPE_WEBHOOK_SECRET and FRONTEND_URL are required when STRIPE_SECRET_KEY is set.");
+  process.exit(1);
+}
+
 async function sendMail(opts) {
   if (!process.env.SMTP_HOST) {
     console.log(`[demo] sendMail skipped — to=${opts.to} subject=${opts.subject ?? "(no subject)"}`);
@@ -38,8 +45,15 @@ const prisma = new PrismaClient({
 
 const app = express();
 
+// FRONTEND_URL in prod, localhost in dev, *.vercel.app for preview deployments
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  "http://localhost:5173",
+  /\.vercel\.app$/,
+].filter(Boolean);
+
 app.use(cors({
-  origin: true,
+  origin: allowedOrigins,
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
 app.use(clerkMiddleware());
@@ -270,6 +284,7 @@ app.post("/contact", async (req, res) => {
       await sendMail({
         to: process.env.CONTACT_RECIPIENT,
         replyTo: email,
+        subject: `Wiadomość od ${name} — formularz kontaktowy`,
         text: `Imię: ${name}\nEmail: ${email}\n\nWiadomość:\n${message}`,
       });
     } catch (emailErr) {
@@ -447,7 +462,9 @@ app.get("/orders/:id", requireAuth(), async (req, res) => {
       include: { items: { include: { product: true } } },
     });
     if (!order) return res.status(404).json({ error: "Nie znaleziono zamówienia" });
-    if (order.userId && order.userId !== getAuth(req).userId) {
+    // Guest orders (userId=null) are only reachable via /orders/by-session/:sessionId —
+    // sequential ids must not expose their shipping data to other signed-in users.
+    if (order.userId !== getAuth(req).userId) {
       return res.status(403).json({ error: "Forbidden" });
     }
     res.json(order);
