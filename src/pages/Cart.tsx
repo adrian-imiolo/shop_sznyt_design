@@ -3,14 +3,8 @@ import { Link } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
 import { useAuth } from "@clerk/react";
 import type { ShippingMethod, CourierAddress, PaczkomatPoint } from "../types";
-
-const SHIPPING_COSTS: Record<ShippingMethod, number> = {
-  paczkomat: 20,
-  inpost_kurier: 25,
-  dpd: 25,
-};
-
-const FREE_SHIPPING_THRESHOLD = 350;
+import { SHIPPING_COSTS, FREE_SHIPPING_THRESHOLD, calcShippingCost } from "../lib/shipping";
+import { validateAddress } from "../lib/checkout-validation";
 
 const IS_DEMO_MODE = import.meta.env.VITE_DEMO_MODE === "true";
 
@@ -45,7 +39,7 @@ function Cart() {
 
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
   const isFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD;
-  const shippingCost = shippingMethod && !isFreeShipping ? SHIPPING_COSTS[shippingMethod] : 0;
+  const shippingCost = calcShippingCost(subtotal, shippingMethod);
   const total = subtotal + shippingCost;
 
   useEffect(() => {
@@ -79,13 +73,7 @@ function Cart() {
   }
 
   async function handleCheckout() {
-    const errors: Partial<Record<keyof CourierAddress, string>> = {};
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address.email))
-      errors.email = "Podaj poprawny adres e-mail";
-    if (!/^\d{2}-\d{3}$/.test(address.postalCode))
-      errors.postalCode = "Kod pocztowy powinien mieć format XX-XXX";
-    if (!/^(\+48\s?)?(\d[\s-]?){9}$/.test(address.phone.replace(/\s|-/g, "")))
-      errors.phone = "Podaj poprawny numer telefonu (9 cyfr)";
+    const errors = validateAddress(address);
     if (Object.keys(errors).length > 0) {
       setAddressErrors(errors);
       return;
