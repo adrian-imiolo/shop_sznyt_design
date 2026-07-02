@@ -91,7 +91,7 @@ app.post(
 
         const lineItems = await stripe.checkout.sessions.listLineItems(
           session.id,
-          { expand: ["data.price.product"] },
+          { expand: ["data.price.product"], limit: 100 },
         );
 
         let paymentMethod = null;
@@ -159,39 +159,13 @@ app.post(
           console.error("Błąd wysyłania emaila:", emailErr.message);
         }
       } catch (err) {
-        console.error("Błąd przetwarzania zamówienia:", err.message);
-      }
-    }
-
-    if (event.type === "checkout.session.expired") {
-      try {
-        const session = event.data.object;
-        await prisma.order.updateMany({
-          where: { stripeSessionId: session.id, status: "pending" },
-          data: { status: "cancelled" },
-        });
-      } catch (err) {
-        console.error("Błąd aktualizacji statusu (expired):", err.message);
-      }
-    }
-
-    if (event.type === "payment_intent.payment_failed") {
-      try {
-        const paymentIntent = event.data.object;
-        // find order by matching stripeSessionId via payment intent — look up the session
-        const sessions = await stripe.checkout.sessions.list({
-          payment_intent: paymentIntent.id,
-          limit: 1,
-        });
-        const sessionId = sessions.data[0]?.id;
-        if (sessionId) {
-          await prisma.order.updateMany({
-            where: { stripeSessionId: sessionId, status: "pending" },
-            data: { status: "failed" },
-          });
+        // P2002 on stripeSessionId = webhook retry for an already-recorded order — safe no-op.
+        // Anything else must return 500 so Stripe retries; a swallowed error here
+        // permanently loses a paid order.
+        if (err.code !== "P2002") {
+          console.error("Błąd przetwarzania zamówienia:", err.message);
+          return res.status(500).json({ error: "Order processing failed" });
         }
-      } catch (err) {
-        console.error("Błąd aktualizacji statusu (failed):", err.message);
       }
     }
 
