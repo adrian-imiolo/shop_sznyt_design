@@ -19,6 +19,6 @@ Non-negotiable gates before "launch-ready":
 - Admin panel CRUD all working
 - Order confirmation email actually delivers to an inbox
 - CORS locked to `FRONTEND_URL` (not `origin: true`)
-- `.env` has all required keys (`CLERK_SECRET_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `DATABASE_URL`, SMTP creds, `FRONTEND_URL`, `ADMIN_USER_ID`)
+- `.env` has all required keys (`CLERK_SECRET_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `DATABASE_URL`, SMTP creds, `FRONTEND_URL`)
 
 If I try to mark "launch-ready" without one of those, push back.
