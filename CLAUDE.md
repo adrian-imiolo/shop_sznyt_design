@@ -32,7 +32,6 @@ Commit per meaningful unit (one page, one component, one fix). Conventional comm
 - Clerk package: `@clerk/react` — NOT `@clerk/clerk-react` or `@clerk/react-router`
 - Stripe CLI for dev: `stripe listen --forward-to localhost:3000/webhook`
 - Stripe `success_url` uses http in dev — Chrome SSL workaround: navigate manually to `http://localhost:5173/sukces`
-- `ADMIN_USER_ID` needed in both `.env` files (with and without `VITE_` prefix)
 - Last page section must NOT use `bg-near-black` (merges with footer)
 - TODOs and roadmap: GitHub issues
 - Test plan: `docs/TEST-PLAN.md`

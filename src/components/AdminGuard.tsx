@@ -1,14 +1,12 @@
-import { useAuth } from "@clerk/react";
+import { useIsAdmin } from "../hooks/useIsAdmin";
 import { Navigate } from "react-router-dom";
 
 function AdminGuard({ children }: { children: React.ReactNode }) {
-  const { userId, isLoaded } = useAuth();
+  const { isAdmin, isLoaded } = useIsAdmin();
 
   if (!isLoaded) return null;
 
-  if (userId !== import.meta.env.VITE_ADMIN_USER_ID) {
-    return <Navigate to="/" replace />;
-  }
+  if (!isAdmin) return <Navigate to="/" replace />;
 
   return <>{children}</>;
 }
