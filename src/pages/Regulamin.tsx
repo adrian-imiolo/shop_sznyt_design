@@ -1,6 +1,12 @@
+import Seo from "../components/Seo";
+
 function Regulamin() {
   return (
     <main className="bg-warm-white px-6 py-16 md:py-24">
+      <Seo
+        title="Regulamin sklepu"
+        description="Regulamin sklepu sznytdesign.pl — zasady składania zamówień, dostaw, płatności i prawa Kupującego w Sznyt Design."
+      />
       <div className="max-w-3xl mx-auto">
         <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">Informacje prawne</p>
         <h1 className="font-cormorant text-4xl md:text-5xl text-near-black font-light mb-2">Regulamin sklepu</h1>

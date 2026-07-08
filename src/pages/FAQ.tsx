@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import type { ReactNode } from "react";
+import Seo from "../components/Seo";
 
 const faqs = [
   {
@@ -106,6 +107,10 @@ function FAQItem({ q, a }: { q: string; a: ReactNode }) {
 function FAQ() {
   return (
     <main className="bg-warm-white px-6 py-16 md:py-24">
+      <Seo
+        title="FAQ"
+        description="Najczęściej zadawane pytania o ramki z litego dębu Sznyt Design — materiały, wysyłka, zwroty i dbanie o drewno. Wszystko, co warto wiedzieć."
+      />
       <div className="max-w-3xl mx-auto">
         <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">Pomoc</p>
         <h1 className="font-cormorant text-4xl md:text-5xl text-near-black font-light mb-4">

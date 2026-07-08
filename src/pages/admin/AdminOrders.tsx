@@ -81,14 +81,14 @@ function AdminOrders() {
       }
     }
     load();
-  }, []);
+  }, [getToken]);
 
   if (error) return <p className="p-4 text-red-600 font-dm-sans text-sm">{error}</p>;
 
   if (!orders)
     return (
-      <div className="flex flex-col items-center p-4">
-        <table className="w-full border-collapse">
+      <div className="p-4 overflow-x-auto">
+        <table className="w-full border-collapse min-w-[900px]">
           <thead className="bg-gray-100">
             <tr>
               {["Id", "Email", "Status płatności", "Realizacja", "Suma", "Dostawa", "Adres", "Data"].map((h) => (

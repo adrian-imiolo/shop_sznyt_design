@@ -30,7 +30,7 @@ function AdminEditProduct() {
       });
     }
     load();
-  }, []);
+  }, [id]);
 
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
@@ -75,7 +75,7 @@ function AdminEditProduct() {
         <h1 className="text-center p-6 text-2xl">Edytuj produkt</h1>
         {error && <p className="text-red-600 font-dm-sans mb-4">{error}</p>}
         <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-[auto_1fr] gap-4 items-center">
+          <div className="grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-4 sm:items-center">
             <label>Nazwa</label>
             <input
               required

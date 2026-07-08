@@ -1,14 +1,5 @@
-import { createContext, useContext, useState } from "react";
-
-type Consent = "accepted" | "declined" | null;
-
-type CookieConsentContextType = {
-  consent: Consent;
-  accept: () => void;
-  decline: () => void;
-};
-
-const CookieConsentContext = createContext<CookieConsentContextType | null>(null);
+import { useState } from "react";
+import { CookieConsentContext, type Consent } from "./cookie-consent-context";
 
 export function CookieConsentProvider({ children }: { children: React.ReactNode }) {
   const [consent, setConsent] = useState<Consent>(() => {
@@ -33,10 +24,4 @@ export function CookieConsentProvider({ children }: { children: React.ReactNode 
       {children}
     </CookieConsentContext.Provider>
   );
-}
-
-export function useCookieConsent() {
-  const context = useContext(CookieConsentContext);
-  if (!context) throw new Error("useCookieConsent must be used inside CookieConsentProvider");
-  return context;
 }

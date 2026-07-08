@@ -8,6 +8,7 @@ import cors from "cors";
 import nodemailer from "nodemailer";
 import Stripe from "stripe";
 import { clerkMiddleware, requireAuth, getAuth } from "@clerk/express";
+import { rateLimit } from "express-rate-limit";
 
 const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY)
@@ -24,6 +25,13 @@ const transporter = nodemailer.createTransport({
 
 const isDemoMode = !stripe || !process.env.SMTP_HOST;
 
+// When Stripe is live, a missing webhook secret means payments succeed but orders
+// are never recorded, and a missing FRONTEND_URL 500s every checkout. Fail at boot.
+if (stripe && (!process.env.STRIPE_WEBHOOK_SECRET || !process.env.FRONTEND_URL)) {
+  console.error("FATAL: STRIPE_WEBHOOK_SECRET and FRONTEND_URL are required when STRIPE_SECRET_KEY is set.");
+  process.exit(1);
+}
+
 async function sendMail(opts) {
   if (!process.env.SMTP_HOST) {
     console.log(`[demo] sendMail skipped — to=${opts.to} subject=${opts.subject ?? "(no subject)"}`);
@@ -38,8 +46,36 @@ const prisma = new PrismaClient({
 
 const app = express();
 
+// Render/Railway sit behind exactly one proxy hop — required for
+// express-rate-limit to see real client IPs instead of the proxy's.
+app.set("trust proxy", 1);
+
+// Public forms trigger outbound SMTP + DB writes; checkout calls Stripe.
+// The honeypot filters dumb bots, this stops dumb loops.
+const formLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 5,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: { error: "Zbyt wiele prób. Spróbuj ponownie za chwilę." },
+});
+const checkoutLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 10,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: { error: "Zbyt wiele prób. Spróbuj ponownie za chwilę." },
+});
+
+// FRONTEND_URL in prod, localhost in dev, *.vercel.app for preview deployments
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  "http://localhost:5173",
+  /\.vercel\.app$/,
+].filter(Boolean);
+
 app.use(cors({
-  origin: true,
+  origin: allowedOrigins,
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
 app.use(clerkMiddleware());
@@ -95,7 +131,7 @@ app.post(
 
         const lineItems = await stripe.checkout.sessions.listLineItems(
           session.id,
-          { expand: ["data.price.product"] },
+          { expand: ["data.price.product"], limit: 100 },
         );
 
         let paymentMethod = null;
@@ -163,39 +199,13 @@ app.post(
           console.error("Błąd wysyłania emaila:", emailErr.message);
         }
       } catch (err) {
-        console.error("Błąd przetwarzania zamówienia:", err.message);
-      }
-    }
-
-    if (event.type === "checkout.session.expired") {
-      try {
-        const session = event.data.object;
-        await prisma.order.updateMany({
-          where: { stripeSessionId: session.id, status: "pending" },
-          data: { status: "cancelled" },
-        });
-      } catch (err) {
-        console.error("Błąd aktualizacji statusu (expired):", err.message);
-      }
-    }
-
-    if (event.type === "payment_intent.payment_failed") {
-      try {
-        const paymentIntent = event.data.object;
-        // find order by matching stripeSessionId via payment intent — look up the session
-        const sessions = await stripe.checkout.sessions.list({
-          payment_intent: paymentIntent.id,
-          limit: 1,
-        });
-        const sessionId = sessions.data[0]?.id;
-        if (sessionId) {
-          await prisma.order.updateMany({
-            where: { stripeSessionId: sessionId, status: "pending" },
-            data: { status: "failed" },
-          });
+        // P2002 on stripeSessionId = webhook retry for an already-recorded order — safe no-op.
+        // Anything else must return 500 so Stripe retries; a swallowed error here
+        // permanently loses a paid order.
+        if (err.code !== "P2002") {
+          console.error("Błąd przetwarzania zamówienia:", err.message);
+          return res.status(500).json({ error: "Order processing failed" });
         }
-      } catch (err) {
-        console.error("Błąd aktualizacji statusu (failed):", err.message);
       }
     }
 
@@ -286,7 +296,7 @@ app.post("/products", requireAuth(), requireAdmin, async (req, res) => {
 });
 
 // submit contact form
-app.post("/contact", async (req, res) => {
+app.post("/contact", formLimiter, async (req, res) => {
   const { name, email, message, _hp } = req.body;
   if (_hp) return res.json({ ok: true });
   if (!name || !email || !message) {
@@ -300,6 +310,7 @@ app.post("/contact", async (req, res) => {
       await sendMail({
         to: process.env.CONTACT_RECIPIENT,
         replyTo: email,
+        subject: `Wiadomość od ${name} — formularz kontaktowy`,
         text: `Imię: ${name}\nEmail: ${email}\n\nWiadomość:\n${message}`,
       });
     } catch (emailErr) {
@@ -312,7 +323,7 @@ app.post("/contact", async (req, res) => {
   }
 });
 
-app.post("/create-checkout-session", async (req, res) => {
+app.post("/create-checkout-session", checkoutLimiter, async (req, res) => {
   try {
     if (!stripe) {
       return res.status(503).json({ error: "Checkout disabled in demo mode" });
@@ -323,20 +334,45 @@ app.post("/create-checkout-session", async (req, res) => {
       return res.status(400).json({ error: "Wybierz metodę dostawy" });
     }
 
-    const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: "Koszyk jest pusty" });
+    }
+
+    // Prices, names and images come from the DB — the client only chooses ids and quantities.
+    const products = await prisma.product.findMany({
+      where: { id: { in: items.map((item) => Number(item.id)) } },
+    });
+    const productsById = new Map(products.map((p) => [p.id, p]));
+
+    const orderLines = [];
+    for (const item of items) {
+      const product = productsById.get(Number(item.id));
+      const quantity = Number(item.quantity);
+      if (!product || !Number.isInteger(quantity) || quantity < 1) {
+        return res.status(400).json({ error: "Nieprawidłowy produkt w koszyku" });
+      }
+      if (quantity > product.stock) {
+        return res.status(409).json({
+          error: `Niewystarczająca ilość produktu „${product.name}" — dostępne sztuki: ${product.stock}`,
+        });
+      }
+      orderLines.push({ product, quantity });
+    }
+
+    const subtotal = orderLines.reduce((sum, line) => sum + line.product.price * line.quantity, 0);
     const shippingCost = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COSTS[shippingMethod];
 
-    const lineItems = items.map((item) => ({
+    const lineItems = orderLines.map(({ product, quantity }) => ({
       price_data: {
         currency: "pln",
         product_data: {
-          name: item.name,
-          ...(item.imageUrl ? { images: [item.imageUrl] } : {}),
-          metadata: { productId: item.id },
+          name: product.name,
+          ...(product.imageUrl ? { images: [product.imageUrl] } : {}),
+          metadata: { productId: product.id },
         },
-        unit_amount: Math.round(item.price * 100),
+        unit_amount: Math.round(product.price * 100),
       },
-      quantity: item.quantity,
+      quantity,
     }));
 
     if (shippingCost > 0) {
@@ -363,7 +399,7 @@ app.post("/create-checkout-session", async (req, res) => {
       success_url: `${process.env.FRONTEND_URL}/sukces?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.FRONTEND_URL}/koszyk`,
       metadata: {
-        userId: userId || null,
+        ...(userId ? { userId } : {}),
         shippingMethod,
         shippingAddress: JSON.stringify(shippingAddress),
       },
@@ -452,7 +488,9 @@ app.get("/orders/:id", requireAuth(), async (req, res) => {
       include: { items: { include: { product: true } } },
     });
     if (!order) return res.status(404).json({ error: "Nie znaleziono zamówienia" });
-    if (order.userId && order.userId !== getAuth(req).userId) {
+    // Guest orders (userId=null) are only reachable via /orders/by-session/:sessionId —
+    // sequential ids must not expose their shipping data to other signed-in users.
+    if (order.userId !== getAuth(req).userId) {
       return res.status(403).json({ error: "Forbidden" });
     }
     res.json(order);
@@ -478,7 +516,7 @@ app.get("/orders/by-session/:sessionId", async (req, res) => {
 });
 
 // submit return form
-app.post("/zwrot", async (req, res) => {
+app.post("/zwrot", formLimiter, async (req, res) => {
   const { orderNumber, name, email, reason, bankAccount, _hp } = req.body;
   if (_hp) return res.json({ ok: true });
   if (!orderNumber || !name || !email || !reason || !bankAccount) {
@@ -499,7 +537,7 @@ app.post("/zwrot", async (req, res) => {
 });
 
 // submit complaint form
-app.post("/reklamacja", async (req, res) => {
+app.post("/reklamacja", formLimiter, async (req, res) => {
   const { orderNumber, name, email, description, _hp } = req.body;
   if (_hp) return res.json({ ok: true });
   if (!orderNumber || !name || !email || !description) {

@@ -90,5 +90,6 @@ export type CartContextType = {
   addItem: (item: Omit<CartItem, "quantity">) => boolean;
   removeItem: (id: number) => void;
   updateQuantity: (id: number, quantity: number) => void;
+  clearCart: () => void;
   totalItems: number;
 };

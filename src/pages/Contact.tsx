@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import Seo from "../components/Seo";
 
 function Contact() {
   const [name, setName] = useState("");
@@ -38,6 +39,10 @@ function Contact() {
 
   return (
     <main>
+      <Seo
+        title="Kontakt"
+        description="Masz pytanie o ramkę, zamówienie lub projekt na zamówienie? Napisz do Sznyt Design — odpowiadamy w ciągu jednego dnia roboczego."
+      />
       {/* Hero header */}
       <section className="bg-near-black px-6 py-16 md:py-32 flex items-end">
         <div className="max-w-6xl mx-auto w-full">

@@ -1,6 +1,7 @@
 import ProductSection from "../components/ProductSection";
 import Hero from "../components/Hero";
 import BrandStatement from "../components/BrandStatement";
+import Seo from "../components/Seo";
 import { useState, useEffect } from "react";
 import type { Product } from "../types";
 
@@ -22,6 +23,11 @@ function Home() {
 
   return (
     <>
+      <Seo
+        isHome
+        title="Home"
+        description="Ręcznie robione ramki z litego dębu — designerski prezent, który zostaje na lata. Kolekcja Sznyt Design, projektowana i wykonywana w Polsce."
+      />
       <Hero />
       <div id="kolekcja" />
       {products.map((product, index) => (

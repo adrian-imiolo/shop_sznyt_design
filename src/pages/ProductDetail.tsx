@@ -1,8 +1,9 @@
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { useCart } from "../context/CartContext";
+import { useCart } from "../hooks/useCart";
 import type { Product } from "../types";
 import Skeleton from "../components/Skeleton";
+import Seo from "../components/Seo";
 
 function ProductDetails() {
   const { id } = useParams();
@@ -36,10 +37,23 @@ function ProductDetails() {
     load();
   }, [id]);
 
-  if (error) return <p className="font-dm-sans text-sm text-red-600 p-6">{error}</p>;
+  if (error)
+    return (
+      <>
+        <Seo
+          title="Produkt"
+          description="Ręcznie robiona ramka z litego dębu od Sznyt Design. Designerski prezent, który zostaje na lata."
+        />
+        <p className="font-dm-sans text-sm text-red-600 p-6">{error}</p>
+      </>
+    );
   if (!product)
     return (
       <main className="flex flex-col md:flex-row md:h-screen md:max-h-240">
+        <Seo
+          title="Produkt"
+          description="Ręcznie robiona ramka z litego dębu od Sznyt Design. Designerski prezent, który zostaje na lata."
+        />
         {/* Image side — 60% width, left */}
         <Skeleton className="relative w-full md:w-3/5 min-h-[60vh] md:h-full overflow-hidden"></Skeleton>
         <div className="w-full bg-[#F5F3F0] md:w-2/5 flex flex-col justify-between px-6 py-12 md:px-16 md:py-20">
@@ -63,6 +77,10 @@ function ProductDetails() {
 
   return (
     <main className="flex flex-col md:flex-row md:h-screen md:max-h-240">
+      <Seo
+        title={product.name}
+        description={`${product.tagline} Ręcznie robiona ramka z litego dębu od Sznyt Design — designerski prezent, który zostaje na lata.`}
+      />
       {/* Add to cart feedback popup */}
       <div
         className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-near-black text-warm-white font-dm-sans text-sm px-6 py-4 flex items-center gap-3 transition-opacity duration-500 ${added ? "opacity-100" : "opacity-0 pointer-events-none"}`}

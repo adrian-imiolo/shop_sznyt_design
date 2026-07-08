@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import Seo from "../components/Seo";
 
 function ZwrotForm() {
   const [orderNumber, setOrderNumber] = useState("");
@@ -177,6 +178,10 @@ function Zwroty() {
 
   return (
     <main className="bg-warm-white px-6 py-16 md:py-24">
+      <Seo
+        title="Zwroty i reklamacje"
+        description="Jak zgłosić zwrot lub reklamację ramki kupionej w Sznyt Design. Prosta procedura, 14 dni na odstąpienie od umowy — krok po kroku."
+      />
       <div className="max-w-3xl mx-auto">
         <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">Obsługa posprzedażowa</p>
         <h1 className="font-cormorant text-4xl md:text-5xl text-near-black font-light mb-4">

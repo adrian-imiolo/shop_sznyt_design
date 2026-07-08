@@ -1,16 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useCart } from "../context/CartContext";
+import { useCart } from "../hooks/useCart";
 import { useAuth } from "@clerk/react";
 import type { ShippingMethod, CourierAddress, PaczkomatPoint } from "../types";
-
-const SHIPPING_COSTS: Record<ShippingMethod, number> = {
-  paczkomat: 20,
-  inpost_kurier: 25,
-  dpd: 25,
-};
-
-const FREE_SHIPPING_THRESHOLD = 350;
+import { SHIPPING_COSTS, FREE_SHIPPING_THRESHOLD, calcShippingCost } from "../lib/shipping";
+import { validateAddress } from "../lib/checkout-validation";
+import Seo from "../components/Seo";
 
 const IS_DEMO_MODE = import.meta.env.VITE_DEMO_MODE === "true";
 
@@ -45,19 +40,17 @@ function Cart() {
 
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
   const isFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD;
-  const shippingCost = shippingMethod && !isFreeShipping ? SHIPPING_COSTS[shippingMethod] : 0;
+  const shippingCost = calcShippingCost(subtotal, shippingMethod);
   const total = subtotal + shippingCost;
 
   useEffect(() => {
-    const easyPack = (window as any).easyPack;
-    if (easyPack) easyPack.init({ defaultLocale: "pl" });
+    window.easyPack?.init({ defaultLocale: "pl" });
   }, []);
 
   function openPaczkomatWidget() {
-    const easyPack = (window as any).easyPack;
-    if (!easyPack) return;
-    easyPack.modalMap(
-      (point: any, modal: any) => {
+    if (!window.easyPack) return;
+    window.easyPack.modalMap(
+      (point, modal) => {
         modal.closeModal();
         setPaczkomatPoint({
           code: point.name,
@@ -65,7 +58,11 @@ function Cart() {
           city: point.address?.city,
         });
       },
-      { width: 500, height: 600 },
+      // the widget hard-codes its size — cap it so the map fits a 375px phone viewport
+      {
+        width: Math.min(500, window.innerWidth - 32),
+        height: Math.min(600, window.innerHeight - 32),
+      },
     );
   }
 
@@ -77,13 +74,7 @@ function Cart() {
   }
 
   async function handleCheckout() {
-    const errors: Partial<Record<keyof CourierAddress, string>> = {};
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address.email))
-      errors.email = "Podaj poprawny adres e-mail";
-    if (!/^\d{2}-\d{3}$/.test(address.postalCode))
-      errors.postalCode = "Kod pocztowy powinien mieć format XX-XXX";
-    if (!/^(\+48\s?)?(\d[\s-]?){9}$/.test(address.phone.replace(/\s|-/g, "")))
-      errors.phone = "Podaj poprawny numer telefonu (9 cyfr)";
+    const errors = validateAddress(address);
     if (Object.keys(errors).length > 0) {
       setAddressErrors(errors);
       return;
@@ -99,7 +90,13 @@ function Cart() {
       const res = await fetch(`${import.meta.env.VITE_API_URL as string}/create-checkout-session`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items, userId, shippingMethod, shippingAddress }),
+        body: JSON.stringify({
+          // backend prices from the DB — it only needs ids and quantities
+          items: items.map(({ id, quantity }) => ({ id, quantity })),
+          userId,
+          shippingMethod,
+          shippingAddress,
+        }),
       });
       if (!res.ok) {
         const data = await res.json();
@@ -108,8 +105,12 @@ function Cart() {
       const data = await res.json();
       if (!data.url) throw new Error("Nie udało się otworzyć strony płatności");
       window.location.href = data.url;
-    } catch (err: any) {
-      setCheckoutError(err.message ?? "Nie udało się przejść do płatności. Spróbuj ponownie.");
+    } catch (err) {
+      setCheckoutError(
+        err instanceof Error && err.message
+          ? err.message
+          : "Nie udało się przejść do płatności. Spróbuj ponownie.",
+      );
       setCheckoutLoading(false);
     }
   }
@@ -117,6 +118,10 @@ function Cart() {
   if (items.length === 0) {
     return (
       <main className="min-h-screen bg-warm-white flex flex-col items-center justify-center px-6">
+        <Seo
+          title="Koszyk"
+          description="Twój koszyk w sklepie Sznyt Design — sprawdź wybrane ramki i przejdź do bezpiecznej płatności."
+        />
         <p className="font-cormorant text-4xl text-near-black font-light mb-4">
           Twój koszyk jest pusty.
         </p>
@@ -132,6 +137,10 @@ function Cart() {
 
   return (
     <main className="min-h-screen bg-warm-white px-6 py-16">
+      <Seo
+        title="Koszyk"
+        description="Twój koszyk w sklepie Sznyt Design — sprawdź wybrane ramki i przejdź do bezpiecznej płatności."
+      />
       <div className="max-w-4xl mx-auto">
         <h1 className="font-cormorant text-3xl md:text-5xl text-near-black font-light mb-8 md:mb-12">
           Koszyk

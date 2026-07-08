@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import type { Product } from "../types";
+import Seo from "../components/Seo";
 
 function ProductCard({ product }: { product: Product }) {
   const [hovered, setHovered] = useState(false);
@@ -58,6 +59,10 @@ function Shop() {
 
   return (
     <main>
+      <Seo
+        title="Sklep"
+        description="Kolekcja ręcznie robionych ramek z litego dębu. Każdy egzemplarz projektowany i wykonywany w Polsce — designerski prezent, który zostaje na lata."
+      />
       {/* Page header */}
       <section className="bg-near-black px-6 py-16 md:py-32 flex items-end">
         <div className="max-w-6xl mx-auto w-full">
