@@ -94,9 +94,13 @@ const SHIPPING_LABELS = {
   dpd: "DPD Kurier",
 };
 
+function getRole(req) {
+  const { sessionClaims } = getAuth(req);
+  return sessionClaims?.metadata?.role ?? null;
+}
+
 function requireAdmin(req, res, next) {
-  const { userId } = getAuth(req);
-  if (userId !== process.env.ADMIN_USER_ID) {
+  if (getRole(req) !== "admin") {
     return res.status(403).json({ error: "Forbidden" });
   }
   next();

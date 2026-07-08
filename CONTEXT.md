@@ -61,7 +61,6 @@ All rendered by per-template render functions returning `{ subject, html, text }
 - **Provider:** Clerk.
 - **Admin role:** `publicMetadata.role === "admin"` on the Clerk user. Read in backend via `@clerk/express` session claims; in frontend via a `useIsAdmin()` hook wrapping `useUser()`. Both surfaces share one source of truth.
 - **Two admins:** Adrian + wife. Each has own Clerk account with the admin role.
-- **Legacy (pre-cutover):** hardcoded `ADMIN_USER_ID` env var. Being phased out by the soft-launch PRD.
 
 ## External services
 
