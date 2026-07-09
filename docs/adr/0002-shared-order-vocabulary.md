@@ -1,0 +1,14 @@
+# Order vocabulary lives in a shared workspace package, not in either app
+
+The order state machine and Polish label dictionaries existed in six independently maintained copies (`backend/orders/shipping.ts`, `backend/emails/orderSummary.ts`, `VALID_STATUSES` in `backend/index.js`, `src/lib/shipping.ts` with a "kept in sync manually" comment, plus label maps in `OrderDetail`, `MyOrders`, `AdminOrders`, `Cart`) — including a trust-boundary duplication of shipping costs and the free-shipping threshold between cart display and checkout pricing. We consolidated them into one dependency-free package, `@sznyt/shared` at `packages/shared`, shared via **npm workspaces**.
+
+Decisions and why:
+
+- **npm workspaces over cross-tree import.** A direct frontend import of a module under `backend/` needs zero tooling and was the cheaper option, but the workspace package draws an explicit boundary and scales to the remaining shared candidates from the architecture-deepening map (#44). Codegen (a build step that can silently go stale) and duplication-guarded-by-sync-test (the duplication stays forever) were rejected.
+- **Minimal workspace conversion.** The root `package.json` stays the frontend app and additionally declares `"workspaces": ["backend", "packages/*"]`. Nothing moves; the textbook `apps/web` + `apps/api` restructure was rejected as pure churn at this scale.
+- **Neutral home, not order intake.** Order intake (`backend/orders/`) owns order lifecycle *behavior*; the vocabulary is the ubiquitous language both sides speak, so it sits in neither app. The backend remains authoritative for pricing — the frontend now provably displays the same numbers it charges.
+- **Full vocabulary scope.** Order statuses, fulfillment statuses with the documented lifecycle sequence (`received → processing → shipped → delivered`), Polish label dictionaries (status, fulfillment, shipping method, payment method), shipping costs, and the free-shipping threshold. Presentation concerns (Tailwind badge colors) stay in the frontend, keyed by the shared status types.
+- **Sequence is vocabulary, not enforcement.** The backend keeps membership-only validation on fulfillment updates so admins can freely correct statuses (e.g. a mis-click from `shipped` back to `processing`). Transition enforcement would be a behavior change and, if ever wanted, is its own ticket.
+- **Guard-rail: dependency-free domain vocabulary only.** `@sznyt/shared` carries no runtime dependencies — no React, no Prisma, no CSS. If a candidate addition needs any of those, it does not belong here.
+
+Consequence: the backend's deploy (Railway, currently demo-only) must install from the repo root so the workspace package materializes in `node_modules` — service root directory at repo root, start via `npm --prefix backend start`. This must be reconfigured and verified before cutover (#32).
