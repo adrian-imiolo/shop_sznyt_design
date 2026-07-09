@@ -5,23 +5,22 @@ import express from "express";
 import { PrismaClient } from "./generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 import cors from "cors";
-import nodemailer from "nodemailer";
 import Stripe from "stripe";
 import { clerkMiddleware, requireAuth, getAuth } from "@clerk/express";
 import { rateLimit } from "express-rate-limit";
+import {
+  sendEmail,
+  renderOrderConfirmation,
+  renderAdminNewOrder,
+  renderOrderShipped,
+  renderContactNotification,
+  renderReturnRequest,
+  renderComplaintRequest,
+} from "./emails/index.ts";
 
 const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY)
   : null;
-
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
 
 const isDemoMode = !stripe || !process.env.SMTP_HOST;
 
@@ -30,14 +29,6 @@ const isDemoMode = !stripe || !process.env.SMTP_HOST;
 if (stripe && (!process.env.STRIPE_WEBHOOK_SECRET || !process.env.FRONTEND_URL)) {
   console.error("FATAL: STRIPE_WEBHOOK_SECRET and FRONTEND_URL are required when STRIPE_SECRET_KEY is set.");
   process.exit(1);
-}
-
-async function sendMail(opts) {
-  if (!process.env.SMTP_HOST) {
-    console.log(`[demo] sendMail skipped — to=${opts.to} subject=${opts.subject ?? "(no subject)"}`);
-    return;
-  }
-  return transporter.sendMail({ from: process.env.SMTP_USER, ...opts });
 }
 
 const prisma = new PrismaClient({
@@ -189,14 +180,44 @@ app.post(
           return newOrder;
         });
 
-        try {
-          await sendMail({
-            to: session.customer_details?.email,
-            subject: "Potwierdzenie zamówienia - Sznyt Design",
-            text: `Dziękujemy za złożenie zamówienia!\n\nNumer zamówienia: ${order.id}\nSuma: ${session.amount_total / 100} PLN\n\nSkontaktujemy się wkrótce.`,
-          });
-        } catch (emailErr) {
-          console.error("Błąd wysyłania emaila:", emailErr.message);
+        // Shipping appears as a regular line item, so the receipt shows
+        // delivery cost without special-casing it.
+        const orderEmailData = {
+          orderId: order.id,
+          items: lineItems.data.map((item) => ({
+            name: item.description ?? item.price.product.name,
+            quantity: item.quantity,
+            unitPrice: item.price.unit_amount / 100,
+          })),
+          total: session.amount_total / 100,
+          shippingMethod: order.shippingMethod,
+          shippingAddress: order.shippingAddress,
+          paymentMethod,
+          customerEmail: session.customer_details?.email ?? null,
+        };
+
+        // Each email fails independently — a rejected SMTP send must never
+        // 500 the webhook for an order that's already recorded.
+        if (orderEmailData.customerEmail) {
+          try {
+            await sendEmail({
+              to: orderEmailData.customerEmail,
+              ...renderOrderConfirmation(orderEmailData),
+            });
+          } catch (emailErr) {
+            console.error("Błąd wysyłania emaila:", emailErr.message);
+          }
+        }
+
+        if (process.env.CONTACT_RECIPIENT) {
+          try {
+            await sendEmail({
+              to: process.env.CONTACT_RECIPIENT,
+              ...renderAdminNewOrder(orderEmailData),
+            });
+          } catch (emailErr) {
+            console.error("Błąd wysyłania emaila do admina:", emailErr.message);
+          }
         }
       } catch (err) {
         // P2002 on stripeSessionId = webhook retry for an already-recorded order — safe no-op.
@@ -307,11 +328,10 @@ app.post("/contact", formLimiter, async (req, res) => {
       data: { name, email, message },
     });
     try {
-      await sendMail({
+      await sendEmail({
         to: process.env.CONTACT_RECIPIENT,
         replyTo: email,
-        subject: `Wiadomość od ${name} — formularz kontaktowy`,
-        text: `Imię: ${name}\nEmail: ${email}\n\nWiadomość:\n${message}`,
+        ...renderContactNotification({ name, email, message }),
       });
     } catch (emailErr) {
       console.error("Błąd wysyłania emaila:", emailErr.message);
@@ -446,10 +466,13 @@ app.patch("/orders/:id/fulfillment", requireAuth(), requireAdmin, async (req, re
     // send shipping email when status set to shipped and we have customer email + tracking number
     if (fulfillmentStatus === "shipped" && order.customerEmail && trackingNumber) {
       try {
-        await sendMail({
+        await sendEmail({
           to: order.customerEmail,
-          subject: "Twoje zamówienie zostało wysłane — Sznyt Design",
-          text: `Twoje zamówienie #${order.id} zostało wysłane.\n\nNumer przesyłki: ${trackingNumber}\n\nDziękujemy za zakup!`,
+          ...renderOrderShipped({
+            orderId: order.id,
+            trackingNumber,
+            shippingMethod: order.shippingMethod,
+          }),
         });
       } catch (emailErr) {
         console.error("Błąd wysyłania emaila o wysyłce:", emailErr.message);
@@ -523,11 +546,10 @@ app.post("/zwrot", formLimiter, async (req, res) => {
     return res.status(400).json({ error: "Wszystkie pola są wymagane." });
   }
   try {
-    await sendMail({
+    await sendEmail({
       to: process.env.CONTACT_RECIPIENT,
       replyTo: email,
-      subject: `Zwrot towaru — zamówienie #${orderNumber}`,
-      text: `ZGŁOSZENIE ZWROTU\n\nNumer zamówienia: #${orderNumber}\nImię i nazwisko: ${name}\nEmail: ${email}\nNumer konta do zwrotu: ${bankAccount}\n\nPowód zwrotu:\n${reason}`,
+      ...renderReturnRequest({ orderNumber, name, email, reason, bankAccount }),
     });
     res.json({ ok: true });
   } catch (err) {
@@ -544,11 +566,10 @@ app.post("/reklamacja", formLimiter, async (req, res) => {
     return res.status(400).json({ error: "Wszystkie pola są wymagane." });
   }
   try {
-    await sendMail({
+    await sendEmail({
       to: process.env.CONTACT_RECIPIENT,
       replyTo: email,
-      subject: `Reklamacja — zamówienie #${orderNumber}`,
-      text: `ZGŁOSZENIE REKLAMACJI\n\nNumer zamówienia: #${orderNumber}\nImię i nazwisko: ${name}\nEmail: ${email}\n\nOpis problemu:\n${description}\n\nKlient zostanie poproszony o przesłanie zdjęć jako odpowiedź na ten email.`,
+      ...renderComplaintRequest({ orderNumber, name, email, description }),
     });
     res.json({ ok: true });
   } catch (err) {
