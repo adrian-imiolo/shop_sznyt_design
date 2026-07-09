@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import Seo from "../components/Seo";
+import { apiFetch, ApiError } from "../lib/api";
 
 function ZwrotForm() {
   const [orderNumber, setOrderNumber] = useState("");
@@ -19,16 +20,17 @@ function ZwrotForm() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL as string}/zwrot`, {
+      await apiFetch("/zwrot", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderNumber, name, email, reason, bankAccount, _hp: honeypot }),
+        body: { orderNumber, name, email, reason, bankAccount, _hp: honeypot },
       });
-      const data = await res.json();
-      if (!res.ok) { setError(data.error); return; }
       setSuccess(true);
-    } catch {
-      setError("Coś poszło nie tak. Napisz bezpośrednio na kontakt@sznytdesign.pl.");
+    } catch (err) {
+      setError(
+        err instanceof ApiError && err.message
+          ? err.message
+          : "Coś poszło nie tak. Napisz bezpośrednio na kontakt@sznytdesign.pl.",
+      );
     } finally {
       setLoading(false);
     }
@@ -104,16 +106,17 @@ function ReklamacjaForm() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL as string}/reklamacja`, {
+      await apiFetch("/reklamacja", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderNumber, name, email, description, _hp: honeypot }),
+        body: { orderNumber, name, email, description, _hp: honeypot },
       });
-      const data = await res.json();
-      if (!res.ok) { setError(data.error); return; }
       setSuccess(true);
-    } catch {
-      setError("Coś poszło nie tak. Napisz bezpośrednio na kontakt@sznytdesign.pl.");
+    } catch (err) {
+      setError(
+        err instanceof ApiError && err.message
+          ? err.message
+          : "Coś poszło nie tak. Napisz bezpośrednio na kontakt@sznytdesign.pl.",
+      );
     } finally {
       setLoading(false);
     }

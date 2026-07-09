@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useAuth } from "@clerk/react";
 import type { Order } from "../types";
 import Seo from "../components/Seo";
+import { useResource } from "../hooks/useResource";
 
 const ORDER_DETAIL_DESCRIPTION =
   "Podgląd zamówienia w Sznyt Design — pozycje, adres dostawy, sposób płatności i status realizacji.";
@@ -55,27 +55,12 @@ function FulfillmentBadge({ status }: { status: string }) {
 
 function OrderDetail() {
   const { id } = useParams();
-  const { userId, isLoaded, getToken } = useAuth();
-  const [order, setOrder] = useState<Order | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!userId) return;
-    async function load() {
-      try {
-        const token = await getToken();
-        const res = await fetch(`${import.meta.env.VITE_API_URL as string}/orders/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        setOrder(data);
-      } catch {
-        setError("Nie udało się załadować zamówienia.");
-      }
-    }
-    load();
-  }, [userId, id, getToken]);
+  const { userId, isLoaded } = useAuth();
+  const { data: order, error: loadFailed } = useResource<Order>(
+    userId ? `/orders/${id}` : null,
+    { auth: true },
+  );
+  const error = loadFailed ? "Nie udało się załadować zamówienia." : null;
 
   if (!isLoaded) return null;
   if (!userId) return <Navigate to="/moje-zamowienia" />;

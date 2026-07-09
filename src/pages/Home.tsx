@@ -2,24 +2,13 @@ import ProductSection from "../components/ProductSection";
 import Hero from "../components/Hero";
 import BrandStatement from "../components/BrandStatement";
 import Seo from "../components/Seo";
-import { useState, useEffect } from "react";
 import type { Product } from "../types";
+import { useResource } from "../hooks/useResource";
 
 function Home() {
-  const [products, setProducts] = useState<Product[]>([]);
-  useEffect(() => {
-    async function load() {
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL as string}/products`);
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        setProducts(data);
-      } catch {
-        // products stays empty — page still renders with Hero and BrandStatement
-      }
-    }
-    load();
-  }, []);
+  // on error products stays empty — page still renders with Hero and BrandStatement
+  const { data } = useResource<Product[]>("/products");
+  const products = data ?? [];
 
   return (
     <>

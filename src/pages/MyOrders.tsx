@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
 import { RedirectToSignIn, useAuth } from "@clerk/react";
+import { useResource } from "../hooks/useResource";
 import type { Order } from "../types";
 import Skeleton from "../components/Skeleton";
 import { Link } from "react-router-dom";
@@ -39,27 +39,12 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 function MyOrders() {
-  const [orders, setOrders] = useState<Order[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const { userId, isLoaded, getToken } = useAuth();
-
-  useEffect(() => {
-    if (!userId) return;
-    async function load() {
-      try {
-        const token = await getToken();
-        const res = await fetch(`${import.meta.env.VITE_API_URL as string}/orders/user/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        setOrders(data);
-      } catch {
-        setError("Nie udało się załadować zamówień. Spróbuj ponownie.");
-      }
-    }
-    load();
-  }, [userId, getToken]);
+  const { userId, isLoaded } = useAuth();
+  const { data: orders, error: loadFailed } = useResource<Order[]>(
+    userId ? `/orders/user/${userId}` : null,
+    { auth: true },
+  );
+  const error = loadFailed ? "Nie udało się załadować zamówień. Spróbuj ponownie." : null;
 
   if (!isLoaded) return null;
   if (!userId) return <RedirectToSignIn />;

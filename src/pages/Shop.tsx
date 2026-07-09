@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import type { Product } from "../types";
 import Seo from "../components/Seo";
+import { useResource } from "../hooks/useResource";
 
 function ProductCard({ product }: { product: Product }) {
   const [hovered, setHovered] = useState(false);
@@ -40,22 +41,9 @@ function ProductCard({ product }: { product: Product }) {
 }
 
 function Shop() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function load() {
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL as string}/products`);
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        setProducts(data);
-      } catch {
-        setError("Nie udało się załadować produktów. Spróbuj ponownie.");
-      }
-    }
-    load();
-  }, []);
+  const { data, error: loadFailed } = useResource<Product[]>("/products");
+  const products = data ?? [];
+  const error = loadFailed ? "Nie udało się załadować produktów. Spróbuj ponownie." : null;
 
   return (
     <main>

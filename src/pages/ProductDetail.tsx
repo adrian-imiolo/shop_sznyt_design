@@ -1,14 +1,15 @@
 import { useParams, Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useCart } from "../hooks/useCart";
 import type { Product } from "../types";
 import Skeleton from "../components/Skeleton";
 import Seo from "../components/Seo";
+import { useResource } from "../hooks/useResource";
 
 function ProductDetails() {
   const { id } = useParams();
-  const [product, setProduct] = useState<Product | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const { data: product, error: loadFailed } = useResource<Product>(`/products/${id}`);
+  const error = loadFailed ? "Nie udało się załadować produktu." : null;
   const [hovered, setHovered] = useState(false);
   const [added, setAdded] = useState(false);
   const { addItem, items } = useCart();
@@ -22,20 +23,6 @@ function ProductDetails() {
       setAdded(false);
     }, 3000);
   }
-
-  useEffect(() => {
-    async function load() {
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL as string}/products/${id}`);
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        setProduct(data);
-      } catch {
-        setError("Nie udało się załadować produktu.");
-      }
-    }
-    load();
-  }, [id]);
 
   if (error)
     return (

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@clerk/react";
+import { apiFetch, ApiError } from "../../lib/api";
 
 function AdminAddProduct() {
   const { getToken } = useAuth();
@@ -23,21 +24,15 @@ function AdminAddProduct() {
     setError("");
     setLoading(true);
     try {
-      const token = await getToken();
-      const res = await fetch(`${import.meta.env.VITE_API_URL as string}/products`, {
+      await apiFetch("/products", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({
+        auth: getToken,
+        body: {
           ...formData,
           price: Number(formData.price),
           stock: Number(formData.stock),
-        }),
+        },
       });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || "Coś poszło nie tak");
-        return;
-      }
       setFormData({
         name: "",
         tagline: "",
@@ -48,8 +43,10 @@ function AdminAddProduct() {
         stock: "",
       });
       navigate("/admin");
-    } catch {
-      setError("Coś poszło nie tak, spróbuj ponownie");
+    } catch (err) {
+      setError(
+        err instanceof ApiError && err.message ? err.message : "Coś poszło nie tak, spróbuj ponownie",
+      );
     } finally {
       setLoading(false);
     }
