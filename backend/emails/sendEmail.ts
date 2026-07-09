@@ -6,9 +6,12 @@ import type { RenderedEmail } from "./types.ts";
 let transporter: Transporter | null = null;
 
 function getTransporter(): Transporter {
+  const port = Number(process.env.SMTP_PORT);
   transporter ??= nodemailer.createTransport({
     host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT),
+    port,
+    // 465 is implicit TLS; 587 upgrades via STARTTLS (nodemailer's default).
+    secure: port === 465,
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
