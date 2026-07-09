@@ -10,13 +10,17 @@ import { clerkMiddleware, requireAuth, getAuth } from "@clerk/express";
 import { rateLimit } from "express-rate-limit";
 import {
   sendEmail,
-  renderOrderConfirmation,
-  renderAdminNewOrder,
   renderOrderShipped,
   renderContactNotification,
   renderReturnRequest,
   renderComplaintRequest,
 } from "./emails/index.ts";
+import {
+  buildCheckoutLineItems,
+  paidOrderFactsFromSession,
+  recordPaidOrder,
+  notifyOrderPlaced,
+} from "./orders/index.ts";
 
 const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY)
@@ -72,19 +76,6 @@ app.use(cors({
 app.use(clerkMiddleware());
 const PORT = process.env.PORT || 3000;
 
-const SHIPPING_COSTS = {
-  paczkomat: 20,
-  inpost_kurier: 25,
-  dpd: 25,
-};
-const FREE_SHIPPING_THRESHOLD = 350;
-
-const SHIPPING_LABELS = {
-  paczkomat: "InPost Paczkomat",
-  inpost_kurier: "InPost Kurier",
-  dpd: "DPD Kurier",
-};
-
 function getRole(req) {
   const { sessionClaims } = getAuth(req);
   return sessionClaims?.metadata?.role ?? null;
@@ -117,6 +108,8 @@ app.post(
       return res.status(400).send(`Webhook error: ${err.message}`);
     }
     if (event.type === "checkout.session.completed") {
+      // This route is the Stripe adapter (ADR-0001): all Stripe I/O happens
+      // here, then plain facts go into the order-intake module.
       try {
         const session = event.data.object;
 
@@ -137,96 +130,19 @@ app.post(
           }
         }
 
-        const order = await prisma.$transaction(async (tx) => {
-          const shippingAddress = session.metadata.shippingAddress
-            ? JSON.parse(session.metadata.shippingAddress)
-            : null;
+        const facts = paidOrderFactsFromSession(session, lineItems.data, paymentMethod);
+        const result = await recordPaidOrder(prisma, facts);
 
-          const newOrder = await tx.order.create({
-            data: {
-              stripeSessionId: session.id,
-              status: "paid",
-              total: session.amount_total / 100,
-              customerEmail: session.customer_details?.email,
-              userId: session.metadata.userId,
-              shippingMethod: session.metadata.shippingMethod || null,
-              shippingAddress,
-              paymentMethod,
-            },
-          });
-
-          for (const item of lineItems.data) {
-            const productId = Number(item.price.product.metadata.productId);
-            if (!productId) continue; // skip shipping line item
-
-            const quantity = item.quantity;
-            const price = item.price.unit_amount / 100;
-
-            await tx.orderItem.create({
-              data: {
-                orderId: newOrder.id,
-                productId,
-                quantity,
-                price,
-              },
-            });
-
-            await tx.product.update({
-              where: { id: productId },
-              data: { stock: { decrement: quantity } },
-            });
-          }
-
-          return newOrder;
-        });
-
-        // Shipping appears as a regular line item, so the receipt shows
-        // delivery cost without special-casing it.
-        const orderEmailData = {
-          orderId: order.id,
-          items: lineItems.data.map((item) => ({
-            name: item.description ?? item.price.product.name,
-            quantity: item.quantity,
-            unitPrice: item.price.unit_amount / 100,
-          })),
-          total: session.amount_total / 100,
-          shippingMethod: order.shippingMethod,
-          shippingAddress: order.shippingAddress,
-          paymentMethod,
-          customerEmail: session.customer_details?.email ?? null,
-        };
-
-        // Each email fails independently — a rejected SMTP send must never
-        // 500 the webhook for an order that's already recorded.
-        if (orderEmailData.customerEmail) {
-          try {
-            await sendEmail({
-              to: orderEmailData.customerEmail,
-              ...renderOrderConfirmation(orderEmailData),
-            });
-          } catch (emailErr) {
-            console.error("Błąd wysyłania emaila:", emailErr.message);
-          }
-        }
-
-        if (process.env.CONTACT_RECIPIENT) {
-          try {
-            await sendEmail({
-              to: process.env.CONTACT_RECIPIENT,
-              ...renderAdminNewOrder(orderEmailData),
-            });
-          } catch (emailErr) {
-            console.error("Błąd wysyłania emaila do admina:", emailErr.message);
-          }
+        // Webhook retry for an already-recorded order — 200 no-op, and
+        // crucially no duplicate emails.
+        if (result.created) {
+          await notifyOrderPlaced(facts, result.order.id);
         }
       } catch (err) {
-        // P2002 on stripeSessionId = webhook retry for an already-recorded order — safe no-op.
-        // Anything else must return 500 so Stripe retries; a swallowed error here
+        // Must return 500 so Stripe retries; a swallowed error here
         // permanently loses a paid order.
-        if (err.code !== "P2002") {
-          console.error("Błąd przetwarzania zamówienia:", err.message);
-          return res.status(500).json({ error: "Order processing failed" });
-        }
+        console.error("Błąd przetwarzania zamówienia:", err.message);
+        return res.status(500).json({ error: "Order processing failed" });
       }
     }
 
@@ -350,70 +266,26 @@ app.post("/create-checkout-session", checkoutLimiter, async (req, res) => {
     }
     const { items, userId, shippingMethod, shippingAddress } = req.body;
 
-    if (!shippingMethod || !SHIPPING_COSTS[shippingMethod]) {
-      return res.status(400).json({ error: "Wybierz metodę dostawy" });
-    }
+    // Fetch the referenced products; all validation and pricing lives in the
+    // order-intake module (server-authoritative — the client only chooses
+    // ids and quantities).
+    const ids = Array.isArray(items)
+      ? items.map((item) => Number(item.id)).filter(Number.isInteger)
+      : [];
+    const products = ids.length
+      ? await prisma.product.findMany({ where: { id: { in: ids } } })
+      : [];
 
-    if (!Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({ error: "Koszyk jest pusty" });
-    }
-
-    // Prices, names and images come from the DB — the client only chooses ids and quantities.
-    const products = await prisma.product.findMany({
-      where: { id: { in: items.map((item) => Number(item.id)) } },
-    });
-    const productsById = new Map(products.map((p) => [p.id, p]));
-
-    const orderLines = [];
-    for (const item of items) {
-      const product = productsById.get(Number(item.id));
-      const quantity = Number(item.quantity);
-      if (!product || !Number.isInteger(quantity) || quantity < 1) {
-        return res.status(400).json({ error: "Nieprawidłowy produkt w koszyku" });
-      }
-      if (quantity > product.stock) {
-        return res.status(409).json({
-          error: `Niewystarczająca ilość produktu „${product.name}" — dostępne sztuki: ${product.stock}`,
-        });
-      }
-      orderLines.push({ product, quantity });
-    }
-
-    const subtotal = orderLines.reduce((sum, line) => sum + line.product.price * line.quantity, 0);
-    const shippingCost = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COSTS[shippingMethod];
-
-    const lineItems = orderLines.map(({ product, quantity }) => ({
-      price_data: {
-        currency: "pln",
-        product_data: {
-          name: product.name,
-          ...(product.imageUrl ? { images: [product.imageUrl] } : {}),
-          metadata: { productId: product.id },
-        },
-        unit_amount: Math.round(product.price * 100),
-      },
-      quantity,
-    }));
-
-    if (shippingCost > 0) {
-      lineItems.push({
-        price_data: {
-          currency: "pln",
-          product_data: {
-            name: `Dostawa — ${SHIPPING_LABELS[shippingMethod]}`,
-            metadata: {},
-          },
-          unit_amount: shippingCost * 100,
-        },
-        quantity: 1,
-      });
+    const result = buildCheckoutLineItems(items, products, shippingMethod);
+    if (!result.ok) {
+      return res.status(result.status).json({ error: result.error });
     }
 
     const customerEmail = shippingAddress?.email || undefined;
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card", "p24", "blik"],
-      line_items: lineItems,
+      line_items: result.lineItems,
       mode: "payment",
       customer_email: customerEmail,
       success_url: `${process.env.FRONTEND_URL}/sukces?session_id={CHECKOUT_SESSION_ID}`,

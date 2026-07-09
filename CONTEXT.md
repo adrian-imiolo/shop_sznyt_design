@@ -29,6 +29,8 @@ Premium e-commerce shop selling designer wooden picture frames at `sznytdesign.p
 - **Furgonetka** — another shipping aggregator, requires business account. Blocked on registration; out of scope until then.
 - **Cutover** — the coordinated DNS + mail records + production env-var switchover from the WordPress placeholder to the React/Express app.
 - **Soft launch** — going live silently, no marketing, with `noindex`. Brand presentation must be production-quality even though no one is being told.
+- **Order intake** — the module that turns a paid Stripe checkout session into a recorded `Order`: transaction, atomic stock decrement, idempotency. Lives in `backend/orders/`. The Stripe webhook route is its adapter.
+- **Line-item contract** — the agreement between checkout and order intake carried through Stripe: each product line item is stamped with `metadata.productId`; a line item without one (shipping) is skipped when recording `OrderItem`s and decrementing stock.
 
 ## Core entities
 
