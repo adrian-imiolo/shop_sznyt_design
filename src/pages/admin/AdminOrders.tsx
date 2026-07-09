@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import type { AdminOrder } from "../../types";
 import { useAuth } from "@clerk/react";
 import Skeleton from "../../components/Skeleton";
+import { apiFetch } from "../../lib/api";
+import { useResource } from "../../hooks/useResource";
 
 const FULFILLMENT_LABELS: Record<string, string> = {
   received: "Przyjęte",
@@ -12,7 +14,8 @@ const FULFILLMENT_LABELS: Record<string, string> = {
 
 const FULFILLMENT_OPTIONS = ["received", "processing", "shipped", "delivered"];
 
-function FulfillmentCell({ order, token }: { order: AdminOrder; token: string }) {
+function FulfillmentCell({ order }: { order: AdminOrder }) {
+  const { getToken } = useAuth();
   const [status, setStatus] = useState(order.fulfillmentStatus);
   const [tracking, setTracking] = useState(order.trackingNumber ?? "");
   const [saving, setSaving] = useState(false);
@@ -20,10 +23,10 @@ function FulfillmentCell({ order, token }: { order: AdminOrder; token: string })
   async function save(newStatus: string, newTracking: string) {
     setSaving(true);
     try {
-      await fetch(`${import.meta.env.VITE_API_URL as string}/orders/${order.id}/fulfillment`, {
+      await apiFetch(`/orders/${order.id}/fulfillment`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ fulfillmentStatus: newStatus, trackingNumber: newTracking }),
+        auth: getToken,
+        body: { fulfillmentStatus: newStatus, trackingNumber: newTracking },
       });
     } catch {
       // non-blocking
@@ -60,28 +63,8 @@ function FulfillmentCell({ order, token }: { order: AdminOrder; token: string })
 }
 
 function AdminOrders() {
-  const { getToken } = useAuth();
-  const [orders, setOrders] = useState<AdminOrder[] | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function load() {
-      try {
-        const t = await getToken();
-        setToken(t);
-        const res = await fetch(`${import.meta.env.VITE_API_URL as string}/orders`, {
-          headers: { Authorization: `Bearer ${t}` },
-        });
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        setOrders(data);
-      } catch {
-        setError("Nie udało się załadować zamówień.");
-      }
-    }
-    load();
-  }, [getToken]);
+  const { data: orders, error: loadFailed } = useResource<AdminOrder[]>("/orders", { auth: true });
+  const error = loadFailed ? "Nie udało się załadować zamówień." : null;
 
   if (error) return <p className="p-4 text-red-600 font-dm-sans text-sm">{error}</p>;
 
@@ -131,7 +114,7 @@ function AdminOrders() {
               <td className="p-3 text-xs">{order.customerEmail ?? "—"}</td>
               <td className="p-3">{order.status}</td>
               <td className="p-3">
-                <FulfillmentCell order={order} token={token!} />
+                <FulfillmentCell order={order} />
               </td>
               <td className="p-3">{order.total} PLN</td>
               <td className="p-3">{order.shippingMethod ?? "—"}</td>

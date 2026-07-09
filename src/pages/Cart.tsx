@@ -5,6 +5,7 @@ import { useAuth } from "@clerk/react";
 import type { ShippingMethod, CourierAddress, PaczkomatPoint } from "../types";
 import { SHIPPING_COSTS, FREE_SHIPPING_THRESHOLD, calcShippingCost } from "../lib/shipping";
 import { validateAddress } from "../lib/checkout-validation";
+import { apiFetch } from "../lib/api";
 import Seo from "../components/Seo";
 
 const IS_DEMO_MODE = import.meta.env.VITE_DEMO_MODE === "true";
@@ -87,22 +88,16 @@ function Cart() {
         shippingMethod === "paczkomat"
           ? { ...paczkomatPoint, ...address }
           : address;
-      const res = await fetch(`${import.meta.env.VITE_API_URL as string}/create-checkout-session`, {
+      const data = await apiFetch<{ url?: string }>("/create-checkout-session", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        body: {
           // backend prices from the DB — it only needs ids and quantities
           items: items.map(({ id, quantity }) => ({ id, quantity })),
           userId,
           shippingMethod,
           shippingAddress,
-        }),
+        },
       });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Błąd serwera");
-      }
-      const data = await res.json();
       if (!data.url) throw new Error("Nie udało się otworzyć strony płatności");
       window.location.href = data.url;
     } catch (err) {

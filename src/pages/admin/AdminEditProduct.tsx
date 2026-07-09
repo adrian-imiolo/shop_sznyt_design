@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@clerk/react";
+import type { Product } from "../../types";
+import { apiFetch, ApiError } from "../../lib/api";
+import { useResource } from "../../hooks/useResource";
 
 function AdminEditProduct() {
   const { getToken } = useAuth();
@@ -19,39 +22,37 @@ function AdminEditProduct() {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  const { data: product, error: loadFailed } = useResource<Product>(`/products/${id}`);
+
   useEffect(() => {
-    async function load() {
-      const res = await fetch(`${import.meta.env.VITE_API_URL as string}/products/${id}`);
-      const data = await res.json();
-      setFormData({
-        ...data,
-        price: String(data.price),
-        stock: String(data.stock),
-      });
-    }
-    load();
-  }, [id]);
+    if (!product) return;
+    setFormData({
+      name: product.name,
+      tagline: product.tagline,
+      description: product.description,
+      price: String(product.price),
+      imageUrl: product.imageUrl,
+      lifestyleImageUrl: product.lifestyleImageUrl,
+      stock: String(product.stock),
+    });
+  }, [product]);
+
+  const displayError = error || (loadFailed ? "Nie udało się załadować produktu." : "");
 
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
     setError("");
     setLoading(true);
     try {
-      const token = await getToken();
-      const res = await fetch(`${import.meta.env.VITE_API_URL as string}/products/${id}`, {
+      await apiFetch(`/products/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({
+        auth: getToken,
+        body: {
           ...formData,
           price: Number(formData.price),
           stock: Number(formData.stock),
-        }),
+        },
       });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || "Coś poszło nie tak");
-        return;
-      }
       setFormData({
         name: "",
         tagline: "",
@@ -62,8 +63,10 @@ function AdminEditProduct() {
         stock: "",
       });
       navigate("/admin");
-    } catch {
-      setError("Coś poszło nie tak, spróbuj ponownie");
+    } catch (err) {
+      setError(
+        err instanceof ApiError && err.message ? err.message : "Coś poszło nie tak, spróbuj ponownie",
+      );
     } finally {
       setLoading(false);
     }
@@ -73,7 +76,7 @@ function AdminEditProduct() {
     <>
       <div className="max-w-2xl mx-auto py-10 px-6">
         <h1 className="text-center p-6 text-2xl">Edytuj produkt</h1>
-        {error && <p className="text-red-600 font-dm-sans mb-4">{error}</p>}
+        {displayError && <p className="text-red-600 font-dm-sans mb-4">{displayError}</p>}
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-4 sm:items-center">
             <label>Nazwa</label>

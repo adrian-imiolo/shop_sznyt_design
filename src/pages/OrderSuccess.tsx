@@ -5,6 +5,7 @@ import type { Order } from "../types";
 import { Show } from "@clerk/react";
 import { useCart } from "../hooks/useCart";
 import Seo from "../components/Seo";
+import { apiFetch } from "../lib/api";
 
 function OrderSuccess() {
   const [searchParams] = useSearchParams();
@@ -22,18 +23,13 @@ function OrderSuccess() {
       // poll briefly before assuming anything is wrong.
       for (let attempt = 1; attempt <= 5; attempt++) {
         try {
-          const res = await fetch(
-            `${import.meta.env.VITE_API_URL as string}/orders/by-session/${sessionId}`,
-          );
-          if (res.ok) {
-            const data = await res.json();
-            if (cancelled) return;
-            setOrder(data);
-            clearCart();
-            return;
-          }
+          const data = await apiFetch<Order>(`/orders/by-session/${sessionId}`);
+          if (cancelled) return;
+          setOrder(data);
+          clearCart();
+          return;
         } catch {
-          // network hiccup — fall through to retry
+          // order not recorded yet or network hiccup — fall through to retry
         }
         await new Promise((resolve) => setTimeout(resolve, attempt * 1500));
       }

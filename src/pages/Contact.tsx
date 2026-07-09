@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import Seo from "../components/Seo";
+import { apiFetch, ApiError } from "../lib/api";
 
 function Contact() {
   const [name, setName] = useState("");
@@ -16,22 +17,18 @@ function Contact() {
     if (honeypot) { setSuccess(true); return; }
     setLoading(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL as string}/contact`, {
+      await apiFetch("/contact", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, message, _hp: honeypot }),
+        body: { name, email, message, _hp: honeypot },
       });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || "Coś poszło nie tak. Spróbuj ponownie.");
-        return;
-      }
       setSuccess(true);
       setName("");
       setEmail("");
       setMessage("");
-    } catch {
-      setError("Coś poszło nie tak. Spróbuj ponownie.");
+    } catch (err) {
+      setError(
+        err instanceof ApiError && err.message ? err.message : "Coś poszło nie tak. Spróbuj ponownie.",
+      );
     } finally {
       setLoading(false);
     }

@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@clerk/react";
 import Skeleton from "../../components/Skeleton";
+import { apiFetch } from "../../lib/api";
+import { useResource } from "../../hooks/useResource";
 
 type Products = {
   id: number;
@@ -17,36 +19,22 @@ type Products = {
 
 function AdminProducts() {
   const { getToken } = useAuth();
-  const [products, setProducts] = useState<Products[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const { data: loaded, error: loadFailed } = useResource<Products[]>("/products");
+  // delete/reorder mutate the list locally; until then the loaded resource is the list
+  const [override, setOverride] = useState<Products[] | null>(null);
+  const products = override ?? loaded;
+  const [actionError, setActionError] = useState<string | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<number | null>(null);
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL as string}/products`);
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        setProducts(data);
-      } catch {
-        setError("Nie udało się załadować produktów.");
-      }
-    }
-    load();
-  }, []);
+  const error = actionError ?? (loadFailed ? "Nie udało się załadować produktów." : null);
 
   async function handleDelete(id: number) {
     try {
-      const token = await getToken();
-      const res = await fetch(`${import.meta.env.VITE_API_URL as string}/products/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error();
-      setProducts(products!.filter((p) => p.id !== id));
+      await apiFetch(`/products/${id}`, { method: "DELETE", auth: getToken });
+      setOverride(products!.filter((p) => p.id !== id));
     } catch {
-      setError("Nie udało się usunąć produktu.");
+      setActionError("Nie udało się usunąć produktu.");
     }
   }
 
@@ -63,20 +51,19 @@ function AdminProducts() {
 
     // swap positions in array too
     [updated[index], updated[swapIndex]] = [updated[swapIndex], updated[index]];
-    setProducts(updated);
+    setOverride(updated);
 
     try {
-      const token = await getToken();
-      await fetch(`${import.meta.env.VITE_API_URL as string}/products/reorder`, {
+      await apiFetch("/products/reorder", {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify([
+        auth: getToken,
+        body: [
           { id: updated[index].id, sortOrder: updated[index].sortOrder },
           { id: updated[swapIndex].id, sortOrder: updated[swapIndex].sortOrder },
-        ]),
+        ],
       });
     } catch {
-      setError("Nie udało się zapisać kolejności.");
+      setActionError("Nie udało się zapisać kolejności.");
     }
   }
 
