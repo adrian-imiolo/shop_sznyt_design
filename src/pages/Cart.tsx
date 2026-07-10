@@ -1,17 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
-import { useAuth } from "@clerk/react";
-import type { ShippingMethod, CourierAddress, PaczkomatPoint } from "../types";
 import {
   SHIPPING_METHODS,
   SHIPPING_METHOD_LABELS,
   SHIPPING_COSTS,
   FREE_SHIPPING_THRESHOLD,
-  calcShippingCost,
+  type ShippingMethod,
 } from "@sznyt/shared";
-import { validateAddress } from "../lib/checkout-validation";
-import { apiFetch } from "../lib/api";
+import { useCheckout, PaczkomatPicker } from "../checkout";
+import type { AddressErrors, AddressField } from "../checkout";
 import Seo from "../components/Seo";
 
 const IS_DEMO_MODE = import.meta.env.VITE_DEMO_MODE === "true";
@@ -20,7 +18,7 @@ const SHIPPING_OPTIONS: { id: ShippingMethod; label: string }[] = SHIPPING_METHO
   (id) => ({ id, label: SHIPPING_METHOD_LABELS[id] }),
 );
 
-const ADDRESS_FIELDS: { key: keyof CourierAddress; label: string; full?: boolean; type?: string }[] = [
+const ADDRESS_FIELDS: { key: AddressField; label: string; full?: boolean; type?: string }[] = [
   { key: "firstName", label: "Imię" },
   { key: "lastName", label: "Nazwisko" },
   { key: "email", label: "Adres e-mail", full: true, type: "email" },
@@ -30,89 +28,52 @@ const ADDRESS_FIELDS: { key: keyof CourierAddress; label: string; full?: boolean
   { key: "phone", label: "Telefon" },
 ];
 
+type AddressFieldsProps = {
+  address: Record<AddressField, string>;
+  errors: AddressErrors;
+  onChange: (field: AddressField, value: string) => void;
+};
+
+function AddressFields({ address, errors, onChange }: AddressFieldsProps) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {ADDRESS_FIELDS.map(({ key, label, full, type }) => (
+        <div key={key} className={full ? "sm:col-span-2" : ""}>
+          <label className="font-dm-sans text-xs text-secondary-text tracking-widest uppercase block mb-1">
+            {label}
+          </label>
+          <input
+            type={type ?? "text"}
+            value={address[key]}
+            onChange={(e) => onChange(key, e.target.value)}
+            className={`w-full border font-dm-sans text-sm text-near-black px-3 py-2 focus:outline-none focus:border-near-black ${errors[key] ? "border-red-400" : "border-borders"}`}
+          />
+          {errors[key] && (
+            <p className="font-dm-sans text-xs text-red-500 mt-1">{errors[key]}</p>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function Cart() {
   const { items, removeItem, updateQuantity } = useCart();
-  const { userId } = useAuth();
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
-  const [checkoutError, setCheckoutError] = useState<string | null>(null);
-  const [addressErrors, setAddressErrors] = useState<Partial<Record<keyof CourierAddress, string>>>({});
   const [regulaminAccepted, setRegulaminAccepted] = useState(false);
-  const [shippingMethod, setShippingMethod] = useState<ShippingMethod | null>(null);
-  const [paczkomatPoint, setPaczkomatPoint] = useState<PaczkomatPoint | null>(null);
-  const [address, setAddress] = useState<CourierAddress>({
-    firstName: "", lastName: "", street: "", postalCode: "", city: "", phone: "", email: "",
-  });
-
-  const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-  const isFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD;
-  const shippingCost = calcShippingCost(subtotal, shippingMethod);
-  const total = subtotal + shippingCost;
-
-  useEffect(() => {
-    window.easyPack?.init({ defaultLocale: "pl" });
-  }, []);
-
-  function openPaczkomatWidget() {
-    if (!window.easyPack) return;
-    window.easyPack.modalMap(
-      (point, modal) => {
-        modal.closeModal();
-        setPaczkomatPoint({
-          code: point.name,
-          name: point.address?.line1 ?? point.name,
-          city: point.address?.city,
-        });
-      },
-      // the widget hard-codes its size — cap it so the map fits a 375px phone viewport
-      {
-        width: Math.min(500, window.innerWidth - 32),
-        height: Math.min(600, window.innerHeight - 32),
-      },
-    );
-  }
-
-  function canCheckout() {
-    if (!shippingMethod) return false;
-    if (shippingMethod === "paczkomat")
-      return paczkomatPoint !== null && Object.values(address).every((v) => v.trim() !== "");
-    return Object.values(address).every((v) => v.trim() !== "");
-  }
-
-  async function handleCheckout() {
-    const errors = validateAddress(address);
-    if (Object.keys(errors).length > 0) {
-      setAddressErrors(errors);
-      return;
-    }
-    setAddressErrors({});
-    setCheckoutLoading(true);
-    setCheckoutError(null);
-    try {
-      const shippingAddress =
-        shippingMethod === "paczkomat"
-          ? { ...paczkomatPoint, ...address }
-          : address;
-      const data = await apiFetch<{ url?: string }>("/create-checkout-session", {
-        method: "POST",
-        body: {
-          // backend prices from the DB — it only needs ids and quantities
-          items: items.map(({ id, quantity }) => ({ id, quantity })),
-          userId,
-          shippingMethod,
-          shippingAddress,
-        },
-      });
-      if (!data.url) throw new Error("Nie udało się otworzyć strony płatności");
-      window.location.href = data.url;
-    } catch (err) {
-      setCheckoutError(
-        err instanceof Error && err.message
-          ? err.message
-          : "Nie udało się przejść do płatności. Spróbuj ponownie.",
-      );
-      setCheckoutLoading(false);
-    }
-  }
+  const {
+    shippingMethod,
+    selectShippingMethod,
+    paczkomatPoint,
+    selectPaczkomatPoint,
+    address,
+    updateAddressField,
+    addressErrors,
+    isComplete,
+    totals,
+    submitting,
+    submitError,
+    submit,
+  } = useCheckout(items);
 
   if (items.length === 0) {
     return (
@@ -207,7 +168,7 @@ function Cart() {
           <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-6">
             Dostawa
           </p>
-          {isFreeShipping ? (
+          {totals.isFreeShipping ? (
             <div className="flex items-center gap-3 bg-accent/10 border border-accent px-4 py-3 mb-6">
               <span className="text-accent text-base">✓</span>
               <p className="font-dm-sans text-sm text-near-black">
@@ -219,14 +180,14 @@ function Cart() {
               <p className="font-dm-sans text-sm text-near-black mb-3">
                 Brakuje Ci jeszcze{" "}
                 <span className="font-medium text-accent">
-                  {FREE_SHIPPING_THRESHOLD - subtotal} PLN
+                  {FREE_SHIPPING_THRESHOLD - totals.subtotal} PLN
                 </span>{" "}
                 do darmowej dostawy.
               </p>
               <div className="w-full h-1 bg-borders">
                 <div
                   className="h-1 bg-accent transition-all duration-500"
-                  style={{ width: `${Math.min((subtotal / FREE_SHIPPING_THRESHOLD) * 100, 100)}%` }}
+                  style={{ width: `${Math.min((totals.subtotal / FREE_SHIPPING_THRESHOLD) * 100, 100)}%` }}
                 />
               </div>
             </div>
@@ -249,85 +210,25 @@ function Cart() {
                     name="shipping"
                     value={option.id}
                     checked={shippingMethod === option.id}
-                    onChange={() => {
-                      setShippingMethod(option.id);
-                      setPaczkomatPoint(null);
-                    }}
+                    onChange={() => selectShippingMethod(option.id)}
                     className="accent-accent"
                   />
                   <span className="font-dm-sans text-sm">{option.label}</span>
                 </div>
                 <span className="font-dm-sans text-sm">
-                  {isFreeShipping ? "Gratis" : `${SHIPPING_COSTS[option.id]} PLN`}
+                  {totals.isFreeShipping ? "Gratis" : `${SHIPPING_COSTS[option.id]} PLN`}
                 </span>
               </label>
             ))}
           </div>
 
-          {/* Paczkomat picker */}
-          {shippingMethod === "paczkomat" && (
+          {/* Paczkomat picker + address form */}
+          {shippingMethod && (
             <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-3">
-                <button
-                  type="button"
-                  onClick={openPaczkomatWidget}
-                  className="font-dm-sans text-sm border border-near-black px-6 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300 self-start"
-                >
-                  {paczkomatPoint ? "Zmień paczkomat" : "Wybierz paczkomat"}
-                </button>
-                {paczkomatPoint && (
-                  <p className="font-dm-sans text-sm text-near-black">
-                    Wybrany: <span className="font-medium">{paczkomatPoint.code}</span>
-                    {paczkomatPoint.name !== paczkomatPoint.code && ` — ${paczkomatPoint.name}`}
-                  </p>
-                )}
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {ADDRESS_FIELDS.map(({ key, label, full, type }) => (
-                  <div key={key} className={full ? "sm:col-span-2" : ""}>
-                    <label className="font-dm-sans text-xs text-secondary-text tracking-widest uppercase block mb-1">
-                      {label}
-                    </label>
-                    <input
-                      type={type ?? "text"}
-                      value={address[key]}
-                      onChange={(e) => {
-                        setAddress((prev) => ({ ...prev, [key]: e.target.value }));
-                        if (addressErrors[key]) setAddressErrors((prev) => ({ ...prev, [key]: undefined }));
-                      }}
-                      className={`w-full border font-dm-sans text-sm text-near-black px-3 py-2 focus:outline-none focus:border-near-black ${addressErrors[key] ? "border-red-400" : "border-borders"}`}
-                    />
-                    {addressErrors[key] && (
-                      <p className="font-dm-sans text-xs text-red-500 mt-1">{addressErrors[key]}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Courier address form */}
-          {(shippingMethod === "inpost_kurier" || shippingMethod === "dpd") && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {ADDRESS_FIELDS.map(({ key, label, full, type }) => (
-                <div key={key} className={full ? "sm:col-span-2" : ""}>
-                  <label className="font-dm-sans text-xs text-secondary-text tracking-widest uppercase block mb-1">
-                    {label}
-                  </label>
-                  <input
-                    type={type ?? "text"}
-                    value={address[key]}
-                    onChange={(e) => {
-                      setAddress((prev) => ({ ...prev, [key]: e.target.value }));
-                      if (addressErrors[key]) setAddressErrors((prev) => ({ ...prev, [key]: undefined }));
-                    }}
-                    className={`w-full border font-dm-sans text-sm text-near-black px-3 py-2 focus:outline-none focus:border-near-black ${addressErrors[key] ? "border-red-400" : "border-borders"}`}
-                  />
-                  {addressErrors[key] && (
-                    <p className="font-dm-sans text-xs text-red-500 mt-1">{addressErrors[key]}</p>
-                  )}
-                </div>
-              ))}
+              {shippingMethod === "paczkomat" && (
+                <PaczkomatPicker point={paczkomatPoint} onSelect={selectPaczkomatPoint} />
+              )}
+              <AddressFields address={address} errors={addressErrors} onChange={updateAddressField} />
             </div>
           )}
         </div>
@@ -339,7 +240,7 @@ function Cart() {
               Produkty
             </p>
             <p className="font-cormorant text-2xl text-near-black font-light w-32 text-right">
-              {subtotal} PLN
+              {totals.subtotal} PLN
             </p>
           </div>
           {shippingMethod && (
@@ -348,7 +249,7 @@ function Cart() {
                 Dostawa
               </p>
               <p className="font-cormorant text-2xl text-near-black font-light w-32 text-right">
-                {shippingCost === 0 ? "Gratis" : `${shippingCost} PLN`}
+                {totals.shippingCost === 0 ? "Gratis" : `${totals.shippingCost} PLN`}
               </p>
             </div>
           )}
@@ -357,7 +258,7 @@ function Cart() {
               Suma
             </p>
             <p className="font-cormorant text-3xl text-near-black font-light w-32 text-right">
-              {total} PLN
+              {totals.total} PLN
             </p>
           </div>
           {!shippingMethod && (
@@ -383,8 +284,8 @@ function Cart() {
               </Link>
             </span>
           </label>
-          {checkoutError && (
-            <p className="font-dm-sans text-sm text-red-600">{checkoutError}</p>
+          {submitError && (
+            <p className="font-dm-sans text-sm text-red-600">{submitError}</p>
           )}
           {IS_DEMO_MODE && (
             <p className="font-dm-sans text-xs text-secondary-text text-right max-w-sm">
@@ -394,13 +295,13 @@ function Cart() {
             </p>
           )}
           <button
-            onClick={handleCheckout}
-            disabled={checkoutLoading || !canCheckout() || !regulaminAccepted || IS_DEMO_MODE}
+            onClick={submit}
+            disabled={submitting || !isComplete || !regulaminAccepted || IS_DEMO_MODE}
             className="font-dm-sans text-sm text-near-black border border-near-black px-12 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {IS_DEMO_MODE
               ? "Demo — checkout disabled"
-              : checkoutLoading
+              : submitting
                 ? "Przekierowywanie..."
                 : "Przejdź do płatności"}
           </button>
