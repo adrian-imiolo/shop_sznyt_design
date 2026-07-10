@@ -1,18 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { buildShippingAddress } from "./buildShippingAddress";
-import type { CourierAddress, PaczkomatPoint } from "./types";
-
-const address: CourierAddress = {
-  firstName: "Jan",
-  lastName: "Kowalski",
-  email: "jan@example.com",
-  street: "Prosta 1",
-  postalCode: "70-123",
-  city: "Szczecin",
-  phone: "501234567",
-};
-
-const point: PaczkomatPoint = { code: "SZC01M", name: "ul. Paczkowa 5", city: "Police" };
+import { VALID_ADDRESS as address, PACZKOMAT_POINT as point } from "./fixtures.test-helper";
 
 describe("buildShippingAddress", () => {
   it("courier variant carries exactly the seven contact fields", () => {

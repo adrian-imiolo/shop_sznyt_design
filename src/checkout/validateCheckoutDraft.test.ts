@@ -1,18 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { validateCheckoutDraft } from "./validateCheckoutDraft";
-import type { CheckoutDraft, CourierAddress } from "./types";
-
-const validAddress: CourierAddress = {
-  firstName: "Jan",
-  lastName: "Kowalski",
-  email: "jan@example.com",
-  street: "Prosta 1",
-  postalCode: "70-123",
-  city: "Szczecin",
-  phone: "501234567",
-};
-
-const point = { code: "SZC01M", name: "ul. Testowa 1" };
+import { VALID_ADDRESS as validAddress, PACZKOMAT_POINT as point } from "./fixtures.test-helper";
+import type { CheckoutDraft } from "./types";
 
 function draft(overrides: Partial<CheckoutDraft> = {}): CheckoutDraft {
   return { shippingMethod: "dpd", paczkomatPoint: null, address: validAddress, ...overrides };

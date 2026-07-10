@@ -180,7 +180,7 @@ function Cart() {
               <p className="font-dm-sans text-sm text-near-black mb-3">
                 Brakuje Ci jeszcze{" "}
                 <span className="font-medium text-accent">
-                  {FREE_SHIPPING_THRESHOLD - totals.subtotal} PLN
+                  {totals.remainingToFreeShipping} PLN
                 </span>{" "}
                 do darmowej dostawy.
               </p>

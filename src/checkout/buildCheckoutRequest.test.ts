@@ -1,16 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { buildCheckoutRequest } from "./buildCheckoutRequest";
-import type { CourierAddress } from "./types";
-
-const address: CourierAddress = {
-  firstName: "Jan",
-  lastName: "Kowalski",
-  email: "jan@example.com",
-  street: "Prosta 1",
-  postalCode: "70-123",
-  city: "Szczecin",
-  phone: "501234567",
-};
+import { VALID_ADDRESS as address } from "./fixtures.test-helper";
 
 describe("buildCheckoutRequest", () => {
   it("strips cart items down to ids and quantities — the backend prices from the DB", () => {

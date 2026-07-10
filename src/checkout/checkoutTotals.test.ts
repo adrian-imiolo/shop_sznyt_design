@@ -29,4 +29,11 @@ describe("checkoutTotals", () => {
     expect(totals.isFreeShipping).toBe(true);
     expect(totals.total).toBe(FREE_SHIPPING_THRESHOLD);
   });
+
+  it("reports the remaining amount to free shipping, clamped at 0", () => {
+    expect(checkoutTotals([item(299, 1)], null).remainingToFreeShipping).toBe(
+      FREE_SHIPPING_THRESHOLD - 299,
+    );
+    expect(checkoutTotals([item(FREE_SHIPPING_THRESHOLD + 50, 1)], null).remainingToFreeShipping).toBe(0);
+  });
 });

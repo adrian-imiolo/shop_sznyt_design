@@ -6,19 +6,28 @@ type PaczkomatPickerProps = {
   onSelect: (point: PaczkomatPoint) => void;
 };
 
+// The widget is configured once per page load — re-initializing on every
+// picker re-mount (method toggles) is not something easyPack documents as safe.
+let easyPackInitialized = false;
+
+function ensureEasyPackInit() {
+  if (easyPackInitialized || !window.easyPack) return;
+  window.easyPack.init({ defaultLocale: "pl" });
+  easyPackInitialized = true;
+}
+
 /**
  * Quarantines the easyPack widget: this is the only checkout file that
- * touches `window`. Swapping the InPost widget means swapping this file.
+ * touches the widget. Swapping the InPost widget means swapping this file.
  */
 function PaczkomatPicker({ point, onSelect }: PaczkomatPickerProps) {
-  useEffect(function initEasyPack() {
-    window.easyPack?.init({ defaultLocale: "pl" });
-  }, []);
+  useEffect(ensureEasyPackInit, []);
 
   function openWidget() {
     if (!window.easyPack) return;
+    ensureEasyPackInit();
     window.easyPack.modalMap(
-      (widgetPoint, modal) => {
+      function handlePointSelected(widgetPoint, modal) {
         modal.closeModal();
         onSelect({
           code: widgetPoint.name,
