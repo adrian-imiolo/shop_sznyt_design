@@ -462,7 +462,7 @@ const server = app.listen(PORT, (err) => {
   }
 });
 
-server.on("error", (err) => {
+server.on("error", function handleServerStartupError(err) {
   if (err.code === "EADDRINUSE") {
     console.error(`Port ${PORT} is already in use — is a stale backend instance still running? Stop it and retry.`);
   } else {
