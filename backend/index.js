@@ -450,10 +450,23 @@ app.post("/reklamacja", formLimiter, async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
+// Express 5 passes listen errors to this callback (and registers it as the
+// server's `error` handler), so without the guard the banner prints and the
+// process exits 0 even when the port is taken.
+const server = app.listen(PORT, (err) => {
+  if (err) return; // handled by the `error` listener below
   if (isDemoMode) {
     console.log(`[DEMO MODE] Backend on :${PORT} — Stripe: ${stripe ? "on" : "off"}, SMTP: ${process.env.SMTP_HOST ? "on" : "off"}`);
   } else {
     console.log(`Server running on http://localhost:${PORT}`);
   }
+});
+
+server.on("error", (err) => {
+  if (err.code === "EADDRINUSE") {
+    console.error(`Port ${PORT} is already in use — is a stale backend instance still running? Stop it and retry.`);
+  } else {
+    console.error("Server failed to start:", err);
+  }
+  process.exit(1);
 });
