@@ -3,6 +3,10 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "workspaces": [
+    "backend",
+    "packages/*"
+  ],
   "scripts": {
     "dev": "concurrently -n frontend,backend -c cyan,magenta \"npm:dev:frontend\" \"npm:dev:backend\"",
     "dev:frontend": "vite",
@@ -15,6 +19,7 @@
   },
   "dependencies": {
     "@clerk/localizations": "^4.2.3",
+    "@sznyt/shared": "*",
     "@clerk/react": "^6.1.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

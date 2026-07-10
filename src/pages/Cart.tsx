@@ -3,18 +3,22 @@ import { Link } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
 import { useAuth } from "@clerk/react";
 import type { ShippingMethod, CourierAddress, PaczkomatPoint } from "../types";
-import { SHIPPING_COSTS, FREE_SHIPPING_THRESHOLD, calcShippingCost } from "../lib/shipping";
+import {
+  SHIPPING_METHODS,
+  SHIPPING_METHOD_LABELS,
+  SHIPPING_COSTS,
+  FREE_SHIPPING_THRESHOLD,
+  calcShippingCost,
+} from "@sznyt/shared";
 import { validateAddress } from "../lib/checkout-validation";
 import { apiFetch } from "../lib/api";
 import Seo from "../components/Seo";
 
 const IS_DEMO_MODE = import.meta.env.VITE_DEMO_MODE === "true";
 
-const SHIPPING_OPTIONS: { id: ShippingMethod; label: string }[] = [
-  { id: "paczkomat", label: "InPost Paczkomat" },
-  { id: "inpost_kurier", label: "InPost Kurier" },
-  { id: "dpd", label: "DPD Kurier" },
-];
+const SHIPPING_OPTIONS: { id: ShippingMethod; label: string }[] = SHIPPING_METHODS.map(
+  (id) => ({ id, label: SHIPPING_METHOD_LABELS[id] }),
+);
 
 const ADDRESS_FIELDS: { key: keyof CourierAddress; label: string; full?: boolean; type?: string }[] = [
   { key: "firstName", label: "Imię" },

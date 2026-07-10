@@ -1,0 +1,10 @@
+{
+  "name": "@sznyt/shared",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Sznyt Design order vocabulary — statuses, labels, shipping pricing, checkout contracts. Dependency-free by design (ADR-0002).",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

@@ -1,5 +1,11 @@
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useAuth } from "@clerk/react";
+import {
+  ORDER_STATUS_LABELS,
+  FULFILLMENT_LABELS,
+  SHIPPING_METHOD_LABELS,
+  PAYMENT_METHOD_LABELS,
+} from "@sznyt/shared";
 import type { Order } from "../types";
 import Seo from "../components/Seo";
 import { useResource } from "../hooks/useResource";
@@ -7,30 +13,19 @@ import { useResource } from "../hooks/useResource";
 const ORDER_DETAIL_DESCRIPTION =
   "Podgląd zamówienia w Sznyt Design — pozycje, adres dostawy, sposób płatności i status realizacji.";
 
-const SHIPPING_LABELS: Record<string, string> = {
-  paczkomat: "InPost Paczkomat",
-  inpost_kurier: "InPost Kurier",
-  dpd: "DPD Kurier",
-};
-
-const PAYMENT_LABELS: Record<string, string> = {
-  card: "Karta płatnicza",
-  p24: "Przelewy24",
-  blik: "BLIK",
-};
-
+// Labels come from the shared vocabulary; badge colors are presentation and stay here (ADR-0002).
 const STATUS_CONFIG: Record<string, { label: string; dot: string }> = {
-  paid:      { label: "Opłacone",               dot: "bg-green-500" },
-  pending:   { label: "Oczekuje na płatność",   dot: "bg-amber-400" },
-  cancelled: { label: "Anulowane",              dot: "bg-red-500" },
-  failed:    { label: "Nieudane",               dot: "bg-red-500" },
+  paid:      { label: ORDER_STATUS_LABELS.paid,      dot: "bg-green-500" },
+  pending:   { label: ORDER_STATUS_LABELS.pending,   dot: "bg-amber-400" },
+  cancelled: { label: ORDER_STATUS_LABELS.cancelled, dot: "bg-red-500" },
+  failed:    { label: ORDER_STATUS_LABELS.failed,    dot: "bg-red-500" },
 };
 
 const FULFILLMENT_CONFIG: Record<string, { label: string; dot: string }> = {
-  received:   { label: "Zamówienie przyjęte",   dot: "bg-amber-400" },
-  processing: { label: "W realizacji",          dot: "bg-blue-400" },
-  shipped:    { label: "Wysłane",               dot: "bg-green-500" },
-  delivered:  { label: "Dostarczone",           dot: "bg-green-700" },
+  received:   { label: FULFILLMENT_LABELS.received,   dot: "bg-amber-400" },
+  processing: { label: FULFILLMENT_LABELS.processing, dot: "bg-blue-400" },
+  shipped:    { label: FULFILLMENT_LABELS.shipped,    dot: "bg-green-500" },
+  delivered:  { label: FULFILLMENT_LABELS.delivered,  dot: "bg-green-700" },
 };
 
 function StatusBadge({ status }: { status: string }) {
@@ -146,7 +141,7 @@ function OrderDetail() {
                 Płatność
               </p>
               <p className="font-dm-sans text-sm text-near-black font-medium">
-                {PAYMENT_LABELS[order.paymentMethod] ?? order.paymentMethod}
+                {PAYMENT_METHOD_LABELS[order.paymentMethod] ?? order.paymentMethod}
               </p>
             </div>
           )}
@@ -158,7 +153,7 @@ function OrderDetail() {
             </p>
             {order.shippingMethod ? (
               <div className="font-dm-sans text-sm text-near-black flex flex-col gap-1">
-                <p className="font-medium">{SHIPPING_LABELS[order.shippingMethod] ?? order.shippingMethod}</p>
+                <p className="font-medium">{SHIPPING_METHOD_LABELS[order.shippingMethod] ?? order.shippingMethod}</p>
                 {order.shippingMethod === "paczkomat" && address?.code && (
                   <p>Paczkomat: {address.code}{address.city ? `, ${address.city}` : ""}</p>
                 )}
