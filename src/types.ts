@@ -67,7 +67,7 @@ export type CartItem = {
   stock: number;
 };
 
-export type ShippingMethod = "paczkomat" | "inpost_kurier" | "dpd";
+export type { ShippingMethod } from "@sznyt/shared";
 
 export type CourierAddress = {
   firstName: string;

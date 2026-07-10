@@ -11,12 +11,14 @@ export interface OrderLineItem {
   unitPrice: number;
 }
 
+import type { ShippingAddress as ShippingAddressContract } from "@sznyt/shared";
+
 /**
- * Free-form address captured at checkout. Courier orders carry
- * firstName/lastName/street/postalCode/city/phone/email; paczkomat orders
- * additionally carry the point's code and name.
+ * The shipping address contract (@sznyt/shared), consumed defensively:
+ * Partial because historical Order rows may predate the full field set —
+ * renderers filter out whatever is absent.
  */
-export type ShippingAddress = Record<string, string | undefined> | null;
+export type ShippingAddress = Partial<ShippingAddressContract> | null;
 
 export interface OrderEmailData {
   orderId: number;

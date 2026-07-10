@@ -21,6 +21,7 @@ import {
   recordPaidOrder,
   notifyOrderPlaced,
 } from "./orders/index.ts";
+import { FULFILLMENT_STATUSES } from "@sznyt/shared";
 
 const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY)
@@ -325,8 +326,7 @@ app.patch("/orders/:id/fulfillment", requireAuth(), requireAdmin, async (req, re
     const id = Number(req.params.id);
     const { fulfillmentStatus, trackingNumber } = req.body;
 
-    const VALID_STATUSES = ["received", "processing", "shipped", "delivered"];
-    if (!VALID_STATUSES.includes(fulfillmentStatus)) {
+    if (!FULFILLMENT_STATUSES.includes(fulfillmentStatus)) {
       return res.status(400).json({ error: "Nieprawidłowy status" });
     }
 
