@@ -1,18 +1,10 @@
 import { useState } from "react";
+import { FULFILLMENT_STATUSES, FULFILLMENT_LABELS_SHORT } from "@sznyt/shared";
 import type { AdminOrder } from "../../types";
 import { useAuth } from "@clerk/react";
 import Skeleton from "../../components/Skeleton";
 import { apiFetch } from "../../lib/api";
 import { useResource } from "../../hooks/useResource";
-
-const FULFILLMENT_LABELS: Record<string, string> = {
-  received: "Przyjęte",
-  processing: "W realizacji",
-  shipped: "Wysłane",
-  delivered: "Dostarczone",
-};
-
-const FULFILLMENT_OPTIONS = ["received", "processing", "shipped", "delivered"];
 
 function FulfillmentCell({ order }: { order: AdminOrder }) {
   const { getToken } = useAuth();
@@ -46,8 +38,8 @@ function FulfillmentCell({ order }: { order: AdminOrder }) {
         }}
         className="border border-borders text-sm px-2 py-1 bg-white focus:outline-none focus:border-near-black"
       >
-        {FULFILLMENT_OPTIONS.map((s) => (
-          <option key={s} value={s}>{FULFILLMENT_LABELS[s]}</option>
+        {FULFILLMENT_STATUSES.map((s) => (
+          <option key={s} value={s}>{FULFILLMENT_LABELS_SHORT[s]}</option>
         ))}
       </select>
       <input

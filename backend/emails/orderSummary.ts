@@ -1,20 +1,9 @@
 // Shared receipt fragments used by the customer confirmation and the admin
 // new-order alert, so both emails always agree on what an order looks like.
 
+import { PAYMENT_METHOD_LABELS, SHIPPING_METHOD_LABELS } from "@sznyt/shared";
 import { escapeHtml, formatPln, layoutColors, sectionHeadingHtml } from "./layout.ts";
 import type { OrderEmailData, ShippingAddress } from "./types.ts";
-
-export const PAYMENT_METHOD_LABELS: Record<string, string> = {
-  card: "Karta płatnicza",
-  p24: "Przelewy24",
-  blik: "BLIK",
-};
-
-export const SHIPPING_METHOD_LABELS: Record<string, string> = {
-  paczkomat: "InPost Paczkomat",
-  inpost_kurier: "InPost Kurier",
-  dpd: "DPD Kurier",
-};
 
 export function paymentMethodLabel(method: string | null): string {
   if (!method) return "—";

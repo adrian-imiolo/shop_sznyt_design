@@ -1,6 +1,6 @@
 import type Stripe from "stripe";
 import type { CartItemInput, CheckoutProduct } from "./types.ts";
-import { SHIPPING_COSTS, SHIPPING_LABELS, FREE_SHIPPING_THRESHOLD } from "./shipping.ts";
+import { SHIPPING_COSTS, SHIPPING_METHOD_LABELS, FREE_SHIPPING_THRESHOLD } from "@sznyt/shared";
 
 export type BuildCheckoutResult =
   | {
@@ -75,7 +75,7 @@ export function buildCheckoutLineItems(
       price_data: {
         currency: "pln",
         product_data: {
-          name: `Dostawa — ${SHIPPING_LABELS[shippingMethod]}`,
+          name: `Dostawa — ${SHIPPING_METHOD_LABELS[shippingMethod]}`,
           metadata: {},
         },
         unit_amount: shippingCost * 100,
