@@ -31,6 +31,7 @@ Premium e-commerce shop selling designer wooden picture frames at `sznytdesign.p
 - **Soft launch** — going live silently, no marketing, with `noindex`. Brand presentation must be production-quality even though no one is being told.
 - **Order intake** — the module that turns a paid Stripe checkout session into a recorded `Order`: transaction, atomic stock decrement, idempotency. Lives in `backend/orders/`. The Stripe webhook route is its adapter.
 - **Line-item contract** — the agreement between checkout and order intake carried through Stripe: each product line item is stamped with `metadata.productId`; a line item without one (shipping) is skipped when recording `OrderItem`s and decrementing stock.
+- **Shipping address contract** — the flat JSON captured at checkout and stored on the Order as `shippingAddress`: `firstName`, `lastName`, `email`, `street`, `postalCode`, `city`, `phone` always present; the paczkomat point's `code` and `name` present iff `shippingMethod === "paczkomat"`. Discriminated by the Order's sibling `shippingMethod`, never by its own shape. Typed as `ShippingAddress` in `@sznyt/shared`; built only by the frontend checkout module, parsed and rendered by order intake and emails. See `docs/adr/0003-checkout-assembly-module.md`.
 
 ## Core entities
 
