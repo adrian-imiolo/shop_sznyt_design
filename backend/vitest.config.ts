@@ -5,7 +5,7 @@ import { defineConfig } from "vitest/config";
 // *.db.test.ts files need Postgres and run separately via `npm run test:db`.
 export default defineConfig({
   test: {
-    include: ["emails/**/*.test.ts", "orders/**/*.test.ts"],
+    include: ["emails/**/*.test.ts", "orders/**/*.test.ts", "revenue/**/*.test.ts"],
     exclude: ["**/*.db.test.ts", "**/node_modules/**"],
   },
 });
