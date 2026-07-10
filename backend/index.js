@@ -21,6 +21,7 @@ import {
   recordPaidOrder,
   notifyOrderPlaced,
 } from "./orders/index.ts";
+import { computeQuarterRevenue } from "./revenue/index.ts";
 
 const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY)
@@ -302,6 +303,21 @@ app.post("/create-checkout-session", checkoutLimiter, async (req, res) => {
     if (err.code === "email_invalid") {
       return res.status(400).json({ error: "Podaj poprawny adres e-mail." });
     }
+    res.status(500).json({ error: "Błąd serwera" });
+  }
+});
+
+// quarterly DN revenue vs the registration cap — order volume is tiny at DN
+// scale, so fetching all paid orders and filtering in the pure function is fine
+app.get("/revenue/quarter", requireAuth(), requireAdmin, async (req, res) => {
+  try {
+    const paidOrders = await prisma.order.findMany({
+      where: { status: "paid" },
+      select: { status: true, total: true, createdAt: true },
+    });
+    res.json(computeQuarterRevenue(paidOrders, new Date()));
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Błąd serwera" });
   }
 });
