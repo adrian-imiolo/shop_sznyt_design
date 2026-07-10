@@ -1,13 +1,6 @@
+import type { QuarterRevenue } from "@sznyt/shared";
 import Skeleton from "../../components/Skeleton";
 import { useResource } from "../../hooks/useResource";
-
-type QuarterRevenue = {
-  quarter: 1 | 2 | 3 | 4;
-  year: number;
-  totalPln: number;
-  capPln: number;
-  threshold: "safe" | "warn70" | "warn90" | "over";
-};
 
 const THRESHOLD_STYLES: Record<
   QuarterRevenue["threshold"],

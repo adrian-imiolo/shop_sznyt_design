@@ -1,16 +1,8 @@
+import type { QuarterRevenue, QuarterRevenueThreshold } from "@sznyt/shared";
+
 // 2026 działalność-nierejestrowana cap. Set by law, changes year over year —
 // bump manually each tax year.
 export const QUARTERLY_REVENUE_CAP_PLN = 10813.5;
-
-export type QuarterRevenueThreshold = "safe" | "warn70" | "warn90" | "over";
-
-export type QuarterRevenue = {
-  quarter: 1 | 2 | 3 | 4;
-  year: number;
-  totalPln: number;
-  capPln: number;
-  threshold: QuarterRevenueThreshold;
-};
 
 export type RevenueOrder = {
   status: string;
