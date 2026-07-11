@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@clerk/react";
 import Skeleton from "../../components/Skeleton";
+import RevenueBanner from "./RevenueBanner";
 import { apiFetch } from "../../lib/api";
 import { useResource } from "../../hooks/useResource";
 
@@ -67,35 +68,44 @@ function AdminProducts() {
     }
   }
 
-  if (error) return <p className="p-4 text-red-600 font-dm-sans text-sm">{error}</p>;
+  if (error)
+    return (
+      <div className="p-4 w-full">
+        <RevenueBanner />
+        <p className="mt-4 text-red-600 font-dm-sans text-sm">{error}</p>
+      </div>
+    );
 
   if (!products)
     return (
-      <div className="flex flex-col items-center p-4 w-full overflow-x-auto">
-        <table className="mt-2 w-full border-collapse min-w-[900px]">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="p-3 text-left w-16">Kolejność</th>
-              <th className="p-3 text-left">Nazwa</th>
-              <th className="p-3 text-left w-32">Slogan</th>
-              <th className="p-3 text-left">Opis</th>
-              <th className="p-3 text-left w-16">Cena</th>
-              <th className="p-3 text-left">Zdjęcie studio</th>
-              <th className="p-3 text-left">Zdjęcie lifestyle</th>
-              <th className="p-3 text-left w-16">Ilość</th>
-              <th className="p-3 text-left">Akcje</th>
-            </tr>
-          </thead>
-          <tbody>
-            {[1, 2, 3].map((i) => (
-              <tr className="border-b border-borders" key={i}>
-                {Array.from({ length: 9 }).map((_, j) => (
-                  <td className="p-3" key={j}><Skeleton className="h-5 w-full" /></td>
-                ))}
+      <div className="p-4 w-full">
+        <RevenueBanner />
+        <div className="flex flex-col items-center w-full overflow-x-auto">
+          <table className="mt-2 w-full border-collapse min-w-[900px]">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="p-3 text-left w-16">Kolejność</th>
+                <th className="p-3 text-left">Nazwa</th>
+                <th className="p-3 text-left w-32">Slogan</th>
+                <th className="p-3 text-left">Opis</th>
+                <th className="p-3 text-left w-16">Cena</th>
+                <th className="p-3 text-left">Zdjęcie studio</th>
+                <th className="p-3 text-left">Zdjęcie lifestyle</th>
+                <th className="p-3 text-left w-16">Ilość</th>
+                <th className="p-3 text-left">Akcje</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {[1, 2, 3].map((i) => (
+                <tr className="border-b border-borders" key={i}>
+                  {Array.from({ length: 9 }).map((_, j) => (
+                    <td className="p-3" key={j}><Skeleton className="h-5 w-full" /></td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     );
 
@@ -129,76 +139,79 @@ function AdminProducts() {
         </>
       )}
 
-      <div className="flex flex-col items-center p-4 w-full overflow-x-auto">
-        <table className="mt-2 w-full border-collapse min-w-[900px]">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="p-3 text-left w-16">Kolejność</th>
-              <th className="p-3 text-left">Nazwa</th>
-              <th className="p-3 text-left w-32">Slogan</th>
-              <th className="p-3 text-left">Opis</th>
-              <th className="p-3 text-left w-16">Cena</th>
-              <th className="p-3 text-left">Zdjęcie studio</th>
-              <th className="p-3 text-left">Zdjęcie lifestyle</th>
-              <th className="p-3 text-left w-16">Ilość</th>
-              <th className="p-3 text-left">Akcje</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((product, index) => (
-              <tr className="border-b border-borders" key={product.id}>
-                <td className="p-3">
-                  <div className="flex flex-col gap-1 -my-1">
-                    <button
-                      onClick={() => move(index, "up")}
-                      disabled={index === 0}
-                      className="text-secondary-text hover:text-near-black disabled:opacity-20 disabled:cursor-not-allowed leading-none text-base p-2 -m-1 min-h-[40px] min-w-[40px] flex items-center justify-center"
-                      title="Przesuń wyżej"
-                      aria-label="Przesuń wyżej"
-                    >
-                      ▲
-                    </button>
-                    <button
-                      onClick={() => move(index, "down")}
-                      disabled={index === products.length - 1}
-                      className="text-secondary-text hover:text-near-black disabled:opacity-20 disabled:cursor-not-allowed leading-none text-base p-2 -m-1 min-h-[40px] min-w-[40px] flex items-center justify-center"
-                      title="Przesuń niżej"
-                      aria-label="Przesuń niżej"
-                    >
-                      ▼
-                    </button>
-                  </div>
-                </td>
-                <td className="p-3">{product.name}</td>
-                <td className="p-3">{product.tagline}</td>
-                <td className="p-3 max-w-[12rem] truncate" title={product.description}>{product.description}</td>
-                <td className="p-3">{product.price}</td>
-                <td className="p-3 max-w-[12rem] truncate" title={product.imageUrl}>{product.imageUrl}</td>
-                <td className="p-3 max-w-[12rem] truncate" title={product.lifestyleImageUrl}>{product.lifestyleImageUrl}</td>
-                <td className="p-3">{product.stock}</td>
-                <td className="p-3">
-                  <div className="flex flex-col gap-3">
-                  <Link
-                    className="text-accent hover:underline"
-                    to={`/admin/produkty/${product.id}`}
-                  >
-                    Edytuj
-                  </Link>
-                  <button
-                    className="text-red-600 hover:text-red-800"
-                    onClick={() => {
-                      setIsDeleteModalOpen(true);
-                      setProductToDelete(product.id);
-                    }}
-                  >
-                    Usuń
-                  </button>
-                  </div>
-                </td>
+      <div className="p-4 w-full">
+        <RevenueBanner />
+        <div className="flex flex-col items-center w-full overflow-x-auto">
+          <table className="mt-2 w-full border-collapse min-w-[900px]">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="p-3 text-left w-16">Kolejność</th>
+                <th className="p-3 text-left">Nazwa</th>
+                <th className="p-3 text-left w-32">Slogan</th>
+                <th className="p-3 text-left">Opis</th>
+                <th className="p-3 text-left w-16">Cena</th>
+                <th className="p-3 text-left">Zdjęcie studio</th>
+                <th className="p-3 text-left">Zdjęcie lifestyle</th>
+                <th className="p-3 text-left w-16">Ilość</th>
+                <th className="p-3 text-left">Akcje</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {products.map((product, index) => (
+                <tr className="border-b border-borders" key={product.id}>
+                  <td className="p-3">
+                    <div className="flex flex-col gap-1 -my-1">
+                      <button
+                        onClick={() => move(index, "up")}
+                        disabled={index === 0}
+                        className="text-secondary-text hover:text-near-black disabled:opacity-20 disabled:cursor-not-allowed leading-none text-base p-2 -m-1 min-h-[40px] min-w-[40px] flex items-center justify-center"
+                        title="Przesuń wyżej"
+                        aria-label="Przesuń wyżej"
+                      >
+                        ▲
+                      </button>
+                      <button
+                        onClick={() => move(index, "down")}
+                        disabled={index === products.length - 1}
+                        className="text-secondary-text hover:text-near-black disabled:opacity-20 disabled:cursor-not-allowed leading-none text-base p-2 -m-1 min-h-[40px] min-w-[40px] flex items-center justify-center"
+                        title="Przesuń niżej"
+                        aria-label="Przesuń niżej"
+                      >
+                        ▼
+                      </button>
+                    </div>
+                  </td>
+                  <td className="p-3">{product.name}</td>
+                  <td className="p-3">{product.tagline}</td>
+                  <td className="p-3 max-w-[12rem] truncate" title={product.description}>{product.description}</td>
+                  <td className="p-3">{product.price}</td>
+                  <td className="p-3 max-w-[12rem] truncate" title={product.imageUrl}>{product.imageUrl}</td>
+                  <td className="p-3 max-w-[12rem] truncate" title={product.lifestyleImageUrl}>{product.lifestyleImageUrl}</td>
+                  <td className="p-3">{product.stock}</td>
+                  <td className="p-3">
+                    <div className="flex flex-col gap-3">
+                    <Link
+                      className="text-accent hover:underline"
+                      to={`/admin/produkty/${product.id}`}
+                    >
+                      Edytuj
+                    </Link>
+                    <button
+                      className="text-red-600 hover:text-red-800"
+                      onClick={() => {
+                        setIsDeleteModalOpen(true);
+                        setProductToDelete(product.id);
+                      }}
+                    >
+                      Usuń
+                    </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </>
   );
