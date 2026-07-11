@@ -63,7 +63,16 @@ export function orderItemsText(data: OrderEmailData): string {
   return [...rows, "", `Suma: ${formatPln(data.total)}`].join("\n");
 }
 
-export function orderDetailsHtml(data: OrderEmailData): string {
+// The admin alert surfaces the note at the top instead (it must not be
+// missed during fulfillment), so it can opt out of the trailing section.
+export interface OrderDetailsOptions {
+  includeNote?: boolean;
+}
+
+export function orderDetailsHtml(
+  data: OrderEmailData,
+  { includeNote = true }: OrderDetailsOptions = {},
+): string {
   const addressLines = shippingAddressLines(data.shippingAddress, data.shippingMethod);
   const parts = [
     sectionHeadingHtml("Zamówione produkty"),
@@ -78,7 +87,7 @@ export function orderDetailsHtml(data: OrderEmailData): string {
     sectionHeadingHtml("Płatność"),
     `<p style="margin:0;">${escapeHtml(paymentMethodLabel(data.paymentMethod))}</p>`,
   );
-  if (data.note) {
+  if (includeNote && data.note) {
     parts.push(
       sectionHeadingHtml("Uwagi do zamówienia"),
       `<p style="margin:0;">${escapeHtml(data.note)}</p>`,
@@ -87,7 +96,10 @@ export function orderDetailsHtml(data: OrderEmailData): string {
   return parts.join("\n");
 }
 
-export function orderDetailsText(data: OrderEmailData): string {
+export function orderDetailsText(
+  data: OrderEmailData,
+  { includeNote = true }: OrderDetailsOptions = {},
+): string {
   const addressLines = shippingAddressLines(data.shippingAddress, data.shippingMethod);
   const sections = [
     "Zamówione produkty:",
@@ -99,7 +111,7 @@ export function orderDetailsText(data: OrderEmailData): string {
     sections.push("Adres dostawy:", addressLines.join("\n"));
   }
   sections.push(`Metoda płatności: ${paymentMethodLabel(data.paymentMethod)}`);
-  if (data.note) {
+  if (includeNote && data.note) {
     sections.push("Uwagi do zamówienia:", data.note);
   }
   return sections.join("\n");

@@ -52,9 +52,22 @@ describe("renderAdminNewOrder", () => {
       note: "Kod do bramy: 1234",
     });
     const output = channel === "html" ? rendered.html : rendered.text;
-    expect(output).toContain("Uwagi do zamówienia");
     expect(output).toContain("Kod do bramy: 1234");
   });
+
+  it.each(["html", "text"] as const)(
+    "shows the note prominently in %s — before the order details",
+    (channel) => {
+      const rendered = renderAdminNewOrder({
+        ...sampleOrder,
+        note: "Kod do bramy: 1234",
+      });
+      const output = channel === "html" ? rendered.html : rendered.text;
+      expect(output.indexOf("Kod do bramy: 1234")).toBeLessThan(
+        output.indexOf("Ramka Orzechowa 21×30"),
+      );
+    },
+  );
 
   it("omits the note section when the order has none", () => {
     expect(html).not.toContain("Uwagi do zamówienia");
