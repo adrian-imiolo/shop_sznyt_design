@@ -42,6 +42,7 @@ export type Order = {
   paymentMethod: string | null;
   fulfillmentStatus: string;
   trackingNumber: string | null;
+  note: string | null;
   items: OrderItem[];
 };
 
@@ -56,6 +57,7 @@ export type AdminOrder = {
   shippingAddress: Record<string, string> | null;
   fulfillmentStatus: string;
   trackingNumber: string | null;
+  note: string | null;
 };
 
 export type CartItem = {
