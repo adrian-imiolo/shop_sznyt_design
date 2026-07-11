@@ -21,6 +21,7 @@ const sampleOrder: OrderEmailData = {
   },
   paymentMethod: "card",
   customerEmail: "anna@example.com",
+  note: null,
 };
 
 describe("renderAdminNewOrder", () => {
@@ -43,5 +44,20 @@ describe("renderAdminNewOrder", () => {
     expect(output).toContain("30-002 Kraków");
     expect(output).toContain("DPD Kurier");
     expect(output).toContain("Karta płatnicza");
+  });
+
+  it.each(["html", "text"] as const)("shows the customer note in %s", (channel) => {
+    const rendered = renderAdminNewOrder({
+      ...sampleOrder,
+      note: "Kod do bramy: 1234",
+    });
+    const output = channel === "html" ? rendered.html : rendered.text;
+    expect(output).toContain("Uwagi do zamówienia");
+    expect(output).toContain("Kod do bramy: 1234");
+  });
+
+  it("omits the note section when the order has none", () => {
+    expect(html).not.toContain("Uwagi do zamówienia");
+    expect(text).not.toContain("Uwagi do zamówienia");
   });
 });

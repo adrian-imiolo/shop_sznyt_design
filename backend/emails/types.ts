@@ -29,4 +29,6 @@ export interface OrderEmailData {
   shippingAddress: ShippingAddress;
   paymentMethod: string | null;
   customerEmail: string | null;
+  /** Customer delivery instructions from checkout. */
+  note: string | null;
 }

@@ -78,6 +78,12 @@ export function orderDetailsHtml(data: OrderEmailData): string {
     sectionHeadingHtml("Płatność"),
     `<p style="margin:0;">${escapeHtml(paymentMethodLabel(data.paymentMethod))}</p>`,
   );
+  if (data.note) {
+    parts.push(
+      sectionHeadingHtml("Uwagi do zamówienia"),
+      `<p style="margin:0;">${escapeHtml(data.note)}</p>`,
+    );
+  }
   return parts.join("\n");
 }
 
@@ -93,5 +99,8 @@ export function orderDetailsText(data: OrderEmailData): string {
     sections.push("Adres dostawy:", addressLines.join("\n"));
   }
   sections.push(`Metoda płatności: ${paymentMethodLabel(data.paymentMethod)}`);
+  if (data.note) {
+    sections.push("Uwagi do zamówienia:", data.note);
+  }
   return sections.join("\n");
 }
