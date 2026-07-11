@@ -31,6 +31,7 @@ export async function recordPaidOrder(
           shippingMethod: facts.shippingMethod,
           shippingAddress: facts.shippingAddress ?? undefined,
           paymentMethod: facts.paymentMethod,
+          note: facts.note,
         },
       });
 

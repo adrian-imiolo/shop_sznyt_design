@@ -40,5 +40,7 @@ export interface PaidOrderFacts {
   shippingMethod: string | null;
   shippingAddress: ShippingAddress;
   paymentMethod: string | null;
+  /** Customer delivery instructions, already trimmed at checkout. */
+  note: string | null;
   lineItems: PaidLineItem[];
 }

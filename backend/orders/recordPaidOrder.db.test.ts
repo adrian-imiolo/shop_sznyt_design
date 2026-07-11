@@ -47,6 +47,7 @@ function facts(overrides: Partial<PaidOrderFacts> = {}): PaidOrderFacts {
     shippingMethod: "paczkomat",
     shippingAddress: { firstName: "Jan", city: "Kraków" },
     paymentMethod: "blik",
+    note: null,
     lineItems: [
       { productId: 1, name: "Rama Dębowa 30×40", quantity: 2, unitPrice: 149.99 },
       { productId: 2, name: "Rama Jesionowa 21×30", quantity: 1, unitPrice: 89 },
@@ -76,6 +77,27 @@ describe("recordPaidOrder", () => {
     const products = await prisma.product.findMany({ orderBy: { id: "asc" } });
     expect(products[0].stock).toBe(3); // 5 - 2
     expect(products[1].stock).toBe(1); // 2 - 1
+  });
+
+  it("persists the customer note on the order", async () => {
+    await seedProducts();
+
+    const result = await recordPaidOrder(
+      prisma,
+      facts({ note: "Proszę zostawić u sąsiada" }),
+    );
+    expect(result.created).toBe(true);
+    if (!result.created) return;
+    expect(result.order.note).toBe("Proszę zostawić u sąsiada");
+  });
+
+  it("stores null when the order has no note", async () => {
+    await seedProducts();
+
+    const result = await recordPaidOrder(prisma, facts());
+    expect(result.created).toBe(true);
+    if (!result.created) return;
+    expect(result.order.note).toBeNull();
   });
 
   it("treats a duplicate stripeSessionId as a no-op: no second order, no double decrement", async () => {

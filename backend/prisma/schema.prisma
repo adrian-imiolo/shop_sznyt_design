@@ -48,6 +48,7 @@ model Order {
   paymentMethod     String?
   fulfillmentStatus String  @default("received")
   trackingNumber    String?
+  note              String?
   items             OrderItem[]
 }
 

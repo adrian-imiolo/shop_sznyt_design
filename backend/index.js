@@ -18,6 +18,7 @@ import {
 import {
   buildCheckoutLineItems,
   paidOrderFactsFromSession,
+  normalizeOrderNote,
   recordPaidOrder,
   notifyOrderPlaced,
 } from "./orders/index.ts";
@@ -266,7 +267,12 @@ app.post("/create-checkout-session", checkoutLimiter, async (req, res) => {
     if (!stripe) {
       return res.status(503).json({ error: "Checkout disabled in demo mode" });
     }
-    const { items, userId, shippingMethod, shippingAddress } = req.body;
+    const { items, userId, shippingMethod, shippingAddress, note } = req.body;
+
+    const noteResult = normalizeOrderNote(note);
+    if (!noteResult.ok) {
+      return res.status(noteResult.status).json({ error: noteResult.error });
+    }
 
     // Fetch the referenced products; all validation and pricing lives in the
     // order-intake module (server-authoritative — the client only chooses
@@ -294,6 +300,7 @@ app.post("/create-checkout-session", checkoutLimiter, async (req, res) => {
       cancel_url: `${process.env.FRONTEND_URL}/koszyk`,
       metadata: {
         ...(userId ? { userId } : {}),
+        ...(noteResult.note ? { note: noteResult.note } : {}),
         shippingMethod,
         shippingAddress: JSON.stringify(shippingAddress),
       },

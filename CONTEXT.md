@@ -38,7 +38,7 @@ Premium e-commerce shop selling designer wooden picture frames at `sznytdesign.p
 Defined in `backend/prisma/schema.prisma`.
 
 - **Product** — a frame SKU. Has `name`, `tagline`, `description`, `price`, `imageUrl`, `lifestyleImageUrl`, `stock`, `sortOrder`. Stock decrements atomically when an order is paid.
-- **Order** — a customer purchase. Lifecycle: `pending` → `paid` (Stripe webhook); fulfillment: `received` → `shipped`. Carries `stripeSessionId` (unique idempotency key), `customerEmail`, `userId` (nullable — guest checkout allowed), `shippingMethod`, `shippingAddress` (JSON), `paymentMethod`, `fulfillmentStatus`, `trackingNumber`.
+- **Order** — a customer purchase. Lifecycle: `pending` → `paid` (Stripe webhook); fulfillment: `received` → `shipped`. Carries `stripeSessionId` (unique idempotency key), `customerEmail`, `userId` (nullable — guest checkout allowed), `shippingMethod`, `shippingAddress` (JSON), `paymentMethod`, `fulfillmentStatus`, `trackingNumber`, `note` (nullable customer delivery instructions, max 300 chars — travels as its own Stripe `metadata.note` key; cap shared as `ORDER_NOTE_MAX_LENGTH` in `@sznyt/shared`).
 - **OrderItem** — line item linking an `Order` to a `Product` with `quantity` and `price` snapshotted at purchase time. `productId` is nullable with `onDelete: SetNull` — orders survive product deletion with their historical line items intact.
 - **ContactMessage** — submission from the contact form. Stored for support history.
 
