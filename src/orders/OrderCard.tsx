@@ -33,7 +33,7 @@ const FULFILLMENT_CONFIG: Record<string, { label: string; dot: string }> = {
   delivered:  { label: FULFILLMENT_LABELS.delivered,  dot: "bg-green-700" },
 };
 
-const DELETED_PRODUCT_NAME = "Produkt usunięty";
+export const DELETED_PRODUCT_NAME = "Produkt usunięty";
 
 function StatusBadge({ status }: { status: string }) {
   const config = STATUS_CONFIG[status] ?? { label: status, dot: "bg-gray-400" };
@@ -55,7 +55,7 @@ function FulfillmentBadge({ status, labelClassName }: { status: string; labelCla
   );
 }
 
-function ItemThumb({ item, sizeClass }: { item: OrderItem; sizeClass: string }) {
+export function ItemThumb({ item, sizeClass }: { item: OrderItem; sizeClass: string }) {
   if (!item.product?.imageUrl) return <div className={`${sizeClass} bg-borders shrink-0`} />;
   return (
     <div

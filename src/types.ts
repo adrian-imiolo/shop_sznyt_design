@@ -46,6 +46,12 @@ export type Order = {
   items: OrderItem[];
 };
 
+// The admin detail page reads the same /orders/:id payload as the customer
+// page; the backend row additionally carries the customer's email.
+export type AdminOrderPayload = Order & {
+  customerEmail: string | null;
+};
+
 export type AdminOrder = {
   id: number;
   stripeSessionId: string;
