@@ -5,7 +5,7 @@ import {
   PAYMENT_METHOD_LABELS,
 } from "@sznyt/shared";
 import type { Order, OrderItem } from "../types";
-import { formatOrderDate, formatRecipientLine } from "./formatting";
+import { formatOrderDate, formatPaczkomatLine, formatRecipientLine } from "./formatting";
 
 /**
  * The one presentational rendering of an Order for customer surfaces.
@@ -98,6 +98,8 @@ function SummaryCard({ order }: { order: Order }) {
   );
 }
 
+// Renders the list-entry *content* only — the enclosing <Link> in MyOrders
+// owns the layout (flex, gap) and the `group` class the hover states key on.
 function ListItem({ order }: { order: Order }) {
   const address = order.shippingAddress;
   const isPaczkomat = order.shippingMethod === "paczkomat";
@@ -146,9 +148,7 @@ function ListItem({ order }: { order: Order }) {
           </p>
           {address && (
             <p className="font-dm-sans text-sm text-near-black">
-              {isPaczkomat
-                ? `Paczkomat: ${address.code}${address.city ? `, ${address.city}` : ""}`
-                : formatRecipientLine(address)}
+              {isPaczkomat ? formatPaczkomatLine(address) : formatRecipientLine(address)}
             </p>
           )}
         </div>
@@ -233,7 +233,7 @@ function DetailBody({ order }: { order: Order }) {
             <div className="font-dm-sans text-sm text-near-black flex flex-col gap-1">
               <p className="font-medium">{SHIPPING_METHOD_LABELS[order.shippingMethod] ?? order.shippingMethod}</p>
               {order.shippingMethod === "paczkomat" && address?.code && (
-                <p>Paczkomat: {address.code}{address.city ? `, ${address.city}` : ""}</p>
+                <p>{formatPaczkomatLine(address)}</p>
               )}
               {order.shippingMethod !== "paczkomat" && address && (
                 <>

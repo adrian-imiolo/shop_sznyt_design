@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { formatOrderDate, formatRecipientLine } from "./formatting";
+import { formatOrderDate, formatPaczkomatLine, formatRecipientLine } from "./formatting";
 
 describe("formatOrderDate", () => {
   it("renders an ISO timestamp as a Polish date", () => {
@@ -31,5 +31,17 @@ describe("formatRecipientLine", () => {
 
   it("returns an empty string for an empty address", () => {
     expect(formatRecipientLine({})).toBe("");
+  });
+});
+
+describe("formatPaczkomatLine", () => {
+  it("shows the point code with its city", () => {
+    expect(formatPaczkomatLine({ code: "KRA010", city: "Kraków" })).toBe(
+      "Paczkomat: KRA010, Kraków",
+    );
+  });
+
+  it("omits the city when absent", () => {
+    expect(formatPaczkomatLine({ code: "KRA010" })).toBe("Paczkomat: KRA010");
   });
 });
