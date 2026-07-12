@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import Seo from "../components/Seo";
-import { apiFetch, ApiError } from "../lib/api";
+import { usePublicForm } from "../hooks/usePublicForm";
+
+const AFTERSALES_FALLBACK_ERROR =
+  "Coś poszło nie tak. Napisz bezpośrednio na kontakt@sznytdesign.pl.";
 
 function ZwrotForm() {
   const [orderNumber, setOrderNumber] = useState("");
@@ -9,31 +12,14 @@ function ZwrotForm() {
   const [email, setEmail] = useState("");
   const [reason, setReason] = useState("");
   const [bankAccount, setBankAccount] = useState("");
-  const [honeypot, setHoneypot] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { honeypotProps, loading, success, error, submit } = usePublicForm(
+    "/zwrot",
+    AFTERSALES_FALLBACK_ERROR,
+  );
 
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
-    if (honeypot) { setSuccess(true); return; }
-    setLoading(true);
-    setError(null);
-    try {
-      await apiFetch("/zwrot", {
-        method: "POST",
-        body: { orderNumber, name, email, reason, bankAccount, _hp: honeypot },
-      });
-      setSuccess(true);
-    } catch (err) {
-      setError(
-        err instanceof ApiError && err.message
-          ? err.message
-          : "Coś poszło nie tak. Napisz bezpośrednio na kontakt@sznytdesign.pl.",
-      );
-    } finally {
-      setLoading(false);
-    }
+    await submit({ orderNumber, name, email, reason, bankAccount });
   }
 
   if (success)
@@ -46,7 +32,7 @@ function ZwrotForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-      <input type="text" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} aria-hidden="true" tabIndex={-1} autoComplete="off" style={{ display: "none" }} />
+      <input {...honeypotProps} />
       <p className="font-dm-sans text-sm text-secondary-text leading-relaxed">
         Wypełnij formularz, a my odeślemy Ci potwierdzenie z instrukcją zwrotu. Produkt odeślij na adres podany w potwierdzeniu.
       </p>
@@ -95,31 +81,14 @@ function ReklamacjaForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [description, setDescription] = useState("");
-  const [honeypot, setHoneypot] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { honeypotProps, loading, success, error, submit } = usePublicForm(
+    "/reklamacja",
+    AFTERSALES_FALLBACK_ERROR,
+  );
 
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
-    if (honeypot) { setSuccess(true); return; }
-    setLoading(true);
-    setError(null);
-    try {
-      await apiFetch("/reklamacja", {
-        method: "POST",
-        body: { orderNumber, name, email, description, _hp: honeypot },
-      });
-      setSuccess(true);
-    } catch (err) {
-      setError(
-        err instanceof ApiError && err.message
-          ? err.message
-          : "Coś poszło nie tak. Napisz bezpośrednio na kontakt@sznytdesign.pl.",
-      );
-    } finally {
-      setLoading(false);
-    }
+    await submit({ orderNumber, name, email, description });
   }
 
   if (success)
@@ -132,7 +101,7 @@ function ReklamacjaForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-      <input type="text" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} aria-hidden="true" tabIndex={-1} autoComplete="off" style={{ display: "none" }} />
+      <input {...honeypotProps} />
       <p className="font-dm-sans text-sm text-secondary-text leading-relaxed">
         Opisz problem i wyślij formularz. W odpowiedzi poprosimy o przesłanie dokumentacji zdjęciowej. Reklamację rozpatrzymy w ciągu 14 dni roboczych.
       </p>
