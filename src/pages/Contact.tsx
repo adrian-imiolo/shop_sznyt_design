@@ -1,37 +1,29 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import Seo from "../components/Seo";
-import { apiFetch, ApiError } from "../lib/api";
+import { usePublicForm } from "../hooks/usePublicForm";
 
 function Contact() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
-  const [honeypot, setHoneypot] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { honeypotProps, loading, success, error, submit } = usePublicForm(
+    "/contact",
+    "Coś poszło nie tak. Spróbuj ponownie.",
+  );
 
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
-    if (honeypot) { setSuccess(true); return; }
-    setLoading(true);
-    try {
-      await apiFetch("/contact", {
-        method: "POST",
-        body: { name, email, message, _hp: honeypot },
-      });
-      setSuccess(true);
-      setName("");
-      setEmail("");
-      setMessage("");
-    } catch (err) {
-      setError(
-        err instanceof ApiError && err.message ? err.message : "Coś poszło nie tak. Spróbuj ponownie.",
-      );
-    } finally {
-      setLoading(false);
-    }
+    await submit(
+      { name, email, message },
+      {
+        onSuccess: () => {
+          setName("");
+          setEmail("");
+          setMessage("");
+        },
+      },
+    );
   }
 
   return (
@@ -62,15 +54,7 @@ function Contact() {
               Napisz do nas
             </p>
             <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-              <input
-                type="text"
-                value={honeypot}
-                onChange={(e) => setHoneypot(e.target.value)}
-                aria-hidden="true"
-                tabIndex={-1}
-                autoComplete="off"
-                style={{ display: "none" }}
-              />
+              <input {...honeypotProps} />
               <div className="flex flex-col gap-2">
                 <label className="font-dm-sans text-xs text-secondary-text tracking-widest uppercase">
                   Imię i nazwisko
