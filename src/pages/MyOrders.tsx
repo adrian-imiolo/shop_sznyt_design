@@ -1,38 +1,13 @@
 import { RedirectToSignIn, useAuth } from "@clerk/react";
-import { ORDER_STATUS_LABELS, FULFILLMENT_LABELS, SHIPPING_METHOD_LABELS } from "@sznyt/shared";
 import { useResource } from "../hooks/useResource";
 import type { Order } from "../types";
 import Skeleton from "../components/Skeleton";
 import { Link } from "react-router-dom";
 import Seo from "../components/Seo";
+import OrderCard from "../orders/OrderCard";
 
 const MY_ORDERS_DESCRIPTION =
   "Historia i status Twoich zamówień w Sznyt Design — sprawdź szczegóły dostawy i numer śledzenia przesyłki.";
-
-// Labels come from the shared vocabulary; badge colors are presentation and stay here (ADR-0002).
-const STATUS_CONFIG: Record<string, { label: string; dot: string }> = {
-  paid:      { label: ORDER_STATUS_LABELS.paid,      dot: "bg-green-500" },
-  pending:   { label: ORDER_STATUS_LABELS.pending,   dot: "bg-amber-400" },
-  cancelled: { label: ORDER_STATUS_LABELS.cancelled, dot: "bg-red-500" },
-  failed:    { label: ORDER_STATUS_LABELS.failed,    dot: "bg-red-500" },
-};
-
-const FULFILLMENT_CONFIG: Record<string, { label: string; dot: string }> = {
-  received:   { label: FULFILLMENT_LABELS.received,   dot: "bg-amber-400" },
-  processing: { label: FULFILLMENT_LABELS.processing, dot: "bg-blue-400" },
-  shipped:    { label: FULFILLMENT_LABELS.shipped,    dot: "bg-green-500" },
-  delivered:  { label: FULFILLMENT_LABELS.delivered,  dot: "bg-green-700" },
-};
-
-function StatusBadge({ status }: { status: string }) {
-  const config = STATUS_CONFIG[status] ?? { label: status, dot: "bg-gray-400" };
-  return (
-    <span className="inline-flex items-center gap-2">
-      <span className={`w-2 h-2 rounded-full shrink-0 ${config.dot}`} />
-      <span>{config.label}</span>
-    </span>
-  );
-}
 
 function MyOrders() {
   const { userId, isLoaded } = useAuth();
@@ -100,109 +75,15 @@ function MyOrders() {
         </h1>
 
         <div className="flex flex-col divide-y divide-borders">
-          {orders.map((order) => {
-            const address = order.shippingAddress;
-            const isPaczkomat = order.shippingMethod === "paczkomat";
-
-            return (
-              <Link
-                key={order.id}
-                to={`/moje-zamowienia/${order.id}`}
-                className="py-8 flex flex-col gap-4 group"
-              >
-                {/* Header row */}
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 sm:gap-0">
-                  <div>
-                    <p className="font-cormorant text-2xl text-near-black font-light group-hover:text-accent transition-colors">
-                      Zamówienie #{order.id}
-                    </p>
-                    <p className="font-dm-sans text-sm text-secondary-text mt-1">
-                      {new Date(order.createdAt).toLocaleDateString("pl-PL")} · <StatusBadge status={order.status} />
-                    </p>
-                    {(() => {
-                      const fc = FULFILLMENT_CONFIG[order.fulfillmentStatus] ?? { label: order.fulfillmentStatus, dot: "bg-gray-400" };
-                      return (
-                        <span className="inline-flex items-center gap-2 font-dm-sans text-sm text-secondary-text mt-0.5">
-                          <span className={`w-2 h-2 rounded-full shrink-0 ${fc.dot}`} />
-                          {fc.label}
-                        </span>
-                      );
-                    })()}
-                  </div>
-                  <p className="font-cormorant text-2xl text-near-black font-light">
-                    {order.total} PLN
-                  </p>
-                </div>
-
-                {/* Products */}
-                {order.items && order.items.length > 0 && (
-                  <div className="flex flex-col gap-2">
-                    {order.items.map((item) => (
-                      <div key={item.id} className="flex items-center gap-3">
-                        {item.product?.imageUrl ? (
-                          <div
-                            className="w-10 h-10 bg-cover bg-center shrink-0"
-                            style={{ backgroundImage: `url(${item.product.imageUrl})` }}
-                          />
-                        ) : (
-                          <div className="w-10 h-10 bg-borders shrink-0" />
-                        )}
-                        <p className="font-dm-sans text-sm text-secondary-text">
-                          {item.product?.name ?? "Produkt usunięty"}{" "}
-                          <span className="text-near-black">× {item.quantity}</span>
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Shipping */}
-                {order.shippingMethod && (
-                  <div className="flex flex-col gap-1">
-                    <p className="font-dm-sans text-xs text-accent tracking-[0.2em] uppercase">
-                      {SHIPPING_METHOD_LABELS[order.shippingMethod] ?? order.shippingMethod}
-                    </p>
-                    {address && (
-                      <>
-                        {isPaczkomat ? (
-                          <p className="font-dm-sans text-sm text-near-black">
-                            Paczkomat: {address.code}
-                            {address.city ? `, ${address.city}` : ""}
-                          </p>
-                        ) : (
-                          <p className="font-dm-sans text-sm text-near-black">
-                            {[
-                              address.firstName && address.lastName
-                                ? `${address.firstName} ${address.lastName}`
-                                : null,
-                              address.street,
-                              address.postalCode && address.city
-                                ? `${address.postalCode} ${address.city}`
-                                : address.city,
-                              address.phone,
-                            ]
-                              .filter(Boolean)
-                              .join(", ")}
-                          </p>
-                        )}
-                      </>
-                    )}
-                  </div>
-                )}
-
-                {/* Order note */}
-                {order.note && (
-                  <p className="font-dm-sans text-sm text-near-black">
-                    <span className="text-secondary-text">Uwagi:</span> {order.note}
-                  </p>
-                )}
-
-                <p className="font-dm-sans text-xs text-secondary-text tracking-widest uppercase group-hover:text-accent transition-colors self-end">
-                  Szczegóły →
-                </p>
-              </Link>
-            );
-          })}
+          {orders.map((order) => (
+            <Link
+              key={order.id}
+              to={`/moje-zamowienia/${order.id}`}
+              className="py-8 flex flex-col gap-4 group"
+            >
+              <OrderCard order={order} variant="list" />
+            </Link>
+          ))}
         </div>
       </div>
     </main>
