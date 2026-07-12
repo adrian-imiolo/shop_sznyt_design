@@ -1,18 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
 import { useAuth } from "@clerk/react";
-import type { ShippingMethod, CourierAddress, PaczkomatPoint } from "../types";
+import type { ShippingMethod } from "../types";
 import {
   SHIPPING_METHODS,
   SHIPPING_METHOD_LABELS,
   SHIPPING_COSTS,
   FREE_SHIPPING_THRESHOLD,
   ORDER_NOTE_MAX_LENGTH,
-  calcShippingCost,
 } from "@sznyt/shared";
-import { validateAddress } from "../lib/checkout-validation";
-import { apiFetch } from "../lib/api";
+import { useCheckout, checkoutTotals, PaczkomatPicker } from "../checkout";
+import type { CheckoutFieldErrors, CourierAddress } from "../checkout";
 import Seo from "../components/Seo";
 
 const IS_DEMO_MODE = import.meta.env.VITE_DEMO_MODE === "true";
@@ -31,91 +30,56 @@ const ADDRESS_FIELDS: { key: keyof CourierAddress; label: string; full?: boolean
   { key: "phone", label: "Telefon" },
 ];
 
+type AddressFormProps = {
+  address: CourierAddress;
+  fieldErrors: CheckoutFieldErrors;
+  onFieldChange: (key: keyof CourierAddress, value: string) => void;
+};
+
+function AddressForm({ address, fieldErrors, onFieldChange }: AddressFormProps) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {ADDRESS_FIELDS.map(({ key, label, full, type }) => (
+        <div key={key} className={full ? "sm:col-span-2" : ""}>
+          <label className="font-dm-sans text-xs text-secondary-text tracking-widest uppercase block mb-1">
+            {label}
+          </label>
+          <input
+            type={type ?? "text"}
+            value={address[key]}
+            onChange={(e) => onFieldChange(key, e.target.value)}
+            className={`w-full border font-dm-sans text-sm text-near-black px-3 py-2 focus:outline-none focus:border-near-black ${fieldErrors[key] ? "border-red-400" : "border-borders"}`}
+          />
+          {fieldErrors[key] && (
+            <p className="font-dm-sans text-xs text-red-500 mt-1">{fieldErrors[key]}</p>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function Cart() {
   const { items, removeItem, updateQuantity } = useCart();
   const { userId } = useAuth();
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
-  const [checkoutError, setCheckoutError] = useState<string | null>(null);
-  const [addressErrors, setAddressErrors] = useState<Partial<Record<keyof CourierAddress, string>>>({});
   const [regulaminAccepted, setRegulaminAccepted] = useState(false);
-  const [shippingMethod, setShippingMethod] = useState<ShippingMethod | null>(null);
-  const [paczkomatPoint, setPaczkomatPoint] = useState<PaczkomatPoint | null>(null);
-  const [note, setNote] = useState("");
-  const [address, setAddress] = useState<CourierAddress>({
-    firstName: "", lastName: "", street: "", postalCode: "", city: "", phone: "", email: "",
-  });
+  const {
+    shippingMethod,
+    selectShippingMethod,
+    paczkomatPoint,
+    setPaczkomatPoint,
+    address,
+    setAddressField,
+    note,
+    setNote,
+    fieldErrors,
+    isComplete,
+    loading: checkoutLoading,
+    error: checkoutError,
+    submit,
+  } = useCheckout(items, userId);
 
-  const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-  const isFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD;
-  const shippingCost = calcShippingCost(subtotal, shippingMethod);
-  const total = subtotal + shippingCost;
-
-  useEffect(() => {
-    window.easyPack?.init({ defaultLocale: "pl" });
-  }, []);
-
-  function openPaczkomatWidget() {
-    if (!window.easyPack) return;
-    window.easyPack.modalMap(
-      (point, modal) => {
-        modal.closeModal();
-        setPaczkomatPoint({
-          code: point.name,
-          name: point.address?.line1 ?? point.name,
-          city: point.address?.city,
-        });
-      },
-      // the widget hard-codes its size — cap it so the map fits a 375px phone viewport
-      {
-        width: Math.min(500, window.innerWidth - 32),
-        height: Math.min(600, window.innerHeight - 32),
-      },
-    );
-  }
-
-  function canCheckout() {
-    if (!shippingMethod) return false;
-    if (shippingMethod === "paczkomat")
-      return paczkomatPoint !== null && Object.values(address).every((v) => v.trim() !== "");
-    return Object.values(address).every((v) => v.trim() !== "");
-  }
-
-  async function handleCheckout() {
-    const errors = validateAddress(address);
-    if (Object.keys(errors).length > 0) {
-      setAddressErrors(errors);
-      return;
-    }
-    setAddressErrors({});
-    setCheckoutLoading(true);
-    setCheckoutError(null);
-    try {
-      const shippingAddress =
-        shippingMethod === "paczkomat"
-          ? { ...paczkomatPoint, ...address }
-          : address;
-      const data = await apiFetch<{ url?: string }>("/create-checkout-session", {
-        method: "POST",
-        body: {
-          // backend prices from the DB — it only needs ids and quantities
-          items: items.map(({ id, quantity }) => ({ id, quantity })),
-          userId,
-          shippingMethod,
-          shippingAddress,
-          ...(note.trim() ? { note: note.trim() } : {}),
-        },
-      });
-      if (!data.url) throw new Error("Nie udało się otworzyć strony płatności");
-      window.location.href = data.url;
-    } catch (err) {
-      setCheckoutError(
-        err instanceof Error && err.message
-          ? err.message
-          : "Nie udało się przejść do płatności. Spróbuj ponownie.",
-      );
-      setCheckoutLoading(false);
-    }
-  }
+  const { subtotal, shippingCost, total, isFreeShipping } = checkoutTotals(items, shippingMethod);
 
   if (items.length === 0) {
     return (
@@ -252,10 +216,7 @@ function Cart() {
                     name="shipping"
                     value={option.id}
                     checked={shippingMethod === option.id}
-                    onChange={() => {
-                      setShippingMethod(option.id);
-                      setPaczkomatPoint(null);
-                    }}
+                    onChange={() => selectShippingMethod(option.id)}
                     className="accent-accent"
                   />
                   <span className="font-dm-sans text-sm">{option.label}</span>
@@ -270,68 +231,14 @@ function Cart() {
           {/* Paczkomat picker */}
           {shippingMethod === "paczkomat" && (
             <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-3">
-                <button
-                  type="button"
-                  onClick={openPaczkomatWidget}
-                  className="font-dm-sans text-sm border border-near-black px-6 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300 self-start"
-                >
-                  {paczkomatPoint ? "Zmień paczkomat" : "Wybierz paczkomat"}
-                </button>
-                {paczkomatPoint && (
-                  <p className="font-dm-sans text-sm text-near-black">
-                    Wybrany: <span className="font-medium">{paczkomatPoint.code}</span>
-                    {paczkomatPoint.name !== paczkomatPoint.code && ` — ${paczkomatPoint.name}`}
-                  </p>
-                )}
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {ADDRESS_FIELDS.map(({ key, label, full, type }) => (
-                  <div key={key} className={full ? "sm:col-span-2" : ""}>
-                    <label className="font-dm-sans text-xs text-secondary-text tracking-widest uppercase block mb-1">
-                      {label}
-                    </label>
-                    <input
-                      type={type ?? "text"}
-                      value={address[key]}
-                      onChange={(e) => {
-                        setAddress((prev) => ({ ...prev, [key]: e.target.value }));
-                        if (addressErrors[key]) setAddressErrors((prev) => ({ ...prev, [key]: undefined }));
-                      }}
-                      className={`w-full border font-dm-sans text-sm text-near-black px-3 py-2 focus:outline-none focus:border-near-black ${addressErrors[key] ? "border-red-400" : "border-borders"}`}
-                    />
-                    {addressErrors[key] && (
-                      <p className="font-dm-sans text-xs text-red-500 mt-1">{addressErrors[key]}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
+              <PaczkomatPicker selectedPoint={paczkomatPoint} onSelect={setPaczkomatPoint} />
+              <AddressForm address={address} fieldErrors={fieldErrors} onFieldChange={setAddressField} />
             </div>
           )}
 
           {/* Courier address form */}
           {(shippingMethod === "inpost_kurier" || shippingMethod === "dpd") && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {ADDRESS_FIELDS.map(({ key, label, full, type }) => (
-                <div key={key} className={full ? "sm:col-span-2" : ""}>
-                  <label className="font-dm-sans text-xs text-secondary-text tracking-widest uppercase block mb-1">
-                    {label}
-                  </label>
-                  <input
-                    type={type ?? "text"}
-                    value={address[key]}
-                    onChange={(e) => {
-                      setAddress((prev) => ({ ...prev, [key]: e.target.value }));
-                      if (addressErrors[key]) setAddressErrors((prev) => ({ ...prev, [key]: undefined }));
-                    }}
-                    className={`w-full border font-dm-sans text-sm text-near-black px-3 py-2 focus:outline-none focus:border-near-black ${addressErrors[key] ? "border-red-400" : "border-borders"}`}
-                  />
-                  {addressErrors[key] && (
-                    <p className="font-dm-sans text-xs text-red-500 mt-1">{addressErrors[key]}</p>
-                  )}
-                </div>
-              ))}
-            </div>
+            <AddressForm address={address} fieldErrors={fieldErrors} onFieldChange={setAddressField} />
           )}
 
           {/* Order note */}
@@ -421,8 +328,8 @@ function Cart() {
             </p>
           )}
           <button
-            onClick={handleCheckout}
-            disabled={checkoutLoading || !canCheckout() || !regulaminAccepted || IS_DEMO_MODE}
+            onClick={submit}
+            disabled={checkoutLoading || !isComplete || !regulaminAccepted || IS_DEMO_MODE}
             className="font-dm-sans text-sm text-near-black border border-near-black px-12 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {IS_DEMO_MODE
