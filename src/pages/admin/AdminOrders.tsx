@@ -1,41 +1,52 @@
-import { useState } from "react";
+import { useMemo, useReducer } from "react";
 import { FULFILLMENT_STATUSES, FULFILLMENT_LABELS_SHORT } from "@sznyt/shared";
+import type { FulfillmentStatus } from "@sznyt/shared";
 import type { AdminOrder } from "../../types";
 import { useAuth } from "@clerk/react";
 import Skeleton from "../../components/Skeleton";
 import { apiFetch } from "../../lib/api";
 import { useResource } from "../../hooks/useResource";
 import { formatOrderDate } from "../../orders/formatting";
+import {
+  createFulfillmentSaver,
+  fulfillmentSaveReducer,
+  initFulfillmentSave,
+  type FulfillmentDraft,
+} from "../../orders/fulfillmentSave";
 
 function FulfillmentCell({ order }: { order: AdminOrder }) {
   const { getToken } = useAuth();
-  const [status, setStatus] = useState(order.fulfillmentStatus);
-  const [tracking, setTracking] = useState(order.trackingNumber ?? "");
-  const [saving, setSaving] = useState(false);
+  const [state, dispatch] = useReducer(
+    fulfillmentSaveReducer,
+    {
+      status: order.fulfillmentStatus as FulfillmentStatus,
+      tracking: order.trackingNumber ?? "",
+    },
+    initFulfillmentSave,
+  );
 
-  async function save(newStatus: string, newTracking: string) {
-    setSaving(true);
-    try {
-      await apiFetch(`/orders/${order.id}/fulfillment`, {
-        method: "PATCH",
-        auth: getToken,
-        body: { fulfillmentStatus: newStatus, trackingNumber: newTracking },
-      });
-    } catch {
-      // non-blocking
-    } finally {
-      setSaving(false);
-    }
-  }
+  const save = useMemo(
+    () =>
+      createFulfillmentSaver(function patchFulfillment(draft: FulfillmentDraft) {
+        return apiFetch(`/orders/${order.id}/fulfillment`, {
+          method: "PATCH",
+          auth: getToken,
+          body: { fulfillmentStatus: draft.status, trackingNumber: draft.tracking },
+        });
+      }, dispatch),
+    [order.id, getToken],
+  );
 
   return (
     <div className="flex flex-col gap-1 min-w-45">
       <select
-        value={status}
-        disabled={saving}
+        value={state.draft.status}
+        disabled={state.saving}
         onChange={(e) => {
-          setStatus(e.target.value);
-          save(e.target.value, tracking);
+          // options are rendered from FULFILLMENT_STATUSES, so the cast is safe
+          const draft = { ...state.draft, status: e.target.value as FulfillmentStatus };
+          dispatch({ type: "edit", draft });
+          save(draft);
         }}
         className="border border-borders text-sm px-2 py-1 bg-white focus:outline-none focus:border-near-black"
       >
@@ -46,11 +57,16 @@ function FulfillmentCell({ order }: { order: AdminOrder }) {
       <input
         type="text"
         placeholder="Nr przesyłki"
-        value={tracking}
-        onChange={(e) => setTracking(e.target.value)}
-        onBlur={() => save(status, tracking)}
+        value={state.draft.tracking}
+        onChange={(e) =>
+          dispatch({ type: "edit", draft: { ...state.draft, tracking: e.target.value } })
+        }
+        onBlur={() => save(state.draft)}
         className="border border-borders text-xs px-2 py-1 focus:outline-none focus:border-near-black placeholder:text-gray-400"
       />
+      {state.error && (
+        <p role="alert" className="text-xs text-red-600">{state.error}</p>
+      )}
     </div>
   );
 }
