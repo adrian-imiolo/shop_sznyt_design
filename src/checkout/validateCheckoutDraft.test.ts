@@ -1,21 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { validateCheckoutDraft } from "./validateCheckoutDraft";
+import { validAddress } from "./testFixtures";
 import type { CheckoutDraft, CourierAddress } from "./types";
 import type { CartItem } from "../types";
 
 const items: CartItem[] = [
   { id: 1, name: "Rama A", price: 200, imageUrl: "/a.jpg", quantity: 1, stock: 5 },
 ];
-
-const validAddress: CourierAddress = {
-  firstName: "Jan",
-  lastName: "Kowalski",
-  email: "jan@example.com",
-  street: "Prosta 1",
-  postalCode: "70-123",
-  city: "Szczecin",
-  phone: "501234567",
-};
 
 const emptyAddress: CourierAddress = {
   firstName: "", lastName: "", email: "", street: "", postalCode: "", city: "", phone: "",

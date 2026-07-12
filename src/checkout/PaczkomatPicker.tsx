@@ -6,6 +6,10 @@ type PaczkomatPickerProps = {
   onSelect: (point: PaczkomatPoint) => void;
 };
 
+// The widget must be init'd once per page load, not once per mount — the
+// picker remounts every time the user toggles away from and back to paczkomat.
+let easyPackInitialized = false;
+
 /**
  * Quarantines the easyPack widget (ADR-0003): init, the modal callback and
  * the viewport sizing workaround live here and nowhere else. Emits the
@@ -13,20 +17,23 @@ type PaczkomatPickerProps = {
  */
 function PaczkomatPicker({ selectedPoint, onSelect }: PaczkomatPickerProps) {
   useEffect(() => {
-    window.easyPack?.init({ defaultLocale: "pl" });
+    if (easyPackInitialized || !window.easyPack) return;
+    window.easyPack.init({ defaultLocale: "pl" });
+    easyPackInitialized = true;
   }, []);
 
   function openWidget() {
     if (!window.easyPack) return;
+    function handlePointSelected(point: EasyPackPoint, modal: EasyPackModal) {
+      modal.closeModal();
+      onSelect({
+        code: point.name,
+        name: point.address?.line1 ?? point.name,
+        city: point.address?.city,
+      });
+    }
     window.easyPack.modalMap(
-      (point, modal) => {
-        modal.closeModal();
-        onSelect({
-          code: point.name,
-          name: point.address?.line1 ?? point.name,
-          city: point.address?.city,
-        });
-      },
+      handlePointSelected,
       // the widget hard-codes its size — cap it so the map fits a 375px phone viewport
       {
         width: Math.min(500, window.innerWidth - 32),

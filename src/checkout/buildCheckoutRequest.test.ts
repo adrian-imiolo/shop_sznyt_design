@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { buildCheckoutRequest } from "./buildCheckoutRequest";
+import { validAddress, paczkomatPoint } from "./testFixtures";
 import type { CheckoutDraft } from "./types";
 
 const draft: CheckoutDraft = {
@@ -8,16 +9,8 @@ const draft: CheckoutDraft = {
     { id: 7, name: "Rama B", price: 150, imageUrl: "/b.jpg", quantity: 1, stock: 2 },
   ],
   shippingMethod: "paczkomat",
-  paczkomatPoint: { code: "KRA010", name: "Wielicka 28", city: "Kraków" },
-  address: {
-    firstName: "Jan",
-    lastName: "Kowalski",
-    email: "jan@example.com",
-    street: "Prosta 1",
-    postalCode: "70-123",
-    city: "Szczecin",
-    phone: "501234567",
-  },
+  paczkomatPoint,
+  address: validAddress,
 };
 
 describe("buildCheckoutRequest", () => {

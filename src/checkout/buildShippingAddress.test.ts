@@ -1,22 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { buildShippingAddress } from "./buildShippingAddress";
-import type { CourierAddress, PaczkomatPoint } from "./types";
-
-const address: CourierAddress = {
-  firstName: "Jan",
-  lastName: "Kowalski",
-  email: "jan@example.com",
-  street: "Prosta 1",
-  postalCode: "70-123",
-  city: "Szczecin",
-  phone: "501234567",
-};
-
-const point: PaczkomatPoint = {
-  code: "KRA010",
-  name: "Wielicka 28",
-  city: "Kraków",
-};
+import { validAddress as address, paczkomatPoint as point } from "./testFixtures";
 
 describe("buildShippingAddress", () => {
   it("courier: carries the seven contact fields and no code/name", () => {
