@@ -408,7 +408,9 @@ app.get("/orders/:id", requireAuth(), async (req, res) => {
     if (!order) return res.status(404).json({ error: "Nie znaleziono zamówienia" });
     // Guest orders (userId=null) are only reachable via /orders/by-session/:sessionId —
     // sequential ids must not expose their shipping data to other signed-in users.
-    if (order.userId !== getAuth(req).userId) {
+    // Admins bypass the ownership check: the admin order-detail page reads any
+    // order (guest ones included) through this endpoint.
+    if (order.userId !== getAuth(req).userId && getRole(req) !== "admin") {
       return res.status(403).json({ error: "Forbidden" });
     }
     res.json(order);
