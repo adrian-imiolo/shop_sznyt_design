@@ -71,22 +71,6 @@ export type CartItem = {
 
 export type { ShippingMethod } from "@sznyt/shared";
 
-export type CourierAddress = {
-  firstName: string;
-  lastName: string;
-  street: string;
-  postalCode: string;
-  city: string;
-  phone: string;
-  email: string;
-};
-
-export type PaczkomatPoint = {
-  code: string;
-  name: string;
-  city?: string;
-};
-
 export type CartContextType = {
   items: CartItem[];
   addItem: (item: Omit<CartItem, "quantity">) => boolean;
