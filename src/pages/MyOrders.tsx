@@ -190,6 +190,13 @@ function MyOrders() {
                   </div>
                 )}
 
+                {/* Order note */}
+                {order.note && (
+                  <p className="font-dm-sans text-sm text-near-black">
+                    <span className="text-secondary-text">Uwagi:</span> {order.note}
+                  </p>
+                )}
+
                 <p className="font-dm-sans text-xs text-secondary-text tracking-widest uppercase group-hover:text-accent transition-colors self-end">
                   Szczegóły →
                 </p>

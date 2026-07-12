@@ -185,6 +185,16 @@ function OrderDetail() {
               <p className="font-dm-sans text-sm text-secondary-text">Brak danych</p>
             )}
           </div>
+
+          {/* Order note */}
+          {order.note && (
+            <div className="sm:col-span-2">
+              <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">
+                Uwagi do zamówienia
+              </p>
+              <p className="font-dm-sans text-sm text-near-black">{order.note}</p>
+            </div>
+          )}
         </div>
 
         {/* Total */}

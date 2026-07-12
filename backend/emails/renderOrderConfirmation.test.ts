@@ -23,6 +23,7 @@ const sampleOrder: OrderEmailData = {
   },
   paymentMethod: "blik",
   customerEmail: "jan@example.com",
+  note: null,
 };
 
 describe("renderOrderConfirmation", () => {
@@ -44,6 +45,30 @@ describe("renderOrderConfirmation", () => {
     expect(output).toContain("00-001 Warszawa");
     expect(output).toContain("InPost Paczkomat");
     expect(output).toContain("BLIK");
+  });
+
+  it.each(["html", "text"] as const)("echoes the customer note in %s", (channel) => {
+    const rendered = renderOrderConfirmation({
+      ...sampleOrder,
+      note: "Proszę zostawić u sąsiada",
+    });
+    const output = channel === "html" ? rendered.html : rendered.text;
+    expect(output).toContain("Uwagi do zamówienia");
+    expect(output).toContain("Proszę zostawić u sąsiada");
+  });
+
+  it("omits the note section when the order has none", () => {
+    expect(html).not.toContain("Uwagi do zamówienia");
+    expect(text).not.toContain("Uwagi do zamówienia");
+  });
+
+  it("escapes HTML in the customer note", () => {
+    const { html: noteHtml } = renderOrderConfirmation({
+      ...sampleOrder,
+      note: `<script>alert("x")</script>`,
+    });
+    expect(noteHtml).not.toContain("<script>");
+    expect(noteHtml).toContain("&lt;script&gt;");
   });
 
   it("escapes HTML in user-controlled fields", () => {

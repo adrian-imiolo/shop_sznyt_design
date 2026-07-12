@@ -22,6 +22,7 @@ export function paidOrderFactsFromSession(
       ? JSON.parse(session.metadata.shippingAddress)
       : null,
     paymentMethod,
+    note: session.metadata?.note || null,
     lineItems: lineItems.map(toPaidLineItem),
   };
 }

@@ -61,6 +61,22 @@ describe("paidOrderFactsFromSession", () => {
     expect(facts.shippingAddress).toBeNull();
   });
 
+  it("passes the customer note through from session metadata", () => {
+    const facts = paidOrderFactsFromSession(
+      fakeSession({
+        metadata: { shippingMethod: "paczkomat", note: "Proszę zostawić u sąsiada" },
+      }),
+      [],
+      null,
+    );
+    expect(facts.note).toBe("Proszę zostawić u sąsiada");
+  });
+
+  it("gives note null when the session has none", () => {
+    const facts = paidOrderFactsFromSession(fakeSession(), [], null);
+    expect(facts.note).toBeNull();
+  });
+
   it("reads productId from metadata for product lines (line-item contract)", () => {
     const facts = paidOrderFactsFromSession(
       fakeSession(),

@@ -26,6 +26,7 @@ export async function notifyOrderPlaced(
     shippingAddress: facts.shippingAddress,
     paymentMethod: facts.paymentMethod,
     customerEmail: facts.customerEmail,
+    note: facts.note,
   };
 
   if (emailData.customerEmail) {

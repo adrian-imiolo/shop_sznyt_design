@@ -114,6 +114,9 @@ function AdminOrders() {
                 {order.shippingAddress
                   ? Object.values(order.shippingAddress).filter(Boolean).join(", ")
                   : "—"}
+                {order.note && (
+                  <p className="mt-1 text-accent font-medium">Uwagi: {order.note}</p>
+                )}
               </td>
               <td className="p-3 whitespace-nowrap">
                 {new Date(order.createdAt).toLocaleDateString("pl-PL")}

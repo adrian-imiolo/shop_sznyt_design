@@ -8,6 +8,7 @@ import {
   SHIPPING_METHOD_LABELS,
   SHIPPING_COSTS,
   FREE_SHIPPING_THRESHOLD,
+  ORDER_NOTE_MAX_LENGTH,
   calcShippingCost,
 } from "@sznyt/shared";
 import { validateAddress } from "../lib/checkout-validation";
@@ -39,6 +40,7 @@ function Cart() {
   const [regulaminAccepted, setRegulaminAccepted] = useState(false);
   const [shippingMethod, setShippingMethod] = useState<ShippingMethod | null>(null);
   const [paczkomatPoint, setPaczkomatPoint] = useState<PaczkomatPoint | null>(null);
+  const [note, setNote] = useState("");
   const [address, setAddress] = useState<CourierAddress>({
     firstName: "", lastName: "", street: "", postalCode: "", city: "", phone: "", email: "",
   });
@@ -100,6 +102,7 @@ function Cart() {
           userId,
           shippingMethod,
           shippingAddress,
+          ...(note.trim() ? { note: note.trim() } : {}),
         },
       });
       if (!data.url) throw new Error("Nie udało się otworzyć strony płatności");
@@ -328,6 +331,30 @@ function Cart() {
                   )}
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Order note */}
+          {shippingMethod && (
+            <div className="mt-6">
+              <label
+                htmlFor="order-note"
+                className="font-dm-sans text-xs text-secondary-text tracking-widest uppercase block mb-1"
+              >
+                Uwagi do zamówienia (opcjonalnie)
+              </label>
+              <textarea
+                id="order-note"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                maxLength={ORDER_NOTE_MAX_LENGTH}
+                rows={3}
+                placeholder="Np. kod do bramy, preferowane godziny doręczenia"
+                className="w-full border border-borders font-dm-sans text-sm text-near-black px-3 py-2 resize-y focus:outline-none focus:border-near-black placeholder:text-gray-400"
+              />
+              <p className="font-dm-sans text-xs text-secondary-text text-right mt-1">
+                {note.length}/{ORDER_NOTE_MAX_LENGTH}
+              </p>
             </div>
           )}
         </div>
