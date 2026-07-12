@@ -13,6 +13,7 @@ import AdminAddProduct from "./pages/admin/AdminAddProduct";
 import AdminEditProduct from "./pages/admin/AdminEditProduct";
 import OrderSuccess from "./pages/OrderSuccess";
 import AdminOrders from "./pages/admin/AdminOrders";
+import AdminOrderDetail from "./pages/admin/AdminOrderDetail";
 import MyOrders from "./pages/MyOrders";
 import OrderDetail from "./pages/OrderDetail";
 import Regulamin from "./pages/Regulamin";
@@ -48,6 +49,7 @@ function App() {
             <Route path="/admin/produkty/nowy" element={<AdminAddProduct />} />
             <Route path="/admin/produkty/:id" element={<AdminEditProduct />} />
             <Route path="/admin/zamowienia" element={<AdminOrders />} />
+            <Route path="/admin/zamowienia/:id" element={<AdminOrderDetail />} />
           </Route>
         </Routes>
       </CartProvider>
