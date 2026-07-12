@@ -5,6 +5,7 @@ import { useAuth } from "@clerk/react";
 import Skeleton from "../../components/Skeleton";
 import { apiFetch } from "../../lib/api";
 import { useResource } from "../../hooks/useResource";
+import { formatOrderDate } from "../../orders/formatting";
 
 function FulfillmentCell({ order }: { order: AdminOrder }) {
   const { getToken } = useAuth();
@@ -119,7 +120,7 @@ function AdminOrders() {
                 )}
               </td>
               <td className="p-3 whitespace-nowrap">
-                {new Date(order.createdAt).toLocaleDateString("pl-PL")}
+                {formatOrderDate(order.createdAt)}
               </td>
             </tr>
           ))}
