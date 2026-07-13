@@ -46,7 +46,7 @@ function Regulamin() {
             <ol className="list-decimal list-outside ml-5 flex flex-col gap-2 text-secondary-text">
               <li>Sprzedawca świadczy za pośrednictwem Sklepu następujące nieodpłatne Usługi elektroniczne: przeglądanie treści Sklepu, konto Klienta, koszyk zakupowy, formularz zamówienia, formularz kontaktowy oraz formularze zwrotu i reklamacji.</li>
               <li>Do korzystania ze Sklepu niezbędne są: urządzenie z dostępem do Internetu oraz aktualna przeglądarka internetowa z włączoną obsługą JavaScript i plików cookies. Do złożenia zamówienia oraz założenia konta niezbędny jest aktywny adres e-mail.</li>
-              <li>Umowa o świadczenie usługi konta Klienta zawierana jest z chwilą rejestracji konta, na czas nieoznaczony. Klient może w każdej chwili, bez podania przyczyny i bez ponoszenia kosztów, rozwiązać tę umowę, żądając usunięcia konta wiadomością na adres kontakt@sznytdesign.pl lub korzystając z ustawień konta. Pozostałe Usługi elektroniczne mają charakter jednorazowy i kończą się z chwilą zaprzestania korzystania z nich.</li>
+              <li>Umowa o świadczenie usługi konta Klienta zawierana jest z chwilą rejestracji konta, na czas nieoznaczony. Klient może w każdej chwili, bez podania przyczyny i bez ponoszenia kosztów, rozwiązać tę umowę, żądając usunięcia konta wiadomością na adres kontakt@sznytdesign.pl. Pozostałe Usługi elektroniczne mają charakter jednorazowy i kończą się z chwilą zaprzestania korzystania z nich.</li>
               <li>Zakazane jest dostarczanie przez Kupującego treści o charakterze bezprawnym.</li>
               <li>Reklamacje dotyczące działania Sklepu i Usług elektronicznych można zgłaszać na adres kontakt@sznytdesign.pl. Sprzedawca rozpatrzy je w terminie 14 dni od otrzymania.</li>
             </ol>
@@ -68,8 +68,8 @@ function Regulamin() {
             <h2 className="font-cormorant text-2xl text-near-black font-light mb-4">§ 5. Ceny, płatności i dokumenty sprzedaży</h2>
             <ol className="list-decimal list-outside ml-5 flex flex-col gap-2 text-secondary-text">
               <li>Ceny produktów podane są w złotych polskich (PLN) i zawierają wszystkie obowiązujące podatki.</li>
-              <li>Sprzedaż prowadzona jest w ramach działalności nierejestrowanej i jest zwolniona z podatku VAT na podstawie art. 113 ust. 1 ustawy z dnia 11 marca 2004 r. o podatku od towarów i usług.</li>
-              <li>Na żądanie Kupującego Sprzedawca wystawia rachunek albo fakturę bez VAT. Żądanie można zgłosić na adres kontakt@sznytdesign.pl w terminie 3 miesięcy, licząc od końca miesiąca, w którym dostarczono Produkt.</li>
+              <li>Sprzedaż prowadzona jest w ramach działalności nierejestrowanej i jest zwolniona z podatku VAT na podstawie art. 113 ustawy z dnia 11 marca 2004 r. o podatku od towarów i usług.</li>
+              <li>Na żądanie Kupującego Sprzedawca wystawia rachunek albo fakturę bez VAT. Żądanie można zgłosić na adres kontakt@sznytdesign.pl; żądanie wystawienia faktury można zgłosić w terminie 3 miesięcy, licząc od końca miesiąca, w którym dostarczono Produkt.</li>
               <li>Płatności obsługiwane są przez serwis <strong className="text-near-black">Stripe</strong>. Dostępne metody płatności: BLIK, Przelewy24, karta płatnicza, szybki przelew bankowy.</li>
               <li>Realizacja zamówienia rozpoczyna się po zaksięgowaniu płatności.</li>
               <li>Sprzedawca zastrzega sobie prawo do zmiany cen produktów, bez wpływu na zamówienia już złożone.</li>
@@ -113,7 +113,7 @@ function Regulamin() {
             <h2 className="font-cormorant text-2xl text-near-black font-light mb-4">§ 8. Reklamacje</h2>
             <ol className="list-decimal list-outside ml-5 flex flex-col gap-2 text-secondary-text">
               <li>Wobec Konsumenta oraz Przedsiębiorcy na prawach konsumenta Sprzedawca odpowiada za <strong className="text-near-black">brak zgodności Produktu z umową</strong> na zasadach określonych w rozdziale 5a ustawy z dnia 30 maja 2014 r. o prawach konsumenta (art. 43a–43g).</li>
-              <li>Sprzedawca odpowiada za brak zgodności Produktu z umową istniejący w chwili jego dostarczenia i ujawniony w ciągu <strong className="text-near-black">2 lat</strong> od tej chwili.</li>
+              <li>Sprzedawca odpowiada za brak zgodności Produktu z umową istniejący w chwili jego dostarczenia i ujawniony w ciągu <strong className="text-near-black">2 lat</strong> od tej chwili. Domniemywa się, że brak zgodności, który ujawnił się przed upływem 2 lat od dostarczenia Produktu, istniał w chwili jego dostarczenia.</li>
               <li>Jeżeli Produkt jest niezgodny z umową, Kupujący, o którym mowa w pkt 1, może żądać jego <strong className="text-near-black">naprawy lub wymiany</strong>. Sprzedawca może dokonać wymiany, gdy Kupujący żąda naprawy (lub odwrotnie), jeżeli wybrany sposób jest niemożliwy albo wymagałby nadmiernych kosztów. Koszty naprawy lub wymiany, w tym koszty odesłania Produktu, ponosi Sprzedawca.</li>
               <li>Kupujący może złożyć oświadczenie o <strong className="text-near-black">obniżeniu ceny albo odstąpieniu od umowy</strong> m.in. gdy naprawa lub wymiana są niemożliwe, nie zostały dokonane lub brak zgodności występuje nadal. Odstąpienie od umowy nie przysługuje, jeżeli brak zgodności jest nieistotny.</li>
               <li>Reklamację można zgłosić na adres <strong className="text-near-black">kontakt@sznytdesign.pl</strong> lub przez formularz na stronie <a href="/zwroty" className="text-accent hover:underline">sznytdesign.pl/zwroty</a>. Dołączenie zdjęć ułatwia i przyspiesza rozpatrzenie, ale nie jest warunkiem przyjęcia ani rozpatrzenia reklamacji.</li>
@@ -140,7 +140,7 @@ function Regulamin() {
             <h2 className="font-cormorant text-2xl text-near-black font-light mb-4">§ 11. Postanowienia końcowe</h2>
             <ol className="list-decimal list-outside ml-5 flex flex-col gap-2 text-secondary-text">
               <li>W sprawach nieuregulowanych niniejszym Regulaminem zastosowanie mają przepisy prawa polskiego, w szczególności Kodeksu cywilnego, ustawy o prawach konsumenta oraz ustawy o świadczeniu usług drogą elektroniczną.</li>
-              <li>Sprzedawca może zmienić Regulamin z ważnych przyczyn. Zmiany nie dotyczą zamówień złożonych przed ich wejściem w życie. O zmianie Regulaminu Klienci posiadający konto zostaną poinformowani e-mailem.</li>
+              <li>Sprzedawca może zmienić Regulamin z ważnych przyczyn. Zmiany nie dotyczą zamówień złożonych przed ich wejściem w życie i są publikowane na tej stronie z podaniem daty, od której obowiązują.</li>
               <li>Regulamin dostępny jest w każdym czasie na stronie sznytdesign.pl/regulamin, w sposób umożliwiający jego pobranie i utrwalenie.</li>
             </ol>
           </section>
