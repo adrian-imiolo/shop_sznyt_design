@@ -14,17 +14,19 @@ function frame(overrides: Partial<CartItem> = {}): CartItem {
   };
 }
 
+function product(
+  overrides: Partial<Omit<CartItem, "quantity">> = {},
+): Omit<CartItem, "quantity"> {
+  const item: Partial<CartItem> = frame(overrides);
+  delete item.quantity;
+  return item as Omit<CartItem, "quantity">;
+}
+
 describe("addToCart", () => {
   it("increments quantity of an existing line instead of appending a duplicate", () => {
     const cart = [frame({ quantity: 1 })];
 
-    const result = addToCart(cart, {
-      id: 2,
-      name: "Ramka Corner Cut",
-      price: 249,
-      imageUrl: "/img/corner-cut.jpg",
-      stock: 5,
-    });
+    const result = addToCart(cart, product());
 
     expect(result).toHaveLength(1);
     expect(result[0].quantity).toBe(2);
@@ -33,42 +35,28 @@ describe("addToCart", () => {
   it("appends a new line with quantity 1 for a product not in the cart", () => {
     const cart = [frame({ id: 1, name: "Ramka Oak" })];
 
-    const result = addToCart(cart, {
-      id: 2,
-      name: "Ramka Corner Cut",
-      price: 249,
-      imageUrl: "/img/corner-cut.jpg",
-      stock: 5,
-    });
+    const result = addToCart(cart, product());
 
     expect(result).toHaveLength(2);
     expect(result[1]).toEqual(frame({ quantity: 1 }));
   });
 
-  it("does not increment past available stock", () => {
+  it("does not increment past available stock — returns the input array untouched", () => {
     const cart = [frame({ quantity: 5, stock: 5 })];
 
-    const result = addToCart(cart, {
-      id: 2,
-      name: "Ramka Corner Cut",
-      price: 249,
-      imageUrl: "/img/corner-cut.jpg",
-      stock: 5,
-    });
+    const result = addToCart(cart, product());
 
-    expect(result).toEqual(cart);
+    // same reference on no-op is contract: CartProvider uses it to decide
+    // whether the add succeeded
+    expect(result).toBe(cart);
   });
 
-  it("does not add a product with zero stock", () => {
-    const result = addToCart([], {
-      id: 2,
-      name: "Ramka Corner Cut",
-      price: 249,
-      imageUrl: "/img/corner-cut.jpg",
-      stock: 0,
-    });
+  it("does not add a product with zero stock — returns the input array untouched", () => {
+    const cart: CartItem[] = [];
 
-    expect(result).toEqual([]);
+    const result = addToCart(cart, product({ stock: 0 }));
+
+    expect(result).toBe(cart);
   });
 });
 
