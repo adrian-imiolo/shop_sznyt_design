@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import type { CartItem } from "../types";
 import { CartContext } from "./cart-context";
+import { addToCart, mergeDuplicateItems } from "../cart/cartItems";
 import { useCookieConsent } from "../hooks/useCookieConsent";
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
@@ -9,7 +10,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (localStorage.getItem("cookie_consent") === "accepted") {
       try {
         const stored = localStorage.getItem("cart");
-        return stored ? JSON.parse(stored) : [];
+        // merge, not just parse — carts saved before #70 may hold duplicate lines
+        return stored ? mergeDuplicateItems(JSON.parse(stored)) : [];
       } catch {
         return [];
       }
@@ -26,21 +28,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [items, consent]);
 
   function addItem(newItem: Omit<CartItem, "quantity">) {
-    const existing = items.find((i) => i.id === newItem.id);
-    if (existing && existing.quantity >= existing.stock) return false;
-    if (newItem.stock === 0) return false;
-    setItems((prev) => {
-      if (existing) {
-        return prev.map((i) =>
-          i.id === newItem.id && i.quantity < i.stock
-            ? { ...i, quantity: i.quantity + 1 }
-            : i,
-        );
-      }
-      if (newItem.stock === 0) return prev;
-      return [...prev, { ...newItem, quantity: 1 }];
-    });
-    return true;
+    // merge decision must run against prev, not the render closure — two rapid
+    // clicks before a re-render would otherwise both append a fresh line (#70).
+    // The returned boolean drives toast feedback only; it reflects render-time
+    // state (addToCart returns the same reference when nothing would change).
+    setItems((prev) => addToCart(prev, newItem));
+    return addToCart(items, newItem) !== items;
   }
 
   function removeItem(id: number) {
