@@ -1,5 +1,10 @@
-import { describe, it, expect } from "vitest";
-import { parseStoredDraft, serializeStoredDraft } from "./checkoutDraftStorage";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import {
+  parseStoredDraft,
+  serializeStoredDraft,
+  loadCheckoutDraft,
+  saveCheckoutDraft,
+} from "./checkoutDraftStorage";
 import { validAddress } from "./testFixtures";
 import type { StoredCheckoutDraft } from "./checkoutDraftStorage";
 
@@ -80,5 +85,41 @@ describe("parseStoredDraft", () => {
   it("accepts a point without the optional city", () => {
     const draft = { ...fullDraft, paczkomatPoint: { code: "KRA01M", name: "Paczkomat KRA01M" } };
     expect(parseStoredDraft(JSON.stringify(draft))).toEqual(draft);
+  });
+});
+
+/** Minimal in-memory Storage — the root suite runs without a DOM. */
+function fakeStorage(initial: Record<string, string> = {}) {
+  const data = new Map(Object.entries(initial));
+  return {
+    getItem: (key: string) => data.get(key) ?? null,
+    setItem: (key: string, value: string) => void data.set(key, value),
+    removeItem: (key: string) => void data.delete(key),
+  };
+}
+
+describe("loadCheckoutDraft / saveCheckoutDraft", () => {
+  beforeEach(() => {
+    vi.stubGlobal("sessionStorage", fakeStorage());
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("persists unconditionally — no consent interaction required", () => {
+    saveCheckoutDraft(fullDraft);
+    expect(loadCheckoutDraft()).toEqual(fullDraft);
+  });
+
+  it("persists despite a stale declined cookie_consent entry", () => {
+    vi.stubGlobal("localStorage", fakeStorage({ cookie_consent: "declined" }));
+    saveCheckoutDraft(fullDraft);
+    expect(loadCheckoutDraft()).toEqual(fullDraft);
+  });
+
+  it("returns null when storage is unavailable", () => {
+    vi.unstubAllGlobals();
+    expect(loadCheckoutDraft()).toBeNull();
   });
 });
