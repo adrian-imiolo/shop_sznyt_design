@@ -26,7 +26,7 @@ const BROWSER_STORAGE: BrowserStorageRow[] = [
     item: "Sesja użytkownika (__session, __client_uat)",
     mechanism: "cookies (Clerk)",
     purpose: "Utrzymanie zalogowania na koncie Klienta. Ustawiane dopiero, gdy korzystasz z logowania lub rejestracji.",
-    lifetime: "Do wylogowania lub wygaśnięcia sesji — domyślnie 7 dni od ostatniej aktywności; token sesji odświeżany jest automatycznie co ok. 60 sekund.",
+    lifetime: "Do wylogowania lub wygaśnięcia sesji — domyślnie 7 dni od ostatniej aktywności, zgodnie z ustawieniami Clerk.",
   },
 ];
 
