@@ -12,6 +12,22 @@ export type BuildCheckoutResult =
   | { ok: false; status: 400 | 409; error: string };
 
 /**
+ * Stripe requires image URLs to be absolute and publicly reachable; the DB
+ * stores deployment-agnostic relative paths, so relative urls get the
+ * frontend origin prefixed here. Without a frontendUrl the image is dropped —
+ * a missing thumbnail beats a rejected checkout session.
+ */
+function toStripeImageUrl(
+  imageUrl: string | null,
+  frontendUrl: string | undefined,
+): string | null {
+  if (!imageUrl) return null;
+  if (!imageUrl.startsWith("/")) return imageUrl;
+  if (!frontendUrl) return null;
+  return `${frontendUrl.replace(/\/$/, "")}${imageUrl}`;
+}
+
+/**
  * Server-authoritative checkout pricing: prices, names and images come from
  * the DB — the client only chooses ids and quantities. Each product line is
  * stamped with metadata.productId (the line-item contract); the shipping
@@ -21,6 +37,7 @@ export function buildCheckoutLineItems(
   items: unknown,
   products: CheckoutProduct[],
   shippingMethod: unknown,
+  frontendUrl?: string,
 ): BuildCheckoutResult {
   if (typeof shippingMethod !== "string" || !SHIPPING_COSTS[shippingMethod]) {
     return { ok: false, status: 400, error: "Wybierz metodę dostawy" };
@@ -57,18 +74,21 @@ export function buildCheckoutLineItems(
     subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COSTS[shippingMethod];
 
   const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] =
-    orderLines.map(({ product, quantity }) => ({
-      price_data: {
-        currency: "pln",
-        product_data: {
-          name: product.name,
-          ...(product.imageUrl ? { images: [product.imageUrl] } : {}),
-          metadata: { productId: String(product.id) },
+    orderLines.map(({ product, quantity }) => {
+      const imageUrl = toStripeImageUrl(product.imageUrl, frontendUrl);
+      return {
+        price_data: {
+          currency: "pln",
+          product_data: {
+            name: product.name,
+            ...(imageUrl ? { images: [imageUrl] } : {}),
+            metadata: { productId: String(product.id) },
+          },
+          unit_amount: Math.round(product.price * 100),
         },
-        unit_amount: Math.round(product.price * 100),
-      },
-      quantity,
-    }));
+        quantity,
+      };
+    });
 
   if (shippingCost > 0) {
     lineItems.push({
