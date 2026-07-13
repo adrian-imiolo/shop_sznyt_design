@@ -142,7 +142,7 @@ stripe listen --forward-to localhost:3000/webhook
 
 ### Demo mode
 
-Set `VITE_DEMO_MODE=true` (frontend) and omit `STRIPE_SECRET_KEY` (backend) to run a read-only demo. A banner appears, the Pay button is disabled, and checkout endpoints return 503.
+Set `VITE_DEMO_MODE=true` (frontend) to show the demo banner and test-card instructions. The backend runs the real checkout pipeline against Stripe **test mode** (`sk_test_...` keys) — full purchase with card `4242 4242 4242 4242`, webhook-recorded order, atomic stock decrement. With `SMTP_HOST` unset, emails are skipped and logged. Without `STRIPE_SECRET_KEY`, checkout endpoints return 503. Deploy runbook: `docs/DEPLOY-DEMO.md`.
 
 ## Project layout
 

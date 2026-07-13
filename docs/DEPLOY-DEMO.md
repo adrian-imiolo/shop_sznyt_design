@@ -1,8 +1,8 @@
-# Deploy the read-only demo
+# Deploy the demo
 
-One-shot guide for putting Sznyt Design on a free `.vercel.app` URL for portfolio use. Total cost: **zero**. Total time: **~45 minutes**.
+One-shot guide for putting Sznyt Design on a free `.vercel.app` URL for portfolio use. Checkout runs the **real Stripe pipeline in test mode** — a recruiter can complete a purchase with card `4242 4242 4242 4242` and no real money moves. Total cost: **zero**. Total time: **~60 minutes**.
 
-Stack: **Vercel** (frontend) + **Render** (backend) + **Neon** (Postgres) + **Clerk dev** (auth).
+Stack: **Vercel** (frontend) + **Render** (backend) + **Neon** (Postgres) + **Clerk dev** (auth) + **Stripe test mode** (payments).
 
 ---
 
@@ -47,9 +47,11 @@ Stack: **Vercel** (frontend) + **Render** (backend) + **Neon** (Postgres) + **Cl
    | `DATABASE_URL` | (paste from Neon) |
    | `CLERK_PUBLISHABLE_KEY` | (paste from Clerk — same `pk_test_...` you'll use on Vercel) |
    | `CLERK_SECRET_KEY` | (paste from Clerk — `sk_test_...`) |
-   | `FRONTEND_URL` | leave empty for now (set in step 6) |
+   | `FRONTEND_URL` | leave empty for now (set in step 5) |
 
    > `CLERK_PUBLISHABLE_KEY` is required by `@clerk/express` middleware even though it's a "public" key. Without it, every request hits a `Publishable key is missing` 500.
+
+   > **Don't set the Stripe vars yet.** The backend exits at boot if `STRIPE_SECRET_KEY` is set without `STRIPE_WEBHOOK_SECRET` + `FRONTEND_URL`, and the webhook secret only exists after you register the endpoint (step 6) — which needs this service's URL. Until then the backend runs with checkout returning 503, which is fine for wiring up the rest.
 
 5. **Create Web Service**. Wait ~3–5 min for the first build.
 6. When the status turns green, copy the public URL (e.g. `https://sznyt-design-backend.onrender.com`). You'll paste it as `VITE_API_URL` in Vercel.
@@ -71,15 +73,15 @@ Render's free tier doesn't include Shell access. Seed via **Neon's SQL Editor** 
     'Dwa kolory, jeden charakter.',
     'Rama wykonana z litego dębu, w której naprzemienne kwadraty jasnego i ciemnego drewna tworzą wzór szachownicy. Każdy element precyzyjnie dopasowany — kontrast kolorów nadaje jej wyrazisty, a zarazem ponadczasowy charakter.',
     299,
-    'https://placehold.co/800x1000/2a2420/FAFAF8?text=Studio',
-    'https://placehold.co/800x1000/4a3f35/FAFAF8?text=Lifestyle',
+    '/images/szachownica-studio.png',
+    '/images/szachownica-lifestyle.png',
     10, 0, NOW()),
    ('Ramka Corner Cut',
     'Minimalizm w każdym detalu.',
     'Dębowa rama z charakterystycznymi nacięciami na narożnikach, w które wpuszczono kontrastowy materiał. Połączenie drewna i wyraźnego detalu na rogach tworzy subtelny, nowoczesny akcent bez zbędnej ozdobności.',
     349,
-    'https://placehold.co/800x1000/1a1a1a/FAFAF8?text=Studio',
-    'https://placehold.co/800x1000/2d2d2d/FAFAF8?text=Lifestyle',
+    '/images/corner-cut-studio.png',
+    '/images/corner-cut-lifestyle.png',
     8, 0, NOW());
    ```
 
@@ -107,7 +109,7 @@ Render's free tier doesn't include Shell access. Seed via **Neon's SQL Editor** 
 
 ---
 
-## 5. Backend: finish the loop
+## 5. Backend: set FRONTEND_URL
 
 Back in Render → Service → **Environment**, set:
 
@@ -117,24 +119,50 @@ FRONTEND_URL=https://sznyt-design.vercel.app
 
 Save — Render redeploys automatically.
 
-`FRONTEND_URL` is only used for Stripe `success_url`; demo mode doesn't hit it, but setting it keeps the env complete.
+`FRONTEND_URL` is used for the Stripe `success_url`/`cancel_url` and to prefix relative product image URLs so Stripe checkout can show thumbnails. Checkout 500s without it.
 
 ---
 
-## 6. Smoke-test the demo
+## 6. Stripe — test-mode keys + webhook
+
+All of this happens in **test mode** — check the Stripe dashboard's test-mode toggle (top right) before copying anything.
+
+1. Go to <https://dashboard.stripe.com>, sign in.
+2. **Developers → API keys** → copy the **Secret key** (`sk_test_...`).
+3. **Developers → Webhooks** → **+ Add endpoint**:
+   - **Endpoint URL:** `https://sznyt-design-backend.onrender.com/webhook` (your Render URL + `/webhook`)
+   - **Events:** select `checkout.session.completed` only
+4. Open the new endpoint and reveal the **Signing secret** (`whsec_...`).
+5. In Render → Service → **Environment**, add:
+
+   | Key | Value |
+   |---|---|
+   | `STRIPE_SECRET_KEY` | `sk_test_...` |
+   | `STRIPE_WEBHOOK_SECRET` | `whsec_...` |
+
+   Save — Render redeploys. The boot log should no longer say `[DEMO MODE] ... Stripe: off`.
+
+> **Never paste live keys here.** The demo must only ever see `sk_test_...` / `whsec_...` from test mode. Leave `SMTP_*` unset — the backend logs `[demo] sendEmail skipped` instead of sending order emails.
+
+---
+
+## 7. Smoke-test the demo
 
 Open the Vercel URL and confirm:
 
-- [ ] Black banner at top: _"Portfolio demo — checkout and admin actions are disabled."_
-- [ ] Two sample products on `/sklep`
+- [ ] Black banner at top: _"Portfolio demo — pay with Stripe test card 4242 4242 4242 4242 …"_
+- [ ] Two sample products on `/sklep`, with images (served from `/images/...`)
 - [ ] Adding to cart works
-- [ ] On `/koszyk`, the Pay button shows _"Demo — checkout disabled"_ and is disabled
-- [ ] `/kontakt` submits without error (backend logs `[demo] sendMail skipped`)
+- [ ] **Full test purchase:** on `/koszyk` fill the address, accept the regulamin, click **Przejdź do płatności** — the Stripe page shows the product thumbnail; pay with `4242 4242 4242 4242`, any future date, any CVC → you land on `/sukces` with the order summary
+- [ ] Render logs show the webhook processed the order and `[demo] sendEmail skipped — ...` (no email sent)
+- [ ] In Neon SQL Editor: `SELECT id, status, total FROM "Order" ORDER BY id DESC LIMIT 1;` → status `paid`, and `SELECT name, stock FROM "Product";` → stock decremented by the purchased quantity
+- [ ] In Stripe dashboard → Webhooks → the endpoint, **Resend** the `checkout.session.completed` event → returns 200 and no duplicate order appears (idempotency)
+- [ ] `/kontakt` submits without error (backend logs `[demo] sendEmail skipped`)
 - [ ] `/admin` is gated by Clerk — sign up with email, you'll land on `/admin` with no admin permissions (intentional — admin role isn't granted)
 
 ---
 
-## 7. Update README + make the repo public
+## 8. Update README + make the repo public
 
 ```bash
 # In your local clone:
@@ -161,6 +189,10 @@ Then on GitHub:
 | Frontend loads but products list is empty | Database not seeded | Run `npm run seed` in Render shell |
 | Frontend loads but API calls 404 | `VITE_API_URL` missing or wrong | Check Vercel env vars; redeploy after editing |
 | Frontend loads but Clerk fails to load | `VITE_CLERK_PUBLISHABLE_KEY` missing | Same as above |
+| Pay button works but backend returns 503 | `STRIPE_SECRET_KEY` not set | Complete step 6, redeploy |
+| Backend crash-loops after adding Stripe key | `STRIPE_WEBHOOK_SECRET` or `FRONTEND_URL` missing | Boot check requires all three together — set them, redeploy |
+| Payment succeeds but no order in DB | Webhook signature mismatch or wrong endpoint URL | Check Render logs for `Webhook error`; re-copy `whsec_...` from the exact endpoint, confirm the URL ends with `/webhook` |
+| Stripe checkout page shows no product image | `FRONTEND_URL` wrong or image path 404s | Open `<FRONTEND_URL>/images/szachownica-studio.png` in a browser — must resolve publicly |
 | First request after some idle time hangs | Render free-tier cold start | Wait ~30 s; the service is waking. No fix on free tier |
 | Site appears in Google search | `noindex` meta missing | Check `index.html` — should have `<meta name="robots" content="noindex, nofollow" />` |
 
