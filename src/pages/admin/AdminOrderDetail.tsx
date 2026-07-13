@@ -7,7 +7,12 @@ import {
 import type { AdminOrderPayload, OrderItem } from "../../types";
 import Skeleton from "../../components/Skeleton";
 import { useResource } from "../../hooks/useResource";
-import { formatOrderDate, formatPaczkomatLine } from "../../orders/formatting";
+import {
+  formatOrderDate,
+  formatPaczkomatLine,
+  formatShippingCost,
+  orderShippingCost,
+} from "../../orders/formatting";
 import FulfillmentControls from "../../orders/FulfillmentControls";
 import { ItemThumb, DELETED_PRODUCT_NAME } from "../../orders/OrderCard";
 
@@ -96,6 +101,12 @@ function AdminOrderDetail() {
             <LineItemRow key={item.id} item={item} />
           ))}
         </div>
+        {order.shippingMethod && (
+          <div className="flex justify-between pt-3">
+            <span className="text-gray-500">Dostawa</span>
+            <span>{formatShippingCost(orderShippingCost(order))}</span>
+          </div>
+        )}
         <div className="flex justify-between py-3 font-medium">
           <span>Suma</span>
           <span>{order.total} PLN</span>
