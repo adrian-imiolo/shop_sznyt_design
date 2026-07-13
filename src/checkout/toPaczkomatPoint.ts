@@ -10,9 +10,10 @@ import type { PaczkomatPoint } from "./types";
 export function toPaczkomatPoint(point: EasyPackPoint): PaczkomatPoint {
   const street = point.address?.line1;
   const city = point.address?.city;
+  if (!street) return { code: point.name, name: point.name, city };
   return {
     code: point.name,
-    name: street ? (city ? `${street}, ${city}` : street) : point.name,
+    name: city ? `${street}, ${city}` : street,
     city,
   };
 }

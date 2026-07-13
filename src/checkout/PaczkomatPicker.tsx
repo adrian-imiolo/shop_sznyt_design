@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { toPaczkomatPoint } from "./toPaczkomatPoint";
 import type { PaczkomatPoint } from "./types";
 
@@ -47,8 +47,17 @@ function PaczkomatPicker({
     );
   }, [onSelect]);
 
+  // Ref-guarded because the parent's acknowledgement lands a render later:
+  // StrictMode's doubled effect (and any re-render in between) would other-
+  // wise see the still-true request and stack a second modal.
+  const openRequestHandled = useRef(false);
   useEffect(() => {
-    if (!openRequested) return;
+    if (!openRequested) {
+      openRequestHandled.current = false;
+      return;
+    }
+    if (openRequestHandled.current) return;
+    openRequestHandled.current = true;
     onOpenRequestHandled();
     openWidget();
   }, [openRequested, onOpenRequestHandled, openWidget]);
