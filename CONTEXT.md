@@ -12,6 +12,7 @@ Premium e-commerce shop selling designer wooden picture frames at `sznytdesign.p
 **Działalność nierejestrowana (DN)** — unregistered business activity under Polish law. Allows operating commercially below a per-quarter revenue cap without formal business registration.
 
 - **Quarterly revenue cap (2026):** 10,813.50 PLN. Crossing it triggers mandatory business registration within 7 days. Cap value is set by law and changes year over year — bumped manually in code each tax year.
+- **Refunded (returned) orders don't count toward the cap** — *przychód należny* excludes the value of returned goods (art. 5 ust. 6 Prawa przedsiębiorców). The admin banner still counts them (it only sums `paid` orders), so it can only over-count — subtract refunds by hand when near the cap. Procedure: `docs/runbooks/refunds.md`.
 - **Pre-registration constraints:** can only issue `rachunek` (informal receipt), not `faktura VAT`. No NIP collection at checkout. No VAT in pricing language.
 - **Statutory 14-day refund right** for distance-purchase consumers — non-negotiable, must be reflected in regulamin.
 
