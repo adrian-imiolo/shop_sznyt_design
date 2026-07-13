@@ -7,7 +7,7 @@ const FRAME: CheckoutProduct = {
   name: "Rama Dębowa 30×40",
   price: 149.99,
   stock: 5,
-  imageUrl: "https://example.com/rama.jpg",
+  imageUrl: "/images/rama.jpg",
 };
 
 const SMALL_FRAME: CheckoutProduct = {
@@ -65,6 +65,7 @@ describe("buildCheckoutLineItems", () => {
       [{ id: 7, quantity: 1 }, { id: 8, quantity: 1 }],
       [FRAME, SMALL_FRAME],
       "paczkomat",
+      "https://sznyt-design.vercel.app",
     );
     if (!result.ok) throw new Error(`expected ok, got ${result.error}`);
 
@@ -75,7 +76,9 @@ describe("buildCheckoutLineItems", () => {
     const [frame, smallFrame, shipping] = result.lineItems;
     expect(frame.price_data?.product_data?.metadata).toEqual({ productId: "7" });
     expect(frame.price_data?.unit_amount).toBe(14999); // grosze, rounded
-    expect(frame.price_data?.product_data?.images).toEqual(["https://example.com/rama.jpg"]);
+    expect(frame.price_data?.product_data?.images).toEqual([
+      "https://sznyt-design.vercel.app/images/rama.jpg",
+    ]);
     expect(smallFrame.price_data?.product_data?.images).toBeUndefined();
 
     // The line-item contract: the shipping line has no productId, so order
@@ -93,6 +96,43 @@ describe("buildCheckoutLineItems", () => {
     expect(result.subtotal).toBeCloseTo(449.97);
     expect(result.shippingCost).toBe(0);
     expect(result.lineItems).toHaveLength(1);
+  });
+
+  it("passes an already-absolute imageUrl to Stripe unchanged", () => {
+    const absolute: CheckoutProduct = {
+      ...FRAME,
+      imageUrl: "https://placehold.co/800x1000?text=Studio",
+    };
+    const result = buildCheckoutLineItems(
+      [{ id: 7, quantity: 1 }],
+      [absolute],
+      "dpd",
+      "https://sznyt-design.vercel.app",
+    );
+    if (!result.ok) throw new Error(`expected ok, got ${result.error}`);
+    expect(result.lineItems[0].price_data?.product_data?.images).toEqual([
+      "https://placehold.co/800x1000?text=Studio",
+    ]);
+  });
+
+  it("prefixes without doubling the slash when frontendUrl has a trailing slash", () => {
+    const result = buildCheckoutLineItems(
+      [{ id: 7, quantity: 1 }],
+      [FRAME],
+      "dpd",
+      "https://sznyt-design.vercel.app/",
+    );
+    if (!result.ok) throw new Error(`expected ok, got ${result.error}`);
+    expect(result.lineItems[0].price_data?.product_data?.images).toEqual([
+      "https://sznyt-design.vercel.app/images/rama.jpg",
+    ]);
+  });
+
+  it("omits the image when the url is relative and no frontendUrl is given", () => {
+    // Stripe rejects non-absolute image URLs — better no thumbnail than a failed session
+    const result = buildCheckoutLineItems([{ id: 7, quantity: 1 }], [FRAME], "dpd");
+    if (!result.ok) throw new Error(`expected ok, got ${result.error}`);
+    expect(result.lineItems[0].price_data?.product_data?.images).toBeUndefined();
   });
 
   it("charges shipping just below the threshold", () => {

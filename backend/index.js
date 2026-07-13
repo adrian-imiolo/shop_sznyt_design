@@ -284,7 +284,12 @@ app.post("/create-checkout-session", checkoutLimiter, async (req, res) => {
       ? await prisma.product.findMany({ where: { id: { in: ids } } })
       : [];
 
-    const result = buildCheckoutLineItems(items, products, shippingMethod);
+    const result = buildCheckoutLineItems(
+      items,
+      products,
+      shippingMethod,
+      process.env.FRONTEND_URL,
+    );
     if (!result.ok) {
       return res.status(result.status).json({ error: result.error });
     }
