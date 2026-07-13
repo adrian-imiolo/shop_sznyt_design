@@ -55,7 +55,7 @@ const faqs = [
       },
       {
         q: "Co zrobić, jeśli paczka przyszła uszkodzona?",
-        a: <>Prosimy o: sprawdzenie paczki przy odbiorze, wykonanie dokumentacji zdjęciowej uszkodzenia oraz sporządzenie protokołu szkody w obecności kuriera lub pracownika punktu odbioru (jeśli to możliwe). Następnie wypełnij <Link to="/zwroty" className="text-accent hover:underline">formularz reklamacyjny</Link> lub napisz na kontakt@sznytdesign.pl — rozpatrzymy zgłoszenie w ciągu 14 dni roboczych.</>,
+        a: <>Prosimy o: sprawdzenie paczki przy odbiorze, wykonanie dokumentacji zdjęciowej uszkodzenia oraz sporządzenie protokołu szkody w obecności kuriera lub pracownika punktu odbioru (jeśli to możliwe). Następnie wypełnij <Link to="/zwroty" className="text-accent hover:underline">formularz reklamacyjny</Link> lub napisz na kontakt@sznytdesign.pl — rozpatrzymy zgłoszenie w ciągu 14 dni. Zdjęcia i protokół ułatwiają sprawę, ale nie są warunkiem rozpatrzenia reklamacji.</>,
       },
     ],
   },
@@ -64,7 +64,7 @@ const faqs = [
     items: [
       {
         q: "Czy mogę zwrócić produkt?",
-        a: "Tak. Jako konsument masz prawo do odstąpienia od umowy bez podania przyczyny w ciągu 14 dni od otrzymania produktu. Produkt powinien być nieużywany i nieuszkodzony (może wykazywać ślady normalnego sprawdzenia).",
+        a: "Tak. Jako konsument masz prawo do odstąpienia od umowy bez podania przyczyny w ciągu 14 dni od otrzymania produktu. Możesz sprawdzić produkt tak, jak zrobiłbyś to w sklepie stacjonarnym — odpowiadasz jedynie za zmniejszenie jego wartości wykraczające poza takie sprawdzenie.",
       },
       {
         q: "Kto pokrywa koszt zwrotu?",
@@ -72,11 +72,11 @@ const faqs = [
       },
       {
         q: "Ile trwa zwrot pieniędzy?",
-        a: "Zwrot środków następuje w ciągu 14 dni od momentu otrzymania zwróconego produktu przez Sprzedawcę — tym samym sposobem płatności, którego użył Klient.",
+        a: "Zwrot środków następuje w ciągu 14 dni od otrzymania oświadczenia o odstąpieniu — tym samym sposobem płatności, którego użył Klient. Możemy wstrzymać się ze zwrotem do czasu otrzymania produktu z powrotem lub dowodu jego odesłania.",
       },
       {
         q: "Jak złożyć reklamację?",
-        a: <>Wypełnij <Link to="/zwroty" className="text-accent hover:underline">formularz reklamacyjny</Link> lub wyślij e-mail na kontakt@sznytdesign.pl, opisując problem i załączając zdjęcia. Reklamacja zostanie rozpatrzona w ciągu 14 dni roboczych od zgłoszenia.</>,
+        a: <>Wypełnij <Link to="/zwroty" className="text-accent hover:underline">formularz reklamacyjny</Link> lub wyślij e-mail na kontakt@sznytdesign.pl, opisując problem. Zdjęcia przyspieszają rozpatrzenie, ale nie są wymagane. Reklamacja zostanie rozpatrzona w ciągu 14 dni od zgłoszenia.</>,
       },
     ],
   },

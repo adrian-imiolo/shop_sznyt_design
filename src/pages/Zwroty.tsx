@@ -95,7 +95,7 @@ function ReklamacjaForm() {
     return (
       <div className="flex flex-col gap-4 py-8">
         <p className="font-cormorant text-2xl text-near-black font-light">Reklamacja przyjęta.</p>
-        <p className="font-dm-sans text-sm text-secondary-text">Otrzymaliśmy Twoje zgłoszenie. Odezwiemy się w ciągu 14 dni roboczych — w odpowiedzi poprosimy o przesłanie zdjęć dokumentujących problem.</p>
+        <p className="font-dm-sans text-sm text-secondary-text">Otrzymaliśmy Twoje zgłoszenie. Odpowiemy w ciągu 14 dni. Jeśli zdjęcia ułatwią rozpatrzenie sprawy, poprosimy o nie w odpowiedzi — nie są jednak warunkiem rozpatrzenia reklamacji.</p>
       </div>
     );
 
@@ -103,7 +103,7 @@ function ReklamacjaForm() {
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
       <input {...honeypotProps} />
       <p className="font-dm-sans text-sm text-secondary-text leading-relaxed">
-        Opisz problem i wyślij formularz. W odpowiedzi poprosimy o przesłanie dokumentacji zdjęciowej. Reklamację rozpatrzymy w ciągu 14 dni roboczych.
+        Opisz problem i wyślij formularz. Zdjęcia przyspieszają rozpatrzenie — możesz je dosłać w odpowiedzi na e-mail potwierdzający. Reklamację rozpatrzymy w ciągu 14 dni.
       </p>
       {[
         { label: "Numer zamówienia", value: orderNumber, set: setOrderNumber, type: "text", placeholder: "np. 42" },
@@ -129,7 +129,7 @@ function ReklamacjaForm() {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           required
-          placeholder="Opisz dokładnie, co się stało. Zdjęcia wyślij w odpowiedzi na e-mail potwierdzający."
+          placeholder="Opisz dokładnie, co się stało. Zdjęcia możesz dosłać w odpowiedzi na e-mail potwierdzający."
           className="font-dm-sans text-base sm:text-sm text-near-black bg-transparent border-b border-borders py-2 outline-none focus:border-near-black transition-colors resize-none placeholder:text-secondary-text/50"
         />
       </div>
@@ -186,12 +186,12 @@ function Zwroty() {
           <div className="border border-borders p-6 flex flex-col gap-2">
             <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase">Zwrot</p>
             <p className="font-cormorant text-xl text-near-black font-light">14 dni na decyzję</p>
-            <p className="font-dm-sans text-xs text-secondary-text leading-relaxed">Produkt nieużywany, nieuszkodzony. Koszt odesłania pokrywa Klient. Zwrot środków do 14 dni od otrzymania paczki.</p>
+            <p className="font-dm-sans text-xs text-secondary-text leading-relaxed">Możesz sprawdzić produkt jak w sklepie stacjonarnym — odpowiadasz tylko za zmniejszenie jego wartości wykraczające poza takie sprawdzenie. Koszt odesłania pokrywa Klient. Zwrot środków do 14 dni od otrzymania oświadczenia o odstąpieniu.</p>
           </div>
           <div className="border border-borders p-6 flex flex-col gap-2">
             <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase">Reklamacja</p>
             <p className="font-cormorant text-xl text-near-black font-light">Rozpatrzenie w 14 dni</p>
-            <p className="font-dm-sans text-xs text-secondary-text leading-relaxed">Wada produktu lub uszkodzenie w transporcie. Koszt odesłania pokrywa Sprzedawca. Wymagana dokumentacja zdjęciowa.</p>
+            <p className="font-dm-sans text-xs text-secondary-text leading-relaxed">Niezgodność produktu z umową lub uszkodzenie w transporcie. Koszt odesłania pokrywa Sprzedawca. Zdjęcia przyspieszają rozpatrzenie, ale nie są wymagane.</p>
           </div>
         </div>
 

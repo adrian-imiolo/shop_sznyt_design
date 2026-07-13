@@ -1,7 +1,6 @@
 import Seo from "../components/Seo";
 
-// TODO(#90): Adrian supplies the real number before merge — art. 12 ust. 1 pkt 3 upk requires it.
-const SELLER_PHONE = "+48 XXX XXX XXX";
+const SELLER_PHONE = "+48 534 218 485";
 
 const RETURN_ADDRESS = "Sznyt Design, Adrian Imioło, Bolesława Śmiałego 8/24, 70-351 Szczecin";
 
