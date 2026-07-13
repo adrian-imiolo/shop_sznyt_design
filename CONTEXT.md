@@ -87,7 +87,6 @@ All rendered by per-template render functions returning `{ subject, html, text }
 - **Rachunek / faktura bez VAT on request, pre-NIP.** Both issued manually by email on the buyer's request (regulamin § 5 pkt 3). No `faktura VAT` UI, no NIP field on checkout, no VAT in pricing copy until business registration ships.
 - **Quarterly revenue cap is monitored, not enforced.** Admin sees a banner with running total + 70 % / 90 % / over thresholds. Crossing it is a manual action (begin registration), not an automatic block.
 - **Production launches only with real products.** The domain flip waits for frames, photos, and descriptions (issues labeled `waiting-for-products`). The interim public artifact is the recruiter demo, not the domain.
-- **Seed defaults to stock 0.** `seed.js` seeds `stock: 0` unless `SEED_STOCK=<n>` is set — fail-safe toward an unpurchasable shop (stock 0 disables add-to-cart and shows "Brak w magazynie"). The demo seeds with `SEED_STOCK` so recruiters can complete test purchases.
 - **`noindex` until real photos.** Site ships with `<meta name="robots" content="noindex">` at the layout level. Lifted only after **real** product photos land — AI-rendered placeholder imagery does not lift it.
 - **Admin must work at 375 px.** Wife uses phone as primary admin device.
 - **Returns and complaints are email-only.** No DB workflow. Forms post to `kontakt@sznytdesign.pl`.
