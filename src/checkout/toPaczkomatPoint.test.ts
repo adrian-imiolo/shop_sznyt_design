@@ -3,9 +3,11 @@ import { toPaczkomatPoint } from "./toPaczkomatPoint";
 
 describe("toPaczkomatPoint", () => {
   it("builds name as 'street, city' so cart and emails carry the full point address", () => {
+    // real widget shape: city lives in address_details, never in address
     const result = toPaczkomatPoint({
       name: "KRA010",
-      address: { line1: "Wielicka 28", city: "Kraków" },
+      address: { line1: "Wielicka 28", line2: "30-552 Kraków" },
+      address_details: { city: "Kraków", province: "małopolskie", post_code: "30-552" },
     });
     expect(result).toEqual({
       code: "KRA010",
@@ -23,7 +25,10 @@ describe("toPaczkomatPoint", () => {
   });
 
   it("falls back to the code when the widget omits the street", () => {
-    const result = toPaczkomatPoint({ name: "SZC105M", address: { city: "Szczecin" } });
+    const result = toPaczkomatPoint({
+      name: "SZC105M",
+      address_details: { city: "Szczecin" },
+    });
     expect(result.name).toBe("SZC105M");
   });
 
