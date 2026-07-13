@@ -135,7 +135,13 @@ The cookie banner was removed in #96 — cart and checkout draft are strictly-ne
 
 Preconditions: DNS flipped, real stock seeded (≥ 1), Stripe live keys + production webhook endpoint configured, Clerk production instance with `publicMetadata.role = "admin"` on both admin accounts. One step makes a **real charge** — refund it afterwards.
 
-### B1. Cart (`/koszyk`)
+### B1. Stock seeded — the A5 gating is gone
+
+- [ ] Product detail: availability line shows "X szt." (no "Brak w magazynie"), add-to-cart enabled
+- [ ] Home product section: add-to-cart button enabled, adds to cart
+- [ ] Stock quantities match what was actually seeded
+
+### B2. Cart (`/koszyk`)
 
 - [ ] Items show image, name, unit price, quantity, line total
 - [ ] +/− buttons work; − disabled at quantity 1; + capped at stock
@@ -146,7 +152,7 @@ Preconditions: DNS flipped, real stock seeded (≥ 1), Stripe live keys + produc
 - [ ] At ≥ 350 PLN: "Masz darmową dostawę!" and shipping shows Gratis
 - [ ] Cart survives page reload (localStorage)
 
-### B2. Shipping & address form
+### B3. Shipping & address form
 
 - [ ] Three methods selectable with correct cost: InPost Paczkomat 20 PLN, InPost Kurier 25 PLN, DPD Kurier 25 PLN (all Gratis at ≥ 350 PLN)
 - [ ] Address form appears for **every** method — paczkomat included (widget point + full address)
@@ -157,14 +163,14 @@ Preconditions: DNS flipped, real stock seeded (≥ 1), Stripe live keys + produc
 - [ ] Checkout button disabled until: method selected + paczkomat point (if paczkomat) + all address fields filled + checkbox checked
 - [ ] Button shows "Przekierowywanie..." while redirecting to Stripe
 
-### B3. Checkout draft persistence
+### B4. Checkout draft persistence
 
 - [ ] Fill method + point + address + note → navigate to `/sklep` → back to `/koszyk`: everything restored (sessionStorage)
 - [ ] Close the tab → reopen the site: form empty (draft dies with the tab)
 - [ ] Restoring a draft with paczkomat selected does **not** auto-open the map
 - [ ] After a completed checkout, returning to `/koszyk` shows an empty form (draft cleared on `/sukces`)
 
-### B4. Paczkomat widget (easyPack)
+### B5. Paczkomat widget (easyPack)
 
 - [ ] Clicking the Paczkomat method **auto-opens** the map widget — no second click needed
 - [ ] Closing the widget without picking: "Wybierz paczkomat" button remains, checkout stays gated
@@ -172,13 +178,13 @@ Preconditions: DNS flipped, real stock seeded (≥ 1), Stripe live keys + produc
 - [ ] "Zmień paczkomat" reopens the widget
 - [ ] Widget works in production (live domain) and at 375px
 
-### B5. Checkout errors
+### B6. Checkout errors
 
 - [ ] Backend unreachable → Polish fallback "Nie udało się przejść do płatności. Spróbuj ponownie." — never a raw English "Failed to fetch"
 - [ ] Server-side stock conflict (someone bought the last unit first) → Polish server message shown
 - [ ] Hammering checkout (>10/min) → rate-limit message "Zbyt wiele prób. Spróbuj ponownie za chwilę."
 
-### B6. Stripe payment & webhook
+### B7. Stripe payment & webhook
 
 - [ ] Stripe page shows correct line items, shipping line, and pre-filled email
 - [ ] Payment methods offered: card, Przelewy24, BLIK
@@ -191,7 +197,7 @@ Preconditions: DNS flipped, real stock seeded (≥ 1), Stripe live keys + produc
 - [ ] Duplicate webhook delivery (Stripe dashboard → resend event) → no duplicate order, no duplicate email (`stripeSessionId` idempotency)
 - [ ] **Refund the live charge** from the Stripe dashboard afterwards (`docs/runbooks/refunds.md`)
 
-### B7. Order success (`/sukces`)
+### B8. Order success (`/sukces`)
 
 - [ ] Order summary card with id + total; item breakdown correct
 - [ ] "Moje zamówienia" link visible when signed in, hidden for guests
@@ -199,7 +205,7 @@ Preconditions: DNS flipped, real stock seeded (≥ 1), Stripe live keys + produc
 - [ ] No `session_id` in the URL → redirect to `/sklep`
 - [ ] Slow webhook: page polls, then shows "Płatność została przyjęta, a zamówienie wciąż się przetwarza…" instead of an error
 
-### B8. Transactional emails (all six, from `kontakt@sznytdesign.pl` via cyberfolks)
+### B9. Transactional emails (all six, from `kontakt@sznytdesign.pl` via cyberfolks)
 
 - [ ] **Order confirmation** (customer): full line items, quantities, unit prices, shipping address, paczkomat point with city, payment method, order note, grand total; branded HTML + plain-text part
 - [ ] **Admin new order** (to `CONTACT_RECIPIENT`): arrives the moment the webhook records the order
@@ -208,7 +214,7 @@ Preconditions: DNS flipped, real stock seeded (≥ 1), Stripe live keys + produc
 - [ ] **Return request** (admin) — covered in A7, re-verify live
 - [ ] **Complaint request** (admin) — covered in A7, re-verify live
 
-### B9. My orders (customer)
+### B10. My orders (customer)
 
 - [ ] `/moje-zamowienia` unauthenticated → sign-in redirect
 - [ ] Shows only the signed-in user's orders; empty state when none
@@ -217,7 +223,7 @@ Preconditions: DNS flipped, real stock seeded (≥ 1), Stripe live keys + produc
 - [ ] "← Moje zamówienia" back link works
 - [ ] Another user's order id → 403 handled gracefully
 
-### B10. Auth & roles (Clerk)
+### B11. Auth & roles (Clerk)
 
 - [ ] "Zaloguj" opens the Polish sign-in modal
 - [ ] Signed in: UserButton with "Moje zamówienia"; sign out restores "Zaloguj"
@@ -226,7 +232,7 @@ Preconditions: DNS flipped, real stock seeded (≥ 1), Stripe live keys + produc
 - [ ] **Both** admin accounts (Adrian + wife) pass the admin guard
 - [ ] A non-admin Clerk user: redirected away from `/admin` routes **and** gets 403 on admin API endpoints
 
-### B11. Admin — products & revenue banner (`/admin`)
+### B12. Admin — products & revenue banner (`/admin`)
 
 - [ ] Revenue banner: "Przychód Q{n} {year}", total vs 10 813,50 zł cap, percentage, progress bar
 - [ ] Thresholds: < 70% green, no message; ≥ 70% amber "Ponad 70% limitu — czas zaplanować rejestrację działalności."; ≥ 90% red "Ponad 90% limitu — rozpocznij rejestrację działalności."; > 100% "Limit przekroczony — obowiązek rejestracji działalności w ciągu 7 dni!"
@@ -236,18 +242,18 @@ Preconditions: DNS flipped, real stock seeded (≥ 1), Stripe live keys + produc
 - [ ] "Usuń" → confirm modal → deletes and removes from the list (historical orders keep their line items)
 - [ ] `/admin/produkty/nowy`: form creates a product and navigates back to `/admin`
 
-### B12. Admin — orders & fulfillment loop (`/admin/zamowienia`, `/admin/zamowienia/:id`)
+### B13. Admin — orders & fulfillment loop (`/admin/zamowienia`, `/admin/zamowienia/:id`)
 
 - [ ] All orders listed, newest first; guest orders included
 - [ ] Address column shows "Uwagi: …" in accent when the order has a note
 - [ ] Fulfillment dropdown (Przyjęte / W realizacji / Wysłane / Dostarczone) PATCHes immediately
 - [ ] Tracking number saves on blur
-- [ ] Setting Wysłane with a tracking number triggers the shipping email (see B8)
+- [ ] Setting Wysłane with a tracking number triggers the shipping email (see B9)
 - [ ] Order id links to the detail page: line items with images, Dostawa cost row, total, delivery method + paczkomat point, payment method, full recipient address, note section when present
 - [ ] Fulfillment controls on the **detail page** behave identically to the list's inline controls (same email trigger)
 - [ ] **Full loop:** admin new-order email → open admin on phone → set Wysłane + paste tracking → customer receives the shipping email
 
-### B13. Admin mobile (375px, real phone — wife's primary device)
+### B14. Admin mobile (375px, real phone — wife's primary device)
 
 - [ ] Revenue banner legible
 - [ ] Products list usable (reorder, edit, delete)
@@ -255,7 +261,7 @@ Preconditions: DNS flipped, real stock seeded (≥ 1), Stripe live keys + produc
 - [ ] Order detail readable; fulfillment loop (status + tracking) doable one-handed
 - [ ] No horizontal page scroll on any admin route
 
-### B14. Edge cases
+### B15. Edge cases
 
 - [ ] Product goes out of stock after it's in someone's cart → checkout returns the Polish stock error, no order created
 - [ ] Non-existent order id (customer and admin detail pages) → error handled, no crash
