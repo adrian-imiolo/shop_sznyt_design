@@ -329,21 +329,17 @@ function Cart() {
           )}
           {IS_DEMO_MODE && (
             <p className="font-dm-sans text-xs text-secondary-text text-right max-w-sm">
-              Checkout is disabled in this portfolio demo. The full flow (Stripe
-              payment, order email, stock decrement) is wired up but requires a
-              configured payment provider.
+              Portfolio demo — checkout runs in Stripe <strong>test mode</strong>.
+              Pay with card <strong>4242 4242 4242 4242</strong>, any future
+              expiry date and any CVC. No real money moves.
             </p>
           )}
           <button
             onClick={submit}
-            disabled={checkoutLoading || !isComplete || !regulaminAccepted || IS_DEMO_MODE}
+            disabled={checkoutLoading || !isComplete || !regulaminAccepted}
             className="self-center sm:self-end mt-2 font-dm-sans text-sm text-near-black border border-near-black px-12 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {IS_DEMO_MODE
-              ? "Demo — checkout disabled"
-              : checkoutLoading
-                ? "Przekierowywanie..."
-                : "Przejdź do płatności"}
+            {checkoutLoading ? "Przekierowywanie..." : "Przejdź do płatności"}
           </button>
         </div>
       </div>
