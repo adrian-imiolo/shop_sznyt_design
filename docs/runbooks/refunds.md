@@ -1,7 +1,7 @@
 # Runbook: Refunding a payment (Stripe)
 
 Who this is for: **both admins** — no developer knowledge needed.
-When to use it: a customer returned a frame under the 14-day right (regulamin § 6), a complaint was resolved with a refund (regulamin § 7), or an order has to be cancelled after payment.
+When to use it: a customer returned a frame under the 14-day right (regulamin § 7), a complaint was resolved with a refund (regulamin § 8), or an order has to be cancelled after payment.
 
 The shop has **no in-app refund flow on purpose** — the Stripe dashboard is the tool. This runbook is the whole procedure.
 
@@ -11,7 +11,7 @@ The shop has **no in-app refund flow on purpose** — the Stripe dashboard is th
 
 1. Customer emails `kontakt@sznytdesign.pl` (or uses the form at `/zwroty`).
 2. Customer ships the frame back; you receive and inspect it.
-3. You refund the payment in the Stripe dashboard (steps below) — within 14 days of receiving the returned product (regulamin § 6 pkt 7).
+3. You refund the payment in the Stripe dashboard (steps below). **The legal deadline is 14 days from the customer's withdrawal statement** (regulamin § 7 pkt 4), not from receiving the parcel — but you may lawfully **withhold** the refund until the frame or a proof of dispatch arrives (§ 7 pkt 5). In practice: refund as soon as the returned frame arrives; if the customer sends a shipping confirmation instead, the withhold right ends there and the 14-day clock is already running.
 4. You do the two manual follow-ups: restock decision + revenue-cap note (see below — the app does none of this automatically).
 
 ## Step-by-step: refund in the Stripe dashboard
@@ -49,6 +49,16 @@ The backend listens only for successful payments. It does **not** react to refun
 - **Stock is NOT restored.** If the returned frame comes back in sellable condition, bump its stock by 1 manually in the admin panel. If it's damaged, leave stock as is.
 - **The revenue-cap banner keeps counting the refunded order** — see the next section.
 
+## Rejecting a complaint: the mandatory ADR sentence
+
+This applies to **complaints** (reklamacje, regulamin § 8), not 14-day returns.
+
+- No response within **14 calendar days** of receiving a complaint = the complaint is **legally deemed accepted** (art. 7a ustawy o prawach konsumenta). Never let a complaint email sit.
+- When you **reject** a complaint, the law (art. 32 ustawy o pozasądowym rozwiązywaniu sporów konsumenckich) requires the rejection email to state whether you agree to out-of-court dispute resolution for that case. **If you say nothing, you are deemed to have consented** and the customer can start the WIIH procedure with you bound to it.
+- The shop's stance (regulamin § 9, decided 2026-07): no advance commitment — you decide per case. So every rejection email must end with one of:
+  - decline: *"Informujemy, że nie wyrażamy zgody na udział w postępowaniu w sprawie pozasądowego rozwiązywania sporów konsumenckich przed Wojewódzkim Inspektoratem Inspekcji Handlowej w Szczecinie."*
+  - or agree (fine for small honest disputes): *"Wyrażamy zgodę na udział w postępowaniu w sprawie pozasądowego rozwiązywania sporów konsumenckich. Podmiotem uprawnionym jest Wojewódzki Inspektorat Inspekcji Handlowej w Szczecinie."*
+
 ## Refunds and the DN quarterly revenue cap
 
 **Question resolved (2026-07): a refunded (returned) order does NOT count toward the działalność-nierejestrowana quarterly cap.**
@@ -65,6 +75,6 @@ What to do in practice:
 
 ## Related
 
-- Regulamin § 6 (14-day withdrawal) and § 7 (complaints): [sznytdesign.pl/regulamin](https://sznytdesign.pl/regulamin) (source: `src/pages/Regulamin.tsx`)
+- Regulamin § 7 (14-day withdrawal), § 8 (complaints), § 9 (ADR): [sznytdesign.pl/regulamin](https://sznytdesign.pl/regulamin) (source: `src/pages/Regulamin.tsx`)
 - Cap banner computation: `backend/revenue/computeQuarterRevenue.ts` (sums `paid` orders per Warsaw-time quarter)
 - Return/complaint intake: forms at `/zwroty` → email to `kontakt@sznytdesign.pl` (email-only by design, no DB workflow)
