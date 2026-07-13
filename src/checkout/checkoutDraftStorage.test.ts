@@ -6,6 +6,7 @@ import {
   saveCheckoutDraft,
 } from "./checkoutDraftStorage";
 import { validAddress } from "./testFixtures";
+import { fakeStorage } from "../testSupport/fakeStorage";
 import type { StoredCheckoutDraft } from "./checkoutDraftStorage";
 
 const fullDraft: StoredCheckoutDraft = {
@@ -87,16 +88,6 @@ describe("parseStoredDraft", () => {
     expect(parseStoredDraft(JSON.stringify(draft))).toEqual(draft);
   });
 });
-
-/** Minimal in-memory Storage — the root suite runs without a DOM. */
-function fakeStorage(initial: Record<string, string> = {}) {
-  const data = new Map(Object.entries(initial));
-  return {
-    getItem: (key: string) => data.get(key) ?? null,
-    setItem: (key: string, value: string) => void data.set(key, value),
-    removeItem: (key: string) => void data.delete(key),
-  };
-}
 
 describe("loadCheckoutDraft / saveCheckoutDraft", () => {
   beforeEach(() => {

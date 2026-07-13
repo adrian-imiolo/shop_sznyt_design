@@ -1,16 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { parseStoredCart, loadCart, saveCart } from "./cartStorage";
+import { fakeStorage } from "../testSupport/fakeStorage";
 import type { CartItem } from "../types";
-
-/** Minimal in-memory Storage — the root suite runs without a DOM. */
-function fakeStorage(initial: Record<string, string> = {}) {
-  const data = new Map(Object.entries(initial));
-  return {
-    getItem: (key: string) => data.get(key) ?? null,
-    setItem: (key: string, value: string) => void data.set(key, value),
-    removeItem: (key: string) => void data.delete(key),
-  };
-}
 
 const items: CartItem[] = [
   { id: 1, name: "Rama Dąb 30x40", price: 249, imageUrl: "/img/dab.jpg", quantity: 2, stock: 5 },
@@ -40,6 +31,22 @@ describe("parseStoredCart", () => {
   it("returns an empty cart for non-array payloads", () => {
     expect(parseStoredCart('{"id":1}')).toEqual([]);
     expect(parseStoredCart('"just a string"')).toEqual([]);
+  });
+
+  it("discards the whole cart when an entry is not an object", () => {
+    expect(parseStoredCart("[1,2]")).toEqual([]);
+    expect(parseStoredCart(JSON.stringify([...items, null]))).toEqual([]);
+  });
+
+  it("discards the whole cart when an item is missing a field", () => {
+    const partial: Record<string, unknown> = { ...items[0] };
+    delete partial.stock;
+    expect(parseStoredCart(JSON.stringify([partial]))).toEqual([]);
+  });
+
+  it("discards the whole cart when an item field has the wrong type", () => {
+    const broken = { ...items[0], price: "249" };
+    expect(parseStoredCart(JSON.stringify([broken]))).toEqual([]);
   });
 });
 
