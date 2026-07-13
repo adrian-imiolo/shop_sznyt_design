@@ -18,6 +18,10 @@ function OrderSuccess() {
 
   useEffect(() => {
     if (!sessionId) return;
+    // Arriving here with a session_id means checkout completed — the draft's
+    // PII must not outlive the purchase (#74). Clear before polling: a slow
+    // webhook must not leave the draft behind.
+    clearCheckoutDraft();
     let cancelled = false;
 
     async function load() {
@@ -29,8 +33,6 @@ function OrderSuccess() {
           if (cancelled) return;
           setOrder(data);
           clearCart();
-          // order placed — the draft's PII must not linger in the session (#74)
-          clearCheckoutDraft();
           return;
         } catch {
           // order not recorded yet or network hiccup — fall through to retry

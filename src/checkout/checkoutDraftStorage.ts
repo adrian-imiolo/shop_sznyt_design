@@ -16,9 +16,12 @@ export type StoredCheckoutDraft = {
 
 const STORAGE_KEY = "checkout_draft";
 
-const ADDRESS_KEYS: (keyof CourierAddress)[] = [
-  "firstName", "lastName", "street", "postalCode", "city", "phone", "email",
-];
+// Record<keyof, true> so adding a CourierAddress field breaks compilation
+// here — a key missing from this list would silently pass parsing half-empty.
+const ADDRESS_FIELDS: Record<keyof CourierAddress, true> = {
+  firstName: true, lastName: true, street: true, postalCode: true, city: true, phone: true, email: true,
+};
+const ADDRESS_KEYS = Object.keys(ADDRESS_FIELDS) as (keyof CourierAddress)[];
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -59,13 +62,13 @@ export function parseStoredDraft(raw: string | null): StoredCheckoutDraft | null
   }
   if (!isRecord(payload)) return null;
 
-  const shippingMethod =
-    payload.shippingMethod === null
-      ? null
-      : typeof payload.shippingMethod === "string" && isShippingMethod(payload.shippingMethod)
-        ? payload.shippingMethod
-        : undefined;
-  if (shippingMethod === undefined) return null;
+  let shippingMethod: ShippingMethod | null = null;
+  if (payload.shippingMethod !== null) {
+    if (typeof payload.shippingMethod !== "string" || !isShippingMethod(payload.shippingMethod)) {
+      return null;
+    }
+    shippingMethod = payload.shippingMethod;
+  }
 
   const paczkomatPoint = payload.paczkomatPoint === null ? null : parsePoint(payload.paczkomatPoint);
   if (payload.paczkomatPoint !== null && paczkomatPoint === null) return null;

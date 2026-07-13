@@ -3,11 +3,12 @@ import type { CartItem } from "../types";
 import { CartContext } from "./cart-context";
 import { addToCart, mergeDuplicateItems } from "../cart/cartItems";
 import { useCookieConsent } from "../hooks/useCookieConsent";
+import { hasStoredConsent } from "./cookie-consent-context";
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const { consent } = useCookieConsent();
   const [items, setItems] = useState<CartItem[]>(() => {
-    if (localStorage.getItem("cookie_consent") === "accepted") {
+    if (hasStoredConsent()) {
       try {
         const stored = localStorage.getItem("cart");
         // merge, not just parse — carts saved before #70 may hold duplicate lines

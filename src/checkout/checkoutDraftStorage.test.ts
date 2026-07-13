@@ -72,7 +72,7 @@ describe("parseStoredDraft", () => {
     expect(parsed?.note).toHaveLength(300);
   });
 
-  it("drops a stale point when the stored point city is a non-string", () => {
+  it("rejects the draft when the stored point city is a non-string", () => {
     const broken = { ...fullDraft, paczkomatPoint: { code: "KRA01M", name: "P", city: 7 } };
     expect(parseStoredDraft(JSON.stringify(broken))).toBeNull();
   });

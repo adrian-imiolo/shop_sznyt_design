@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { ShippingMethod } from "@sznyt/shared";
 import { apiFetch } from "../lib/api";
 import { useCookieConsent } from "../hooks/useCookieConsent";
+import { hasStoredConsent } from "../context/cookie-consent-context";
 import { validateCheckoutDraft } from "./validateCheckoutDraft";
 import { buildCheckoutRequest } from "./buildCheckoutRequest";
 import { loadCheckoutDraft, saveCheckoutDraft, clearCheckoutDraft } from "./checkoutDraftStorage";
@@ -21,11 +22,7 @@ const EMPTY_ADDRESS: CourierAddress = {
  */
 export function useCheckout(items: CartItem[], userId: string | null | undefined) {
   const { consent } = useCookieConsent();
-  // Same lazy-init consent gate as CartContext: the consent context may not
-  // have settled yet on first render, so read the persisted flag directly.
-  const [restored] = useState(() =>
-    localStorage.getItem("cookie_consent") === "accepted" ? loadCheckoutDraft() : null,
-  );
+  const [restored] = useState(() => (hasStoredConsent() ? loadCheckoutDraft() : null));
   const [shippingMethod, setShippingMethod] = useState<ShippingMethod | null>(
     restored?.shippingMethod ?? null,
   );
