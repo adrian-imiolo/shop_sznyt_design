@@ -330,7 +330,7 @@ function Cart() {
           <button
             onClick={submit}
             disabled={checkoutLoading || !isComplete || !regulaminAccepted || IS_DEMO_MODE}
-            className="font-dm-sans text-sm text-near-black border border-near-black px-12 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="self-center sm:self-end mt-2 font-dm-sans text-sm text-near-black border border-near-black px-12 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {IS_DEMO_MODE
               ? "Demo — checkout disabled"
