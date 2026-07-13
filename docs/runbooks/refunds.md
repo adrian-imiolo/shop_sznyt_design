@@ -11,7 +11,7 @@ The shop has **no in-app refund flow on purpose** — the Stripe dashboard is th
 
 1. Customer emails `kontakt@sznytdesign.pl` (or uses the form at `/zwroty`).
 2. Customer ships the frame back; you receive and inspect it.
-3. You refund the payment in the Stripe dashboard (steps below) — within 14 days of receiving the returned product (regulamin § 6 pkt 6).
+3. You refund the payment in the Stripe dashboard (steps below) — within 14 days of receiving the returned product (regulamin § 6 pkt 7).
 4. You do the two manual follow-ups: restock decision + revenue-cap note (see below — the app does none of this automatically).
 
 ## Step-by-step: refund in the Stripe dashboard
@@ -45,7 +45,7 @@ There is no "undo" for a refund. If you refund the wrong payment, the money goes
 
 The backend listens only for successful payments. It does **not** react to refunds (`charge.refunded` is not handled). After you refund in Stripe:
 
-- **The order stays `paid`** in the admin panel, and its fulfillment status is untouched. That's a judgment call, not a bug — the order history should still show what happened. Use the order's tracking/notes as you see fit.
+- **The order stays `paid`** in the admin panel, and its fulfillment status is untouched. That's a judgment call, not a bug — the order history should still show what happened, and there's no separate "refunded" status to set. Stripe's payment page is the record of the refund.
 - **Stock is NOT restored.** If the returned frame comes back in sellable condition, bump its stock by 1 manually in the admin panel. If it's damaged, leave stock as is.
 - **The revenue-cap banner keeps counting the refunded order** — see the next section.
 
@@ -65,6 +65,6 @@ What to do in practice:
 
 ## Related
 
-- Regulamin § 6 (14-day withdrawal) and § 7 (complaints): `src/pages/Regulamin.tsx`
+- Regulamin § 6 (14-day withdrawal) and § 7 (complaints): [sznytdesign.pl/regulamin](https://sznytdesign.pl/regulamin) (source: `src/pages/Regulamin.tsx`)
 - Cap banner computation: `backend/revenue/computeQuarterRevenue.ts` (sums `paid` orders per Warsaw-time quarter)
 - Return/complaint intake: forms at `/zwroty` → email to `kontakt@sznytdesign.pl` (email-only by design, no DB workflow)
