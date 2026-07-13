@@ -36,14 +36,14 @@ function ProductDetails() {
     );
   if (!product)
     return (
-      <main className="flex flex-col md:flex-row md:h-screen md:max-h-240">
+      <main className="flex flex-col md:flex-row lg:h-screen lg:max-h-240">
         <Seo
           title="Produkt"
           description="Ręcznie robiona ramka z litego dębu od Sznyt Design. Designerski prezent, który zostaje na lata."
         />
-        {/* Image side — 60% width, left */}
-        <Skeleton className="relative w-full md:w-3/5 min-h-[60vh] md:h-full overflow-hidden"></Skeleton>
-        <div className="w-full bg-[#F5F3F0] md:w-2/5 flex flex-col justify-between px-6 py-12 md:px-16 md:py-20">
+        {/* Image side — 50% on tablet, 60% on desktop, left */}
+        <Skeleton className="relative w-full md:w-1/2 lg:w-3/5 min-h-[60vh] lg:h-full overflow-hidden"></Skeleton>
+        <div className="w-full bg-[#F5F3F0] md:w-1/2 lg:w-2/5 flex flex-col justify-between px-6 py-12 md:px-8 md:py-14 lg:px-16 lg:py-20">
           <div>
             <Skeleton className="w-1/2 h-6 mb-10"></Skeleton>
             <Skeleton className="w-1/2 h-6 mb-4"></Skeleton>
@@ -63,7 +63,7 @@ function ProductDetails() {
     );
 
   return (
-    <main className="flex flex-col md:flex-row md:h-screen md:max-h-240">
+    <main className="flex flex-col md:flex-row lg:h-screen lg:max-h-240">
       <Seo
         title={product.name}
         description={`${product.tagline} Ręcznie robiona ramka z litego dębu od Sznyt Design — designerski prezent, który zostaje na lata.`}
@@ -76,9 +76,9 @@ function ProductDetails() {
         <p>Dodano do koszyka!</p>
       </div>
 
-      {/* Image side — 60% width, left */}
+      {/* Image side — 50% on tablet, 60% on desktop, left */}
       <div
-        className="relative w-full md:w-3/5 min-h-[60vh] md:h-full overflow-hidden cursor-pointer bg-warm-white p-6 md:p-10"
+        className="relative w-full md:w-1/2 lg:w-3/5 min-h-[60vh] lg:h-full overflow-hidden cursor-pointer bg-warm-white p-6 md:p-10"
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
@@ -92,9 +92,9 @@ function ProductDetails() {
         />
       </div>
 
-      {/* Text side — 40% width, right */}
+      {/* Text side — 50% on tablet, 40% on desktop, right */}
 
-      <div className="w-full md:w-2/5 flex flex-col justify-between bg-[#F5F3F0] px-6 py-12 md:px-16 md:py-20">
+      <div className="w-full md:w-1/2 lg:w-2/5 flex flex-col justify-between bg-[#F5F3F0] px-6 py-12 md:px-8 md:py-14 lg:px-16 lg:py-20">
         {/* Top: breadcrumb + product info */}
         <div>
           <p className="font-dm-sans text-xs text-secondary-text tracking-widest uppercase mb-10">
@@ -107,7 +107,7 @@ function ProductDetails() {
           <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">
             Sznyt Design
           </p>
-          <h1 className="font-cormorant text-3xl md:text-5xl text-near-black font-light leading-tight mb-4">
+          <h1 className="font-cormorant text-3xl md:text-4xl lg:text-5xl text-near-black font-light leading-tight mb-4">
             {product.name}
           </h1>
           <p className="font-cormorant text-lg text-secondary-text italic mb-8">

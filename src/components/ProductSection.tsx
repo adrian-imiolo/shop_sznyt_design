@@ -39,11 +39,11 @@ function ProductSection({
       </div>
 
       <section
-        className={`flex flex-col ${reverse ? "md:flex-row-reverse" : "md:flex-row"} min-h-screen`}
+        className={`flex flex-col ${reverse ? "md:flex-row-reverse" : "md:flex-row"} lg:min-h-screen`}
       >
         {/* Image side */}
         <div
-          className="relative w-full md:w-1/2 min-h-[60vh] md:min-h-screen overflow-hidden cursor-pointer"
+          className="relative w-full md:w-1/2 min-h-[60vh] lg:min-h-screen overflow-hidden cursor-pointer"
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
         >
@@ -60,7 +60,7 @@ function ProductSection({
         </div>
 
         {/* Text side */}
-        <div className="w-full md:w-1/2 flex items-center bg-warm-white px-6 py-12 md:px-20">
+        <div className="w-full md:w-1/2 flex items-center bg-warm-white px-6 py-12 md:px-10 lg:px-20">
           <div className="max-w-md">
             <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">
               Sznyt Design

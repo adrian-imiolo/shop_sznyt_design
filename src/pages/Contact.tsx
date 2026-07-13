@@ -63,7 +63,7 @@ function Contact() {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="font-dm-sans text-sm text-near-black bg-transparent border-b border-borders py-2 outline-none focus:border-near-black transition-colors"
+                  className="font-dm-sans text-base sm:text-sm text-near-black bg-transparent border-b border-borders py-2 outline-none focus:border-near-black transition-colors"
                 />
               </div>
               <div className="flex flex-col gap-2">
@@ -74,7 +74,7 @@ function Contact() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="font-dm-sans text-sm text-near-black bg-transparent border-b border-borders py-2 outline-none focus:border-near-black transition-colors"
+                  className="font-dm-sans text-base sm:text-sm text-near-black bg-transparent border-b border-borders py-2 outline-none focus:border-near-black transition-colors"
                 />
               </div>
               <div className="flex flex-col gap-2">
@@ -85,7 +85,7 @@ function Contact() {
                   rows={5}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  className="font-dm-sans text-sm text-near-black bg-transparent border-b border-borders py-2 outline-none focus:border-near-black transition-colors resize-none"
+                  className="font-dm-sans text-base sm:text-sm text-near-black bg-transparent border-b border-borders py-2 outline-none focus:border-near-black transition-colors resize-none"
                 />
               </div>
               {success && (

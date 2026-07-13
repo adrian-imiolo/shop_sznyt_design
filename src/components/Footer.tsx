@@ -8,7 +8,7 @@ function Footer() {
         <div className="flex flex-col md:flex-row justify-between gap-12 md:gap-16 mb-12 md:mb-16">
 
           {/* Brand */}
-          <div className="max-w-xs text-center md:text-left">
+          <div className="max-w-xs md:max-w-56 lg:max-w-xs mx-auto md:mx-0 text-center md:text-left">
             <Link
               to="/"
               className="font-cormorant text-2xl text-warm-white tracking-wide block mb-3"
@@ -27,7 +27,7 @@ function Footer() {
           </div>
 
           {/* Links */}
-          <div className="flex flex-wrap justify-center md:justify-end gap-8 md:gap-24">
+          <div className="flex flex-wrap justify-center md:justify-end gap-8 md:gap-12 lg:gap-24">
             <div className="flex flex-col gap-4">
               <p className="font-dm-sans text-xs text-accent tracking-[0.2em] uppercase mb-1">
                 Sklep

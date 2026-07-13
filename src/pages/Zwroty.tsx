@@ -50,7 +50,7 @@ function ZwrotForm() {
             placeholder={field.placeholder}
             onChange={(e) => field.set(e.target.value)}
             required
-            className="font-dm-sans text-sm text-near-black bg-transparent border-b border-borders py-2 outline-none focus:border-near-black transition-colors"
+            className="font-dm-sans text-base sm:text-sm text-near-black bg-transparent border-b border-borders py-2 outline-none focus:border-near-black transition-colors"
           />
         </div>
       ))}
@@ -61,7 +61,7 @@ function ZwrotForm() {
           value={reason}
           onChange={(e) => setReason(e.target.value)}
           required
-          className="font-dm-sans text-sm text-near-black bg-transparent border-b border-borders py-2 outline-none focus:border-near-black transition-colors resize-none"
+          className="font-dm-sans text-base sm:text-sm text-near-black bg-transparent border-b border-borders py-2 outline-none focus:border-near-black transition-colors resize-none"
         />
       </div>
       {error && <p className="font-dm-sans text-sm text-red-500">{error}</p>}
@@ -118,7 +118,7 @@ function ReklamacjaForm() {
             placeholder={field.placeholder}
             onChange={(e) => field.set(e.target.value)}
             required
-            className="font-dm-sans text-sm text-near-black bg-transparent border-b border-borders py-2 outline-none focus:border-near-black transition-colors"
+            className="font-dm-sans text-base sm:text-sm text-near-black bg-transparent border-b border-borders py-2 outline-none focus:border-near-black transition-colors"
           />
         </div>
       ))}
@@ -130,7 +130,7 @@ function ReklamacjaForm() {
           onChange={(e) => setDescription(e.target.value)}
           required
           placeholder="Opisz dokładnie, co się stało. Zdjęcia wyślij w odpowiedzi na e-mail potwierdzający."
-          className="font-dm-sans text-sm text-near-black bg-transparent border-b border-borders py-2 outline-none focus:border-near-black transition-colors resize-none placeholder:text-secondary-text/50"
+          className="font-dm-sans text-base sm:text-sm text-near-black bg-transparent border-b border-borders py-2 outline-none focus:border-near-black transition-colors resize-none placeholder:text-secondary-text/50"
         />
       </div>
       {error && <p className="font-dm-sans text-sm text-red-500">{error}</p>}

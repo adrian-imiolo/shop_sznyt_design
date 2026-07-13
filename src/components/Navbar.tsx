@@ -25,7 +25,7 @@ function Navbar() {
       <div className="flex items-center justify-between max-w-6xl mx-auto">
         <Link
           to="/"
-          className="font-cormorant text-2xl text-near-black tracking-wide"
+          className="font-cormorant text-xl md:text-2xl text-near-black tracking-wide whitespace-nowrap"
         >
           Sznyt Design
         </Link>
@@ -46,11 +46,11 @@ function Navbar() {
               </li>
             ))}
           </ul>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4 md:gap-6">
             <Show when="signed-out">
-              <div className="border border-borders px-3 md:px-6">
+              <div className="border border-borders px-2 md:px-6">
                 <SignInButton mode="modal">
-                  <button className="font-dm-sans text-sm text-near-black hover:text-accent tracking-widest uppercase cursor-pointer">
+                  <button className="font-dm-sans text-xs md:text-sm text-near-black hover:text-accent tracking-widest uppercase cursor-pointer">
                     Zaloguj
                   </button>
                 </SignInButton>
@@ -104,14 +104,16 @@ function Navbar() {
                 </span>
               )}
             </Link>
+            {/* 2px lines + 4px gaps center on whole pixels inside h-6; fractional
+                heights render each line with different antialiasing (uneven thickness) */}
             <button
-              className="md:hidden flex flex-col justify-center gap-1.25 w-6 h-6"
+              className="md:hidden flex flex-col justify-center gap-1 w-6 h-6"
               onClick={() => setToggleMenu(!toggleMenu)}
               aria-label={toggleMenu ? "Zamknij menu" : "Otwórz menu"}
             >
-              <span className={`block w-6 h-[1.5px] bg-near-black transition-all duration-300 origin-center ${toggleMenu ? "translate-y-[6.5px] rotate-45" : ""}`} />
-              <span className={`block w-6 h-[1.5px] bg-near-black transition-all duration-300 ${toggleMenu ? "opacity-0" : ""}`} />
-              <span className={`block w-6 h-[1.5px] bg-near-black transition-all duration-300 origin-center ${toggleMenu ? "-translate-y-[6.5px] -rotate-45" : ""}`} />
+              <span className={`block w-6 h-[2px] bg-near-black transition-all duration-300 origin-center ${toggleMenu ? "translate-y-[6px] rotate-45" : ""}`} />
+              <span className={`block w-6 h-[2px] bg-near-black transition-all duration-300 ${toggleMenu ? "opacity-0" : ""}`} />
+              <span className={`block w-6 h-[2px] bg-near-black transition-all duration-300 origin-center ${toggleMenu ? "-translate-y-[6px] -rotate-45" : ""}`} />
             </button>
           </div>
         </div>

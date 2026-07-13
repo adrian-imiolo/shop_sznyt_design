@@ -48,7 +48,7 @@ function AddressForm({ address, fieldErrors, onFieldChange }: AddressFormProps) 
             type={type ?? "text"}
             value={address[key]}
             onChange={(e) => onFieldChange(key, e.target.value)}
-            className={`w-full border font-dm-sans text-sm text-near-black px-3 py-2 focus:outline-none focus:border-near-black ${fieldErrors[key] ? "border-red-400" : "border-borders"}`}
+            className={`w-full border font-dm-sans text-base sm:text-sm text-near-black px-3 py-2 focus:outline-none focus:border-near-black ${fieldErrors[key] ? "border-red-400" : "border-borders"}`}
           />
           {fieldErrors[key] && (
             <p className="font-dm-sans text-xs text-red-500 mt-1">{fieldErrors[key]}</p>
@@ -257,7 +257,7 @@ function Cart() {
                 maxLength={ORDER_NOTE_MAX_LENGTH}
                 rows={3}
                 placeholder="Np. kod do bramy, preferowane godziny doręczenia"
-                className="w-full border border-borders font-dm-sans text-sm text-near-black px-3 py-2 resize-y focus:outline-none focus:border-near-black placeholder:text-gray-400"
+                className="w-full border border-borders font-dm-sans text-base sm:text-sm text-near-black px-3 py-2 resize-y focus:outline-none focus:border-near-black placeholder:text-gray-400"
               />
               <p className="font-dm-sans text-xs text-secondary-text text-right mt-1">
                 {note.length}/{ORDER_NOTE_MAX_LENGTH}
@@ -330,7 +330,7 @@ function Cart() {
           <button
             onClick={submit}
             disabled={checkoutLoading || !isComplete || !regulaminAccepted || IS_DEMO_MODE}
-            className="font-dm-sans text-sm text-near-black border border-near-black px-12 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="self-center sm:self-end mt-2 font-dm-sans text-sm text-near-black border border-near-black px-12 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {IS_DEMO_MODE
               ? "Demo — checkout disabled"
