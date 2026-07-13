@@ -26,10 +26,7 @@ function About() {
         {/* Image placeholder */}
         <div
           className="w-full md:w-1/2 min-h-[50vh] md:min-h-full bg-cover bg-center"
-          style={{
-            backgroundImage:
-              "url(https://placehold.co/800x1000/2a2420/FAFAF8?text=Pracownia)",
-          }}
+          style={{ backgroundImage: "url(/images/pracownia.png)" }}
         />
 
         {/* Text */}

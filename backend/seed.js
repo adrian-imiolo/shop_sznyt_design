@@ -20,9 +20,9 @@ async function main() {
         description:
           "Rama wykonana z litego dębu, w której naprzemienne kwadraty jasnego i ciemnego drewna tworzą wzór szachownicy. Każdy element precyzyjnie dopasowany — kontrast kolorów nadaje jej wyrazisty, a zarazem ponadczasowy charakter.",
         price: 299,
-        imageUrl: "https://placehold.co/800x1000/2a2420/FAFAF8?text=Studio",
-        lifestyleImageUrl:
-          "https://placehold.co/800x1000/4a3f35/FAFAF8?text=Lifestyle",
+        // Relative — deployment-agnostic; checkout prefixes FRONTEND_URL for Stripe
+        imageUrl: "/images/szachownica-studio.png",
+        lifestyleImageUrl: "/images/szachownica-lifestyle.png",
         stock: 10,
       },
       {
@@ -31,9 +31,8 @@ async function main() {
         description:
           "Dębowa rama z charakterystycznymi nacięciami na narożnikach, w które wpuszczono kontrastowy materiał. Połączenie drewna i wyraźnego detalu na rogach tworzy subtelny, nowoczesny akcent bez zbędnej ozdobności.",
         price: 349,
-        imageUrl: "https://placehold.co/800x1000/1a1a1a/FAFAF8?text=Studio",
-        lifestyleImageUrl:
-          "https://placehold.co/800x1000/2d2d2d/FAFAF8?text=Lifestyle",
+        imageUrl: "/images/corner-cut-studio.png",
+        lifestyleImageUrl: "/images/corner-cut-lifestyle.png",
         stock: 8,
       },
     ],
