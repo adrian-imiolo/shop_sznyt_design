@@ -299,7 +299,7 @@ function Cart() {
               Wybierz metodę dostawy, aby kontynuować.
             </p>
           )}
-          <label className="flex items-start gap-3 cursor-pointer">
+          <label className="self-start sm:self-end flex items-start gap-3 cursor-pointer">
             <input
               type="checkbox"
               checked={regulaminAccepted}
