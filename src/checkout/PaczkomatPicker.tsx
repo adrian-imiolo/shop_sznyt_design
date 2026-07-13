@@ -1,9 +1,13 @@
-import { useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
+import { toPaczkomatPoint } from "./toPaczkomatPoint";
 import type { PaczkomatPoint } from "./types";
 
 type PaczkomatPickerProps = {
   selectedPoint: PaczkomatPoint | null;
   onSelect: (point: PaczkomatPoint) => void;
+  /** One-shot open request from the checkout draft — auto-opens the map. */
+  openRequested: boolean;
+  onOpenRequestHandled: () => void;
 };
 
 // The widget must be init'd once per page load, not once per mount — the
@@ -15,22 +19,23 @@ let easyPackInitialized = false;
  * the viewport sizing workaround live here and nowhere else. Emits the
  * selected point; holds no state of its own.
  */
-function PaczkomatPicker({ selectedPoint, onSelect }: PaczkomatPickerProps) {
+function PaczkomatPicker({
+  selectedPoint,
+  onSelect,
+  openRequested,
+  onOpenRequestHandled,
+}: PaczkomatPickerProps) {
   useEffect(() => {
     if (easyPackInitialized || !window.easyPack) return;
     window.easyPack.init({ defaultLocale: "pl" });
     easyPackInitialized = true;
   }, []);
 
-  function openWidget() {
+  const openWidget = useCallback(() => {
     if (!window.easyPack) return;
     function handlePointSelected(point: EasyPackPoint, modal: EasyPackModal) {
       modal.closeModal();
-      onSelect({
-        code: point.name,
-        name: point.address?.line1 ?? point.name,
-        city: point.address?.city,
-      });
+      onSelect(toPaczkomatPoint(point));
     }
     window.easyPack.modalMap(
       handlePointSelected,
@@ -40,7 +45,22 @@ function PaczkomatPicker({ selectedPoint, onSelect }: PaczkomatPickerProps) {
         height: Math.min(600, window.innerHeight - 32),
       },
     );
-  }
+  }, [onSelect]);
+
+  // Ref-guarded because the parent's acknowledgement lands a render later:
+  // StrictMode's doubled effect (and any re-render in between) would other-
+  // wise see the still-true request and stack a second modal.
+  const openRequestHandled = useRef(false);
+  useEffect(() => {
+    if (!openRequested) {
+      openRequestHandled.current = false;
+      return;
+    }
+    if (openRequestHandled.current) return;
+    openRequestHandled.current = true;
+    onOpenRequestHandled();
+    openWidget();
+  }, [openRequested, onOpenRequestHandled, openWidget]);
 
   return (
     <div className="flex flex-col gap-3">
