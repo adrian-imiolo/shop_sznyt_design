@@ -6,6 +6,7 @@ import { Show } from "@clerk/react";
 import { useCart } from "../hooks/useCart";
 import Seo from "../components/Seo";
 import { apiFetch } from "../lib/api";
+import { clearCheckoutDraft } from "../checkout";
 import OrderCard from "../orders/OrderCard";
 
 function OrderSuccess() {
@@ -17,6 +18,10 @@ function OrderSuccess() {
 
   useEffect(() => {
     if (!sessionId) return;
+    // Arriving here with a session_id means checkout completed — the draft's
+    // PII must not outlive the purchase (#74). Clear before polling: a slow
+    // webhook must not leave the draft behind.
+    clearCheckoutDraft();
     let cancelled = false;
 
     async function load() {

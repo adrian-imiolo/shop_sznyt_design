@@ -3,6 +3,7 @@ export { buildShippingAddress } from "./buildShippingAddress";
 export { checkoutTotals } from "./checkoutTotals";
 export { buildCheckoutRequest } from "./buildCheckoutRequest";
 export { useCheckout } from "./useCheckout";
+export { clearCheckoutDraft } from "./checkoutDraftStorage";
 export { default as PaczkomatPicker } from "./PaczkomatPicker";
 export type { CheckoutDraft, CheckoutMissing, CheckoutFieldErrors, CourierAddress, PaczkomatPoint } from "./types";
 export type { CheckoutValidation } from "./validateCheckoutDraft";
