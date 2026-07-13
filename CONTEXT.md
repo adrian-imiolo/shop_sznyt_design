@@ -27,7 +27,7 @@ Premium e-commerce shop selling designer wooden picture frames at `sznytdesign.p
 - **easyPack** — InPost's JS widget for paczkomat selection at checkout. No business account required.
 - **Apaczka / Sendit** — Polish shipping-label aggregators. Operate on individual accounts, no business registration required. Used to manually generate paczkomat labels; admin pastes tracking back into the order.
 - **Furgonetka** — another shipping aggregator, requires business account. Blocked on registration; out of scope until then.
-- **Cutover** — the coordinated DNS + mail records + production env-var switchover from the WordPress placeholder to the React/Express app.
+- **Cutover** — the coordinated DNS + production env-var switchover from the WordPress placeholder to the React/Express app. Web-only: mail stays at cyberfolks, so MX/SPF/DKIM records never move.
 - **Soft launch** — going live silently, no marketing, with `noindex`. Brand presentation must be production-quality even though no one is being told.
 - **Order intake** — the module that turns a paid Stripe checkout session into a recorded `Order`: transaction, atomic stock decrement, idempotency. Lives in `backend/orders/`. The Stripe webhook route is its adapter.
 - **Line-item contract** — the agreement between checkout and order intake carried through Stripe: each product line item is stamped with `metadata.productId`; a line item without one (shipping) is skipped when recording `OrderItem`s and decrementing stock.
@@ -69,7 +69,7 @@ All rendered by per-template render functions returning `{ subject, html, text }
 
 - **Stripe** — payments. Live keys post-cutover. Webhook (`/webhook`) is the source of truth for payment state. Dev uses Stripe CLI (`stripe listen --forward-to localhost:3000/webhook`).
 - **Clerk** — auth. Production instance with `publicMetadata.role` post-cutover.
-- **Google Workspace** — transactional email SMTP and `kontakt@sznytdesign.pl` inbox.
+- **cyberfolks** — mail hosting: transactional email SMTP (`s123.cyber-folks.pl:465`, implicit TLS) and the `kontakt@sznytdesign.pl` + admin inboxes, read via Thunderbird.
 - **InPost easyPack** — paczkomat picker widget.
 - **Apaczka / Sendit** — manual shipping labels (individual account).
 - **Vercel** — frontend hosting (hobby tier).
@@ -104,3 +104,4 @@ What the project explicitly does NOT do — to prevent reintroducing rejected id
 - **React Admin** — custom admin panel.
 - **`comingSoon` flag on `Product`** — only 2 products at launch; if a product is not for sale, it doesn't get seeded.
 - **Backend `index.js` split** — works as-is at 507 lines; refactor tracked as a separate initiative.
+- **Google Workspace migration** — rejected 2026-07-13. Mail stays at cyberfolks (works as desired via Thunderbird, saves ~38 PLN/mo); revisit only if deliverability becomes a problem.
