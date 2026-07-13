@@ -8,7 +8,7 @@ function Footer() {
         <div className="flex flex-col md:flex-row justify-between gap-12 md:gap-16 mb-12 md:mb-16">
 
           {/* Brand */}
-          <div className="max-w-xs md:max-w-56 lg:max-w-xs text-center md:text-left">
+          <div className="max-w-xs md:max-w-56 lg:max-w-xs mx-auto md:mx-0 text-center md:text-left">
             <Link
               to="/"
               className="font-cormorant text-2xl text-warm-white tracking-wide block mb-3"
