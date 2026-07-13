@@ -49,6 +49,8 @@ When a skill mentions a role (e.g. "apply the AFK-ready triage label"), use the 
 | Label     | Meaning                                                                  |
 | --------- | ------------------------------------------------------------------------ |
 | `blocked` | Cannot proceed due to external dependency. Pair with type label; priority may be omitted until unblocked. |
+| `demo-now` | Finish before parking the project — part of the recruiter-demo milestone (2026-07-13 demo-first replan). |
+| `waiting-for-products` | Parked until real frames/photos/descriptions exist. The re-entry filter when work resumes: `gh issue list --label waiting-for-products`. |
 
 ## Workflow
 
