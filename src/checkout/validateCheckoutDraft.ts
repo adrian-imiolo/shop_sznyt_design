@@ -39,7 +39,7 @@ export function validateCheckoutDraft(draft: CheckoutDraft): CheckoutValidation 
   if (!/^\d{2}-\d{3}$/.test(draft.address.postalCode)) {
     fieldErrors.postalCode = "Kod pocztowy powinien mieć format XX-XXX";
   }
-  if (!/^(\+48\s?)?(\d[\s-]?){9}$/.test(draft.address.phone.replace(/\s|-/g, ""))) {
+  if (!/^(\+48)?\d{9}$/.test(draft.address.phone.replace(/[\s-]/g, ""))) {
     fieldErrors.phone = "Podaj poprawny numer telefonu (9 cyfr)";
   }
 
