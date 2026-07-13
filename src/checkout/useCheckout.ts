@@ -4,6 +4,7 @@ import { apiFetch } from "../lib/api";
 import { useCookieConsent } from "../hooks/useCookieConsent";
 import { hasStoredConsent } from "../context/cookie-consent-context";
 import { validateCheckoutDraft } from "./validateCheckoutDraft";
+import { checkoutErrorMessage } from "./checkoutErrorMessage";
 import { buildCheckoutRequest } from "./buildCheckoutRequest";
 import { loadCheckoutDraft, saveCheckoutDraft, clearCheckoutDraft } from "./checkoutDraftStorage";
 import type { CheckoutDraft, CheckoutFieldErrors, CourierAddress, PaczkomatPoint } from "./types";
@@ -78,14 +79,16 @@ export function useCheckout(items: CartItem[], userId: string | null | undefined
         method: "POST",
         body: buildCheckoutRequest(draft, userId ?? null, note),
       });
-      if (!data.url) throw new Error("Nie udało się otworzyć strony płatności");
+      if (!data.url) {
+        // Not thrown: checkoutErrorMessage would swallow this specific
+        // message, since only ApiError messages pass through it.
+        setError("Nie udało się otworzyć strony płatności");
+        setLoading(false);
+        return;
+      }
       window.location.href = data.url;
     } catch (err) {
-      setError(
-        err instanceof Error && err.message
-          ? err.message
-          : "Nie udało się przejść do płatności. Spróbuj ponownie.",
-      );
+      setError(checkoutErrorMessage(err));
       setLoading(false);
     }
   }
