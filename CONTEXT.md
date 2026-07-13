@@ -28,7 +28,9 @@ Premium e-commerce shop selling designer wooden picture frames at `sznytdesign.p
 - **Apaczka / Sendit** — Polish shipping-label aggregators. Operate on individual accounts, no business registration required. Used to manually generate paczkomat labels; admin pastes tracking back into the order.
 - **Furgonetka** — another shipping aggregator, requires business account. Blocked on registration; out of scope until then.
 - **Cutover** — the coordinated DNS + production env-var switchover from the WordPress placeholder to the React/Express app. Web-only: mail stays at cyberfolks, so MX/SPF/DKIM records never move.
-- **Soft launch** — going live silently, no marketing, with `noindex`. Brand presentation must be production-quality even though no one is being told.
+- **Soft launch** — going live silently, no marketing, with `noindex`. Brand presentation must be production-quality even though no one is being told. Happens in two phases: portfolio launch, then commerce open.
+- **Portfolio launch (week of 13 July 2026)** — phase one of the soft launch: the site is live at `sznytdesign.pl` with **all stock at 0**, so purchases are blocked. Frames are not yet manufactured (no carpenter contracted); the live site acts as a portfolio. Product/hero imagery is AI-rendered from the real frame design until real photos exist.
+- **Commerce open (31 July 2026)** — phase two: real stock is seeded and purchases become possible. Gated by a full `docs/TEST-PLAN.md` walkthrough on the live domain, including one real Stripe charge (refunded afterwards). Closes PRD #19.
 - **Order intake** — the module that turns a paid Stripe checkout session into a recorded `Order`: transaction, atomic stock decrement, idempotency. Lives in `backend/orders/`. The Stripe webhook route is its adapter.
 - **Line-item contract** — the agreement between checkout and order intake carried through Stripe: each product line item is stamped with `metadata.productId`; a line item without one (shipping) is skipped when recording `OrderItem`s and decrementing stock.
 - **Shipping address contract** — the flat JSON captured at checkout and stored on the Order as `shippingAddress`: `firstName`, `lastName`, `email`, `street`, `postalCode`, `city`, `phone` always present; the paczkomat point's `code` and `name` present iff `shippingMethod === "paczkomat"`. Discriminated by the Order's sibling `shippingMethod`, never by its own shape. Typed as `ShippingAddress` in `@sznyt/shared`; built only by the frontend checkout module, parsed and rendered by order intake and emails. See `docs/adr/0003-checkout-assembly-module.md`.
@@ -82,7 +84,8 @@ All rendered by per-template render functions returning `{ subject, html, text }
 - **`stripeSessionId` is the idempotency key.** Webhook retries must be no-ops.
 - **Rachunek only pre-NIP.** No `faktura VAT` UI, no NIP field on checkout, no VAT in pricing copy until business registration ships.
 - **Quarterly revenue cap is monitored, not enforced.** Admin sees a banner with running total + 70 % / 90 % / over thresholds. Crossing it is a manual action (begin registration), not an automatic block.
-- **`noindex` until photos.** Site ships with `<meta name="robots" content="noindex">` at the layout level. Lifted only after real product photos land (mid-June 2026 decision point).
+- **Stock 0 blocks purchases (portfolio phase).** During the portfolio launch every product is seeded with `stock: 0` — add-to-cart is disabled and PDP/home show "Brak w magazynie". Commerce opens by seeding real stock, not by a feature flag. Do not "fix" the empty shop by seeding stock.
+- **`noindex` until real photos.** Site ships with `<meta name="robots" content="noindex">` at the layout level. Lifted only after **real** product photos land — AI-rendered placeholder imagery does not lift it.
 - **Admin must work at 375 px.** Wife uses phone as primary admin device.
 - **Returns and complaints are email-only.** No DB workflow. Forms post to `kontakt@sznytdesign.pl`.
 
