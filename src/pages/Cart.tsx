@@ -68,6 +68,8 @@ function Cart() {
     selectShippingMethod,
     paczkomatPoint,
     setPaczkomatPoint,
+    paczkomatOpenRequested,
+    clearPaczkomatOpenRequest,
     address,
     setAddressField,
     note,
@@ -231,7 +233,12 @@ function Cart() {
           {/* Paczkomat picker */}
           {shippingMethod === "paczkomat" && (
             <div className="flex flex-col gap-4">
-              <PaczkomatPicker selectedPoint={paczkomatPoint} onSelect={setPaczkomatPoint} />
+              <PaczkomatPicker
+                selectedPoint={paczkomatPoint}
+                onSelect={setPaczkomatPoint}
+                openRequested={paczkomatOpenRequested}
+                onOpenRequestHandled={clearPaczkomatOpenRequest}
+              />
               <AddressForm address={address} fieldErrors={fieldErrors} onFieldChange={setAddressField} />
             </div>
           )}

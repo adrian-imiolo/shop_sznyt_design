@@ -5,8 +5,9 @@ import type { CourierAddress, PaczkomatPoint } from "./types";
  * Constructs the Order's `shippingAddress` JSON — the shipping address
  * contract (CONTEXT.md glossary, ADR-0003). Explicit field-by-field so the
  * shape is visible here, not decided by spread order: the paczkomat point
- * contributes only `code` and `name`; its redundant `city` is deliberately
- * dropped in favor of the customer's own.
+ * contributes only `code` and `name`; its separate `city` field is
+ * deliberately dropped — the `city` key stays the customer's own, while the
+ * point's city travels inside `name` ("street, city", see toPaczkomatPoint).
  */
 export function buildShippingAddress(
   method: ShippingMethod,

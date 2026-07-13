@@ -20,6 +20,7 @@ const EMPTY_ADDRESS: CourierAddress = {
 export function useCheckout(items: CartItem[], userId: string | null | undefined) {
   const [shippingMethod, setShippingMethod] = useState<ShippingMethod | null>(null);
   const [paczkomatPoint, setPaczkomatPoint] = useState<PaczkomatPoint | null>(null);
+  const [paczkomatOpenRequested, setPaczkomatOpenRequested] = useState(false);
   const [address, setAddress] = useState<CourierAddress>(EMPTY_ADDRESS);
   const [note, setNote] = useState("");
   const [fieldErrors, setFieldErrors] = useState<CheckoutFieldErrors>({});
@@ -32,6 +33,13 @@ export function useCheckout(items: CartItem[], userId: string | null | undefined
   function selectShippingMethod(method: ShippingMethod) {
     setShippingMethod(method);
     setPaczkomatPoint(null);
+    // The auto-open request originates here and only here, so the map can
+    // never open on mount or draft restore — only on the user's click (#75).
+    setPaczkomatOpenRequested(method === "paczkomat");
+  }
+
+  function clearPaczkomatOpenRequest() {
+    setPaczkomatOpenRequested(false);
   }
 
   function setAddressField(key: keyof CourierAddress, value: string) {
@@ -70,6 +78,8 @@ export function useCheckout(items: CartItem[], userId: string | null | undefined
     selectShippingMethod,
     paczkomatPoint,
     setPaczkomatPoint,
+    paczkomatOpenRequested,
+    clearPaczkomatOpenRequest,
     address,
     setAddressField,
     note,
