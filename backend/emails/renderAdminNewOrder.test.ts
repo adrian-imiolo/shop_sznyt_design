@@ -4,10 +4,7 @@ import type { OrderEmailData } from "./types.ts";
 
 const sampleOrder: OrderEmailData = {
   orderId: 7,
-  items: [
-    { name: "Ramka Orzechowa 21×30", quantity: 1, unitPrice: 189 },
-    { name: "Dostawa — DPD Kurier", quantity: 1, unitPrice: 25 },
-  ],
+  items: [{ name: "Ramka Orzechowa 21×30", quantity: 1, unitPrice: 189 }],
   total: 214,
   shippingMethod: "dpd",
   shippingAddress: {
@@ -45,6 +42,15 @@ describe("renderAdminNewOrder", () => {
     expect(output).toContain("DPD Kurier");
     expect(output).toContain("Karta płatnicza");
   });
+
+  it.each(["html", "text"] as const)(
+    "shows the shipping cost as its own Dostawa line in %s",
+    (channel) => {
+      const output = channel === "html" ? html : text;
+      expect(output).toContain("Dostawa");
+      expect(output).toContain("25,00 PLN"); // 214 total − 189 items
+    },
+  );
 
   it.each(["html", "text"] as const)("shows the customer note in %s", (channel) => {
     const rendered = renderAdminNewOrder({
