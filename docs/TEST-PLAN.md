@@ -1,176 +1,263 @@
 # Sznyt Design — Manual Test Plan
 
-Run through before launch. Uses real browser, Stripe test mode, and Stripe CLI webhook forwarding.
+Two parts, matching the two launch gates:
 
-## Setup required
+- **Part A — Portfolio surface** is the checklist for the portfolio-launch gate (#31). Run against the **staged Vercel + Railway environment** (DNS not yet flipped), with **all stock at 0**. Verifies everything the DNS flip exposes: public pages, stock-0 gating, forms, legal pages, `noindex`.
+- **Part B — Commerce** is the checklist for the commerce-open gate (#85). Run against the **live domain** (`https://sznytdesign.pl`) after the DNS flip, with real stock seeded. Verifies the full purchase path: cart, checkout, Stripe payment, webhook, all six emails, my-orders, admin, fulfillment loop.
 
-- Frontend running: `npm run dev` (port 5173)
-- Backend running: `npx tsx index.js` (port 3000)
+Both parts are HITL: Adrian (and/or wife) clicks through each step on real desktop and mobile devices. Any red is fixed before the gate closes.
+
+## Setup
+
+### Local dev (for reproducing reds and pre-run smoke tests)
+
+- Frontend: `npm run dev` (port 5173)
+- Backend: `npx tsx index.js` from `backend/` — NOT plain `node` (port 3000)
+- Seed: `npx tsx seed.js` from `backend/`
 - Stripe CLI: `stripe listen --forward-to localhost:3000/webhook`
-- Stripe test cards: `4242 4242 4242 4242` (success), `4000 0000 0000 9995` (decline)
+- Chrome SSL gotcha: after a dev checkout, navigate manually to `http://localhost:5173/sukces` (Stripe `success_url` uses http in dev)
+
+### Stripe cards
+
+- Test mode (local / demo): `4242 4242 4242 4242` success, `4000 0000 0000 9995` decline — any future date, any CVC
+- **Live mode (Part B): a real card and a real charge.** Refund it from the Stripe dashboard afterwards (`docs/runbooks/refunds.md`). Test cards do not work live.
+
+### Which environment runs what
+
+| Part | Environment | Stripe | Webhook | Emails |
+|---|---|---|---|---|
+| A | Staged Vercel + Railway URL (pre-flip) | not exercised | not exercised | form emails only, via cyberfolks SMTP |
+| B | `https://sznytdesign.pl` (live) | live mode, one real charge | production endpoint (no CLI) | all six, via cyberfolks SMTP |
+
+Email checks: read `kontakt@sznytdesign.pl` (and the admin inboxes) in Thunderbird.
 
 ---
 
-### 1. Navigation & layout ✅ PASSED
+## Part A — Portfolio surface (gate: #31)
 
-- [x] All nav links work (Sklep, O nas, Kontakt)
-- [x] Active nav link highlighted in gold
-- [x] Logo links to `/`
-- [x] Cart icon shows badge with correct count
-- [x] Hamburger opens/closes on mobile
-- [x] Mobile nav link closes menu
-- [x] Footer links all work
-- [x] ScrollToTop appears after 300px, scrolls smoothly
-- [x] ScrollOnNav scrolls to top on route change
+Preconditions: staged URL up, all products seeded with `stock = 0`, `VITE_DEMO_MODE` **not** set.
 
-### 2. Home page (`/`)
+### A1. Navigation & layout
+
+- [ ] All nav links work (Sklep, O nas, Kontakt)
+- [ ] Active nav link highlighted in gold
+- [ ] Logo links to `/`
+- [ ] Cart icon shows badge with correct count
+- [ ] Hamburger opens/closes on mobile; tapping a link closes the menu
+- [ ] Footer links all work (incl. Regulamin, Polityka prywatności, Zwroty, FAQ)
+- [ ] ScrollToTop button appears after 300px, scrolls smoothly
+- [ ] Route change scrolls to top
+- [ ] Demo banner is absent (it only renders with `VITE_DEMO_MODE=true`)
+
+### A2. Home (`/`)
 
 - [ ] Hero renders, scroll indicator visible
-- [ ] ProductSection loads from backend
+- [ ] Product section loads products from the backend
 - [ ] BrandStatement renders
 - [ ] "Why us" 3-column strip renders
-- [ ] Footer correct links
+- [ ] Footer links correct
 
-### 3. Shop page (`/sklep`)
+### A3. Shop (`/sklep`)
 
-- [ ] Products load in grid
+- [ ] Products load in grid (name, tagline, price — cards intentionally have no stock info or add-to-cart button)
 - [ ] Hover swaps to lifestyle image
 - [ ] Click navigates to `/sklep/:id`
 - [ ] Philosophy + materials strips render
-- [ ] Out-of-stock handled gracefully
 
-### 4. Product detail (`/sklep/:id`)
+### A4. Product detail (`/sklep/:id`)
 
 - [ ] Name, description, price render
-- [ ] Image swap on hover
-- [ ] Stock count displayed
-- [ ] "Dodaj do koszyka" works + badge increments
-- [ ] Cannot exceed stock
-- [ ] Out of stock: button disabled
-- [ ] "← Odkryj całą kolekcję" → `/sklep`
 - [ ] Breadcrumb renders
+- [ ] Image swap on hover
+- [ ] "← Odkryj całą kolekcję" → `/sklep`
 
-### 5. Cart (`/koszyk`)
+### A5. Stock-0 gating (the portfolio state)
 
-- [ ] Items: image, name, unit price, quantity, line total
-- [ ] +/− buttons work; − disabled at 1; + capped at stock
-- [ ] "Usuń" removes item
-- [ ] Empty cart state with shop link
-- [ ] Subtotal correct
-- [ ] Free shipping banner at ≥ 350 PLN + progress bar
-- [ ] All 3 shipping methods selectable with correct cost
-- [ ] Paczkomat: widget picker + address fields
-- [ ] Kurier: address form only
-- [ ] All address fields required
-- [ ] Regulamin checkbox required
-- [ ] Checkout button disabled until: shipping + address + regulamin
-- [ ] Checkout → Stripe with pre-filled email
+- [ ] Product detail: availability line shows **"Brak w magazynie"** (instead of "X szt.")
+- [ ] Product detail: add-to-cart button disabled
+- [ ] Home product section: add-to-cart button disabled (note: label reads "Maksymalna ilość w koszyku" — the button caps at stock, there is no separate out-of-stock label on Home)
+- [ ] No path adds a stock-0 product to the cart; cart badge stays at 0
+- [ ] `/koszyk` shows the empty-cart state with a link to the shop
 
-### 6. Stripe checkout & payment
+### A6. Contact form (`/kontakt`)
 
-- [ ] Correct line items and shipping on Stripe page
-- [ ] Success card `4242...` → `/sukces?session_id=...`
-- [ ] Decline card `4000...0995` → error on Stripe page
-- [ ] Cancel → `/koszyk`
-- [ ] Webhook `checkout.session.completed` processed
-- [ ] Order created: status "paid", correct items, stock decremented
-- [ ] PaymentMethod + customerEmail saved
+- [ ] All fields fillable; submit shows loading → success state
+- [ ] Empty form → validation error
+- [ ] Submission stores a ContactMessage in the DB
+- [ ] Contact-notification email arrives at `kontakt@sznytdesign.pl` (Thunderbird)
+- [ ] Honeypot: fill the hidden `_hp` field via devtools and submit → fake success, **no** email, **no** DB row
+- [ ] A normal submission (honeypot empty) is not blocked
 
-### 7. Order success (`/sukces`)
+### A7. Returns & complaints (`/zwroty`)
 
-- [ ] Order details card with id + total
-- [ ] Item breakdown correct
-- [ ] "Moje zamówienia" link: visible signed-in, hidden guest
-- [ ] No session_id: handled gracefully
-
-### 8. My orders (`/moje-zamowienia`)
-
-- [ ] Unauth → sign-in redirect
-- [ ] Shows only user's orders
-- [ ] Card: order#, date, payment dot, fulfillment dot, thumbnails, total
-- [ ] Click → `/moje-zamowienia/:id`
-- [ ] Empty state
-
-### 9. Order detail (`/moje-zamowienia/:id`)
-
-- [ ] Order#, date, payment badge, fulfillment dot + label
-- [ ] Tracking number when set
-- [ ] Products: image, name, qty, price
-- [ ] Payment method shown
-- [ ] Shipping: Paczkomat → locker code; Kurier → full address
-- [ ] Total correct
-- [ ] "← Moje zamówienia" works
-- [ ] Cannot access other user's order (403)
-
-### 10. Admin — Products (`/admin`)
-
-- [ ] Non-admin redirected (AdminGuard)
-- [ ] Product list loads
-- [ ] ▲▼ reorder persists on reload
-- [ ] Edytuj → pre-filled edit page
-- [ ] Usuń → confirm modal → delete + remove from list
-
-### 11. Admin — Add product (`/admin/produkty/nowy`)
-
-- [ ] Form submits, creates product, navigates to /admin
-
-### 12. Admin — Edit product (`/admin/produkty/:id`)
-
-- [ ] Pre-filled form, saves correctly, "Anuluj" returns without saving
-
-### 13. Admin — Orders (`/admin/zamowienia`)
-
-- [ ] All orders listed, newest first
-- [ ] Fulfillment dropdown PATCHes immediately
-- [ ] Tracking number saves on blur
-- [ ] "Wysłane" + tracking → triggers shipping email
-
-### 14. Auth (Clerk)
-
-- [ ] "Zaloguj" → Polish sign-in modal
-- [ ] Sign in → UserButton with "Moje zamówienia"
-- [ ] Sign out → "Zaloguj" returns
-- [ ] Guest checkout works
-- [ ] Signed-in checkout → userId on order
-
-### 15. Contact (`/kontakt`)
-
-- [ ] All fields fillable, submit shows loading → success
-- [ ] Empty form → error
-- [ ] ContactMessage saved in DB
-
-### 16. Zwroty (`/zwroty`)
-
-- [ ] Tab switch works
-- [ ] Both forms: all required, submit → success
+- [ ] Tab switch between zwrot and reklamacja works
+- [ ] Both forms: all fields required, submit → success state
 - [ ] Info boxes render
+- [ ] Return-request email arrives at `kontakt@sznytdesign.pl`
+- [ ] Complaint-request email arrives at `kontakt@sznytdesign.pl`
+- [ ] Honeypot on both forms: filled `_hp` → fake success, no email
 
-### 17. FAQ (`/faq`)
+### A8. FAQ (`/faq`)
 
 - [ ] Accordion opens/closes
-- [ ] "Formularz reklamacyjny" → `/zwroty`
-- [ ] CTA links: /kontakt and /zwroty
+- [ ] "Formularz reklamacyjny" link → `/zwroty`
+- [ ] CTA links → `/kontakt` and `/zwroty`
 
-### 18. Legal pages
+### A9. Legal pages
 
-- [ ] `/regulamin` and `/polityka-prywatnosci` render all sections
-- [ ] Links from Cart checkbox open in new tab
+- [ ] `/regulamin` renders all sections (post-#90 rewrite: DN status, 14-day withdrawal incl. the art. 32 no-advance-commitment sentence, rachunek / faktura bez VAT on request)
+- [ ] `/polityka-prywatnosci` renders all sections (post-#99: browser-storage description, Stripe/Clerk DPF transfers, Adrian as sole controller)
+- [ ] Both reachable from the footer
 
-### 19. Responsiveness (390px viewport)
+### A10. Browser storage (no cookie banner)
 
-- [ ] Navbar → hamburger
-- [ ] Hero readable
+The cookie banner was removed in #96 — cart and checkout draft are strictly-necessary storage, described in the privacy policy instead of gated by consent.
+
+- [ ] **No cookie banner appears** on any page, desktop or mobile
+- [ ] Cart contents survive a page reload (localStorage) with no consent prompt
+
+### A11. `noindex`
+
+- [ ] View-source on home, shop, product detail, cart, kontakt, FAQ, zwroty, regulamin, polityka prywatności, and `/admin`: `<meta name="robots" content="noindex, nofollow" />` present (single source: `index.html`)
+
+### A12. Public mobile (375px, real phone)
+
+- [ ] No horizontal scrolling on any public page
+- [ ] Navbar collapses to hamburger; hero readable
 - [ ] Shop grid: single column
-- [ ] ProductDetail: stacked
-- [ ] Cart: compact layout
-- [ ] Address form: single column
-- [ ] MyOrders: stacked headers
+- [ ] Product detail: stacked layout
+- [ ] Forms (kontakt, zwroty) usable
 - [ ] Footer: centered, columns side by side
 
-### 20. Edge cases
+---
 
-- [ ] stock=0 → cannot add to cart
-- [ ] Non-existent order id → error handled
-- [ ] Non-admin → /admin redirected
-- [ ] Duplicate webhook → order not duplicated (unique stripeSessionId)
-- [ ] Same product added twice → quantity increments, not duplicate line
+## Part B — Commerce (gate: #85)
+
+Preconditions: DNS flipped, real stock seeded (≥ 1), Stripe live keys + production webhook endpoint configured, Clerk production instance with `publicMetadata.role = "admin"` on both admin accounts. One step makes a **real charge** — refund it afterwards.
+
+### B1. Cart (`/koszyk`)
+
+- [ ] Items show image, name, unit price, quantity, line total
+- [ ] +/− buttons work; − disabled at quantity 1; + capped at stock
+- [ ] "Usuń" removes the item
+- [ ] Adding the same product twice increments quantity — no duplicate line
+- [ ] Subtotal correct
+- [ ] Below 350 PLN: progress bar + "Brakuje Ci jeszcze X PLN do darmowej dostawy."
+- [ ] At ≥ 350 PLN: "Masz darmową dostawę!" and shipping shows Gratis
+- [ ] Cart survives page reload (localStorage)
+
+### B2. Shipping & address form
+
+- [ ] Three methods selectable with correct cost: InPost Paczkomat 20 PLN, InPost Kurier 25 PLN, DPD Kurier 25 PLN (all Gratis at ≥ 350 PLN)
+- [ ] Address form appears for **every** method — paczkomat included (widget point + full address)
+- [ ] All 7 address fields required: imię, nazwisko, e-mail, ulica, kod pocztowy, miasto, telefon
+- [ ] Format validation fires on submit attempt (e-mail shape, kod `XX-XXX`, telefon 9 cyfr / `+48`) — errors shown inline, button itself is not gated by format
+- [ ] Order note: "Uwagi do zamówienia (opcjonalnie)" textarea appears once a method is selected; live counter; input capped at 300 characters
+- [ ] Regulamin checkbox required; its Regulamin and Polityka prywatności links open in a new tab
+- [ ] Checkout button disabled until: method selected + paczkomat point (if paczkomat) + all address fields filled + checkbox checked
+- [ ] Button shows "Przekierowywanie..." while redirecting to Stripe
+
+### B3. Checkout draft persistence
+
+- [ ] Fill method + point + address + note → navigate to `/sklep` → back to `/koszyk`: everything restored (sessionStorage)
+- [ ] Close the tab → reopen the site: form empty (draft dies with the tab)
+- [ ] Restoring a draft with paczkomat selected does **not** auto-open the map
+- [ ] After a completed checkout, returning to `/koszyk` shows an empty form (draft cleared on `/sukces`)
+
+### B4. Paczkomat widget (easyPack)
+
+- [ ] Clicking the Paczkomat method **auto-opens** the map widget — no second click needed
+- [ ] Closing the widget without picking: "Wybierz paczkomat" button remains, checkout stays gated
+- [ ] Picking a point shows "Wybrany: {code} — {street}, {city}" — full address including city
+- [ ] "Zmień paczkomat" reopens the widget
+- [ ] Widget works in production (live domain) and at 375px
+
+### B5. Checkout errors
+
+- [ ] Backend unreachable → Polish fallback "Nie udało się przejść do płatności. Spróbuj ponownie." — never a raw English "Failed to fetch"
+- [ ] Server-side stock conflict (someone bought the last unit first) → Polish server message shown
+- [ ] Hammering checkout (>10/min) → rate-limit message "Zbyt wiele prób. Spróbuj ponownie za chwilę."
+
+### B6. Stripe payment & webhook
+
+- [ ] Stripe page shows correct line items, shipping line, and pre-filled email
+- [ ] Payment methods offered: card, Przelewy24, BLIK
+- [ ] Cancel on Stripe → back to `/koszyk`, cart intact
+- [ ] (Test mode only) decline card `4000...9995` → error stays on the Stripe page
+- [ ] **Live order:** pay with a real card → lands on `/sukces?session_id=...`
+- [ ] Webhook creates the order: status `paid`, correct items and quantities, prices snapshotted
+- [ ] Stock decremented by exactly the ordered quantity (atomic, in the webhook — verify in admin)
+- [ ] `paymentMethod`, `customerEmail`, and the order note saved on the order
+- [ ] Duplicate webhook delivery (Stripe dashboard → resend event) → no duplicate order, no duplicate email (`stripeSessionId` idempotency)
+- [ ] **Refund the live charge** from the Stripe dashboard afterwards (`docs/runbooks/refunds.md`)
+
+### B7. Order success (`/sukces`)
+
+- [ ] Order summary card with id + total; item breakdown correct
+- [ ] "Moje zamówienia" link visible when signed in, hidden for guests
+- [ ] Cart and checkout draft cleared
+- [ ] No `session_id` in the URL → redirect to `/sklep`
+- [ ] Slow webhook: page polls, then shows "Płatność została przyjęta, a zamówienie wciąż się przetwarza…" instead of an error
+
+### B8. Transactional emails (all six, from `kontakt@sznytdesign.pl` via cyberfolks)
+
+- [ ] **Order confirmation** (customer): full line items, quantities, unit prices, shipping address, paczkomat point with city, payment method, order note, grand total; branded HTML + plain-text part
+- [ ] **Admin new order** (to `CONTACT_RECIPIENT`): arrives the moment the webhook records the order
+- [ ] **Order shipped** (customer): fires only when status is set to Wysłane **and** tracking number is present; contains the tracking number
+- [ ] **Contact notification** (admin) — covered in A6, re-verify live
+- [ ] **Return request** (admin) — covered in A7, re-verify live
+- [ ] **Complaint request** (admin) — covered in A7, re-verify live
+
+### B9. My orders (customer)
+
+- [ ] `/moje-zamowienia` unauthenticated → sign-in redirect
+- [ ] Shows only the signed-in user's orders; empty state when none
+- [ ] Card: order #, date, payment dot, fulfillment dot, thumbnails, total
+- [ ] Click → `/moje-zamowienia/:id`: order #, date, payment badge, fulfillment label, tracking number when set, products with image/qty/price, payment method, delivery (paczkomat → locker code + address with city; kurier → full address), total
+- [ ] "← Moje zamówienia" back link works
+- [ ] Another user's order id → 403 handled gracefully
+
+### B10. Auth & roles (Clerk)
+
+- [ ] "Zaloguj" opens the Polish sign-in modal
+- [ ] Signed in: UserButton with "Moje zamówienia"; sign out restores "Zaloguj"
+- [ ] Guest checkout works end-to-end (order has no userId)
+- [ ] Signed-in checkout stamps userId on the order
+- [ ] **Both** admin accounts (Adrian + wife) pass the admin guard
+- [ ] A non-admin Clerk user: redirected away from `/admin` routes **and** gets 403 on admin API endpoints
+
+### B11. Admin — products & revenue banner (`/admin`)
+
+- [ ] Revenue banner: "Przychód Q{n} {year}", total vs 10 813,50 zł cap, percentage, progress bar
+- [ ] Thresholds: < 70% green, no message; ≥ 70% amber "Ponad 70% limitu — czas zaplanować rejestrację działalności."; ≥ 90% red "Ponad 90% limitu — rozpocznij rejestrację działalności."; > 100% "Limit przekroczony — obowiązek rejestracji działalności w ciągu 7 dni!"
+- [ ] Banner sums only `paid` orders from the current calendar quarter (the live test order should appear in the total)
+- [ ] Product list loads; ▲▼ reorder persists after reload; arrows disabled at list ends
+- [ ] "Edytuj" → pre-filled edit page; saves; "Anuluj" returns without saving
+- [ ] "Usuń" → confirm modal → deletes and removes from the list (historical orders keep their line items)
+- [ ] `/admin/produkty/nowy`: form creates a product and navigates back to `/admin`
+
+### B12. Admin — orders & fulfillment loop (`/admin/zamowienia`, `/admin/zamowienia/:id`)
+
+- [ ] All orders listed, newest first; guest orders included
+- [ ] Address column shows "Uwagi: …" in accent when the order has a note
+- [ ] Fulfillment dropdown (Przyjęte / W realizacji / Wysłane / Dostarczone) PATCHes immediately
+- [ ] Tracking number saves on blur
+- [ ] Setting Wysłane with a tracking number triggers the shipping email (see B8)
+- [ ] Order id links to the detail page: line items with images, Dostawa cost row, total, delivery method + paczkomat point, payment method, full recipient address, note section when present
+- [ ] Fulfillment controls on the **detail page** behave identically to the list's inline controls (same email trigger)
+- [ ] **Full loop:** admin new-order email → open admin on phone → set Wysłane + paste tracking → customer receives the shipping email
+
+### B13. Admin mobile (375px, real phone — wife's primary device)
+
+- [ ] Revenue banner legible
+- [ ] Products list usable (reorder, edit, delete)
+- [ ] Orders list usable (table scrolls horizontally inside its container; page doesn't break)
+- [ ] Order detail readable; fulfillment loop (status + tracking) doable one-handed
+- [ ] No horizontal page scroll on any admin route
+
+### B14. Edge cases
+
+- [ ] Product goes out of stock after it's in someone's cart → checkout returns the Polish stock error, no order created
+- [ ] Non-existent order id (customer and admin detail pages) → error handled, no crash
+- [ ] Direct navigation to `/admin/*` as guest or non-admin → redirected
+- [ ] `/sukces` with a bogus `session_id` → handled gracefully (polling gives up with the processing message)
