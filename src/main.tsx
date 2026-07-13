@@ -5,7 +5,6 @@ import App from "./App.tsx";
 import { ClerkProvider } from "@clerk/react";
 import { plPL } from "@clerk/localizations";
 import { HelmetProvider } from "react-helmet-async";
-import { CookieConsentProvider } from "./context/CookieConsentContext";
 
 const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -13,9 +12,7 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <HelmetProvider>
       <ClerkProvider publishableKey={publishableKey} afterSignOutUrl="/" localization={plPL}>
-        <CookieConsentProvider>
-          <App />
-        </CookieConsentProvider>
+        <App />
       </ClerkProvider>
     </HelmetProvider>
   </StrictMode>,

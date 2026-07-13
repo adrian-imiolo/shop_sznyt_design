@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
 import type { ShippingMethod } from "@sznyt/shared";
 import { apiFetch } from "../lib/api";
-import { useCookieConsent } from "../hooks/useCookieConsent";
-import { hasStoredConsent } from "../context/cookie-consent-context";
 import { validateCheckoutDraft } from "./validateCheckoutDraft";
 import { checkoutErrorMessage } from "./checkoutErrorMessage";
 import { buildCheckoutRequest } from "./buildCheckoutRequest";
-import { loadCheckoutDraft, saveCheckoutDraft, clearCheckoutDraft } from "./checkoutDraftStorage";
+import { loadCheckoutDraft, saveCheckoutDraft } from "./checkoutDraftStorage";
 import type { CheckoutDraft, CheckoutFieldErrors, CourierAddress, PaczkomatPoint } from "./types";
 import type { CartItem } from "../types";
 
@@ -22,8 +20,7 @@ const EMPTY_ADDRESS: CourierAddress = {
  * Stripe redirect is this hook's only browser dependency.
  */
 export function useCheckout(items: CartItem[], userId: string | null | undefined) {
-  const { consent } = useCookieConsent();
-  const [restored] = useState(() => (hasStoredConsent() ? loadCheckoutDraft() : null));
+  const [restored] = useState(loadCheckoutDraft);
   const [shippingMethod, setShippingMethod] = useState<ShippingMethod | null>(
     restored?.shippingMethod ?? null,
   );
@@ -38,12 +35,8 @@ export function useCheckout(items: CartItem[], userId: string | null | undefined
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (consent === "accepted") {
-      saveCheckoutDraft({ shippingMethod, paczkomatPoint, address, note });
-    } else {
-      clearCheckoutDraft();
-    }
-  }, [consent, shippingMethod, paczkomatPoint, address, note]);
+    saveCheckoutDraft({ shippingMethod, paczkomatPoint, address, note });
+  }, [shippingMethod, paczkomatPoint, address, note]);
 
   const draft: CheckoutDraft = { items, shippingMethod, paczkomatPoint, address };
   const isComplete = validateCheckoutDraft(draft).missing.length === 0;

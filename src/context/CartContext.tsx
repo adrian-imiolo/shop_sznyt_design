@@ -1,32 +1,15 @@
 import { useState, useEffect, useCallback } from "react";
 import type { CartItem } from "../types";
 import { CartContext } from "./cart-context";
-import { addToCart, mergeDuplicateItems } from "../cart/cartItems";
-import { useCookieConsent } from "../hooks/useCookieConsent";
-import { hasStoredConsent } from "./cookie-consent-context";
+import { addToCart } from "../cart/cartItems";
+import { loadCart, saveCart } from "../cart/cartStorage";
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const { consent } = useCookieConsent();
-  const [items, setItems] = useState<CartItem[]>(() => {
-    if (hasStoredConsent()) {
-      try {
-        const stored = localStorage.getItem("cart");
-        // merge, not just parse — carts saved before #70 may hold duplicate lines
-        return stored ? mergeDuplicateItems(JSON.parse(stored)) : [];
-      } catch {
-        return [];
-      }
-    }
-    return [];
-  });
+  const [items, setItems] = useState<CartItem[]>(loadCart);
 
   useEffect(() => {
-    if (consent === "accepted") {
-      localStorage.setItem("cart", JSON.stringify(items));
-    } else {
-      localStorage.removeItem("cart");
-    }
-  }, [items, consent]);
+    saveCart(items);
+  }, [items]);
 
   function addItem(newItem: Omit<CartItem, "quantity">) {
     // merge decision must run against prev, not the render closure — two rapid
