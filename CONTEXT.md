@@ -13,17 +13,18 @@ Premium e-commerce shop selling designer wooden picture frames at `sznytdesign.p
 
 - **Quarterly revenue cap (2026):** 10,813.50 PLN. Crossing it triggers mandatory business registration within 7 days. Cap value is set by law and changes year over year — bumped manually in code each tax year.
 - **Refunded (returned) orders don't count toward the cap** — *przychód należny* excludes the value of returned goods (art. 5 ust. 6 Prawa przedsiębiorców). The admin banner still counts them (it only sums `paid` orders), so it can only over-count — subtract refunds by hand when near the cap. Procedure: `docs/runbooks/refunds.md`.
-- **Pre-registration constraints:** can only issue `rachunek` (informal receipt), not `faktura VAT`. No NIP collection at checkout. No VAT in pricing language.
+- **Pre-registration constraints:** issues `rachunek` on the buyer's request (art. 87 § 1 Ordynacji podatkowej) and `faktura bez VAT` on the buyer's request made within 3 months (art. 106b ust. 3 pkt 2 ustawy o VAT) — never `faktura VAT`. No NIP collection at checkout. No VAT in pricing language.
 - **Statutory 14-day refund right** for distance-purchase consumers — non-negotiable, must be reflected in regulamin.
 
 ## Domain glossary
 
 - **Działalność nierejestrowana (DN)** — unregistered business activity. Polish legal regime allowing commerce below a quarterly revenue cap without business registration.
 - **NIP** — Polish tax identification number. Required to issue `faktura VAT`. Not collected pre-registration.
-- **Rachunek** — informal receipt. What customers get pre-NIP. Line items, totals, seller and buyer data, no VAT or NIP.
+- **Rachunek** — informal receipt, issued on the buyer's request. Line items, totals, seller and buyer data, no VAT or NIP.
+- **Faktura bez VAT** — invoice without VAT (sale exempt under art. 113 ustawy o VAT). Mandatory when the buyer requests one within 3 months of delivery; does NOT require business registration or a seller NIP.
 - **Faktura VAT** — VAT invoice. Requires NIP. Blocked until business registration.
 - **Regulamin** — terms of service. Legal requirement under Polish e-commerce law. Lives at `src/pages/Regulamin.tsx`. Must declare DN status, refund right, returns/complaints procedures, data controller.
-- **Polityka prywatności** — privacy policy. Lives at `src/pages/PolitykaPrywatnosci.tsx`. Must describe cookie usage, data processing basis, controller.
+- **Polityka prywatności** — privacy policy. Lives at `src/pages/PolitykaPrywatnosci.tsx`. Must describe browser storage (art. 399 Prawa komunikacji elektronicznej), data processing bases, third-country transfers (Stripe/Clerk DPF), controller — consistent with the regulamin.
 - **Paczkomat / InPost** — Polish parcel locker network. Most common delivery method for low-value e-commerce.
 - **easyPack** — InPost's JS widget for paczkomat selection at checkout. No business account required.
 - **Apaczka / Sendit** — Polish shipping-label aggregators. Operate on individual accounts, no business registration required. Used to manually generate paczkomat labels; admin pastes tracking back into the order.
@@ -83,7 +84,7 @@ All rendered by per-template render functions returning `{ subject, html, text }
 - **Atomic stock decrement.** Stock decrements happen in the Stripe webhook handler inside a Prisma transaction. Never decrement on cart-add or checkout-start — only on payment confirmation.
 - **Stripe webhook is the source of truth.** Order status transitions to `paid` only via the webhook. `/sukces` is a UX page, not a state transition.
 - **`stripeSessionId` is the idempotency key.** Webhook retries must be no-ops.
-- **Rachunek only pre-NIP.** No `faktura VAT` UI, no NIP field on checkout, no VAT in pricing copy until business registration ships.
+- **Rachunek / faktura bez VAT on request, pre-NIP.** Both issued manually by email on the buyer's request (regulamin § 5 pkt 3). No `faktura VAT` UI, no NIP field on checkout, no VAT in pricing copy until business registration ships.
 - **Quarterly revenue cap is monitored, not enforced.** Admin sees a banner with running total + 70 % / 90 % / over thresholds. Crossing it is a manual action (begin registration), not an automatic block.
 - **Production launches only with real products.** The domain flip waits for frames, photos, and descriptions (issues labeled `waiting-for-products`). The interim public artifact is the recruiter demo, not the domain.
 - **Seed defaults to stock 0.** `seed.js` seeds `stock: 0` unless `SEED_STOCK=<n>` is set — fail-safe toward an unpurchasable shop (stock 0 disables add-to-cart and shows "Brak w magazynie"). The demo seeds with `SEED_STOCK` so recruiters can complete test purchases.
