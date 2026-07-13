@@ -104,14 +104,16 @@ function Navbar() {
                 </span>
               )}
             </Link>
+            {/* 2px lines + 4px gaps center on whole pixels inside h-6; fractional
+                heights render each line with different antialiasing (uneven thickness) */}
             <button
-              className="md:hidden flex flex-col justify-center gap-1.25 w-6 h-6"
+              className="md:hidden flex flex-col justify-center gap-1 w-6 h-6"
               onClick={() => setToggleMenu(!toggleMenu)}
               aria-label={toggleMenu ? "Zamknij menu" : "Otwórz menu"}
             >
-              <span className={`block w-6 h-[1.5px] bg-near-black transition-all duration-300 origin-center ${toggleMenu ? "translate-y-[6.5px] rotate-45" : ""}`} />
-              <span className={`block w-6 h-[1.5px] bg-near-black transition-all duration-300 ${toggleMenu ? "opacity-0" : ""}`} />
-              <span className={`block w-6 h-[1.5px] bg-near-black transition-all duration-300 origin-center ${toggleMenu ? "-translate-y-[6.5px] -rotate-45" : ""}`} />
+              <span className={`block w-6 h-[2px] bg-near-black transition-all duration-300 origin-center ${toggleMenu ? "translate-y-[6px] rotate-45" : ""}`} />
+              <span className={`block w-6 h-[2px] bg-near-black transition-all duration-300 ${toggleMenu ? "opacity-0" : ""}`} />
+              <span className={`block w-6 h-[2px] bg-near-black transition-all duration-300 origin-center ${toggleMenu ? "-translate-y-[6px] -rotate-45" : ""}`} />
             </button>
           </div>
         </div>
