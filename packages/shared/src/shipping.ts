@@ -20,3 +20,10 @@ export function calcShippingCost(subtotal: number, method: string | null): numbe
   if (!method) return 0;
   return subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : (SHIPPING_COSTS[method] ?? 0);
 }
+
+// Recovers the shipping cost of a recorded order, whose total includes
+// shipping but whose line items don't. Clamped at 0 so inconsistent
+// historical data can never render a negative delivery line.
+export function deriveShippingCost(total: number, itemsSubtotal: number): number {
+  return Math.max(0, total - itemsSubtotal);
+}

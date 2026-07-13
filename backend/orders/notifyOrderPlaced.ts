@@ -12,15 +12,18 @@ export async function notifyOrderPlaced(
   facts: PaidOrderFacts,
   orderId: number,
 ): Promise<void> {
-  // Shipping appears as a regular line item, so the receipt shows
-  // delivery cost without special-casing it.
+  // Only product lines become email items (the line-item contract:
+  // productId null marks the shipping line). The renderer derives the
+  // delivery cost from the total and shows it as its own Dostawa row.
   const emailData: OrderEmailData = {
     orderId,
-    items: facts.lineItems.map((item) => ({
-      name: item.name,
-      quantity: item.quantity,
-      unitPrice: item.unitPrice,
-    })),
+    items: facts.lineItems
+      .filter((item) => item.productId !== null)
+      .map((item) => ({
+        name: item.name,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+      })),
     total: facts.total,
     shippingMethod: facts.shippingMethod,
     shippingAddress: facts.shippingAddress,

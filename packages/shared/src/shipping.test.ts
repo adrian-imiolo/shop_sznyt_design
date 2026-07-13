@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { calcShippingCost, isShippingMethod, SHIPPING_COSTS, SHIPPING_METHODS, FREE_SHIPPING_THRESHOLD } from "./shipping.ts";
+import { calcShippingCost, deriveShippingCost, isShippingMethod, SHIPPING_COSTS, SHIPPING_METHODS, FREE_SHIPPING_THRESHOLD } from "./shipping.ts";
 import { FULFILLMENT_LABELS, FULFILLMENT_LABELS_SHORT, SHIPPING_METHOD_LABELS } from "./labels.ts";
 import { FULFILLMENT_STATUSES } from "./statuses.ts";
 
@@ -20,6 +20,20 @@ describe("calcShippingCost", () => {
 
   it("is free above the threshold", () => {
     expect(calcShippingCost(FREE_SHIPPING_THRESHOLD + 1, "dpd")).toBe(0);
+  });
+});
+
+describe("deriveShippingCost", () => {
+  it("is the gap between the order total and the items subtotal", () => {
+    expect(deriveShippingCost(319, 299)).toBe(20);
+  });
+
+  it("is 0 for free-shipping orders (total equals items subtotal)", () => {
+    expect(deriveShippingCost(400, 400)).toBe(0);
+  });
+
+  it("never goes negative on inconsistent data", () => {
+    expect(deriveShippingCost(290, 299)).toBe(0);
   });
 });
 

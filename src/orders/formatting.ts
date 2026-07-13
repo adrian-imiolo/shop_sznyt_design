@@ -1,3 +1,4 @@
+import { FREE_SHIPPING_LABEL, deriveShippingCost } from "@sznyt/shared";
 import type { ShippingAddress } from "@sznyt/shared";
 
 // Pure order-presentation formatters shared by every surface that renders
@@ -32,4 +33,24 @@ export function formatRecipientLine(address: Partial<ShippingAddress>): string {
 /** Paczkomat point summary, e.g. "Paczkomat: KRA010, Kraków". */
 export function formatPaczkomatLine(address: Partial<ShippingAddress>): string {
   return `Paczkomat: ${address.code ?? ""}${address.city ? `, ${address.city}` : ""}`;
+}
+
+/**
+ * Shipping cost of a recorded order — the gap between its grand total and
+ * its line items, since Order doesn't persist the cost as a field.
+ */
+export function orderShippingCost(order: {
+  total: number;
+  items?: { price: number; quantity: number }[];
+}): number {
+  const subtotal = (order.items ?? []).reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
+  return deriveShippingCost(order.total, subtotal);
+}
+
+/** "Gratis" for free shipping, otherwise the amount — matching the emails. */
+export function formatShippingCost(cost: number): string {
+  return cost === 0 ? FREE_SHIPPING_LABEL : `${cost} PLN`;
 }

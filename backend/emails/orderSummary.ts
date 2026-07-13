@@ -1,7 +1,12 @@
 // Shared receipt fragments used by the customer confirmation and the admin
 // new-order alert, so both emails always agree on what an order looks like.
 
-import { PAYMENT_METHOD_LABELS, SHIPPING_METHOD_LABELS } from "@sznyt/shared";
+import {
+  FREE_SHIPPING_LABEL,
+  PAYMENT_METHOD_LABELS,
+  SHIPPING_METHOD_LABELS,
+  deriveShippingCost,
+} from "@sznyt/shared";
 import { escapeHtml, formatPln, layoutColors, sectionHeadingHtml } from "./layout.ts";
 import type { OrderEmailData, ShippingAddress } from "./types.ts";
 
@@ -36,6 +41,21 @@ export function shippingAddressLines(
   return lines;
 }
 
+// Items carry only product lines; shipping is the gap between their subtotal
+// and the grand total, shown as its own row ("Gratis" when free) so the
+// receipt visibly adds up.
+function shippingCostOf(data: OrderEmailData): number {
+  const subtotal = data.items.reduce(
+    (sum, item) => sum + item.unitPrice * item.quantity,
+    0,
+  );
+  return deriveShippingCost(data.total, subtotal);
+}
+
+function shippingCostLabel(cost: number): string {
+  return cost === 0 ? FREE_SHIPPING_LABEL : formatPln(cost);
+}
+
 export function orderItemsHtml(data: OrderEmailData): string {
   const rows = data.items
     .map(
@@ -47,8 +67,16 @@ export function orderItemsHtml(data: OrderEmailData): string {
     )
     .join("");
 
+  const shippingRow = data.shippingMethod
+    ? `<tr>
+      <td colspan="2" style="padding:8px 0;border-bottom:1px solid ${layoutColors.borders};">Dostawa</td>
+      <td style="padding:8px 0;border-bottom:1px solid ${layoutColors.borders};text-align:right;white-space:nowrap;">${shippingCostLabel(shippingCostOf(data))}</td>
+    </tr>`
+    : "";
+
   return `<table style="width:100%;border-collapse:collapse;font-size:14px;" role="presentation">
     ${rows}
+    ${shippingRow}
     <tr>
       <td colspan="2" style="padding:12px 0 0;font-weight:600;">Suma</td>
       <td style="padding:12px 0 0;text-align:right;font-weight:600;white-space:nowrap;color:${layoutColors.accent};">${formatPln(data.total)}</td>
@@ -60,6 +88,9 @@ export function orderItemsText(data: OrderEmailData): string {
   const rows = data.items.map(
     (item) => `- ${item.name} × ${item.quantity} — ${formatPln(item.unitPrice)}`,
   );
+  if (data.shippingMethod) {
+    rows.push(`- Dostawa — ${shippingCostLabel(shippingCostOf(data))}`);
+  }
   return [...rows, "", `Suma: ${formatPln(data.total)}`].join("\n");
 }
 

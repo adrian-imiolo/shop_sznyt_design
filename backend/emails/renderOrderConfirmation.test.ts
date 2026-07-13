@@ -4,10 +4,7 @@ import type { OrderEmailData } from "./types.ts";
 
 const sampleOrder: OrderEmailData = {
   orderId: 42,
-  items: [
-    { name: "Ramka Dębowa 30×40", quantity: 2, unitPrice: 149 },
-    { name: "Dostawa — InPost Paczkomat", quantity: 1, unitPrice: 20 },
-  ],
+  items: [{ name: "Ramka Dębowa 30×40", quantity: 2, unitPrice: 149 }],
   total: 318,
   shippingMethod: "paczkomat",
   shippingAddress: {
@@ -46,6 +43,28 @@ describe("renderOrderConfirmation", () => {
     expect(output).toContain("InPost Paczkomat");
     expect(output).toContain("BLIK");
   });
+
+  it.each(["html", "text"] as const)(
+    "shows the shipping cost as its own Dostawa line in %s",
+    (channel) => {
+      const output = channel === "html" ? html : text;
+      expect(output).toContain("Dostawa");
+      expect(output).toContain("20,00 PLN"); // 318 total − 298 items
+    },
+  );
+
+  it.each(["html", "text"] as const)(
+    "shows Gratis for free-shipping orders in %s",
+    (channel) => {
+      const rendered = renderOrderConfirmation({
+        ...sampleOrder,
+        items: [{ name: "Ramka Dębowa 30×40", quantity: 3, unitPrice: 149 }],
+        total: 447, // above the free-shipping threshold, no shipping charged
+      });
+      const output = channel === "html" ? rendered.html : rendered.text;
+      expect(output).toContain("Gratis");
+    },
+  );
 
   it.each(["html", "text"] as const)("echoes the customer note in %s", (channel) => {
     const rendered = renderOrderConfirmation({

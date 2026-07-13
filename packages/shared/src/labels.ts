@@ -31,6 +31,9 @@ export const SHIPPING_METHOD_LABELS: Record<string, string> = {
   dpd: "DPD Kurier",
 };
 
+/** Wording for a free-shipping Dostawa line — shared so web and emails can't drift. */
+export const FREE_SHIPPING_LABEL = "Gratis";
+
 export const PAYMENT_METHOD_LABELS: Record<string, string> = {
   card: "Karta płatnicza",
   p24: "Przelewy24",

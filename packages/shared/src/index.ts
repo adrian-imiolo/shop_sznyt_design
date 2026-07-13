@@ -6,6 +6,7 @@ export {
   FULFILLMENT_LABELS_SHORT,
   SHIPPING_METHOD_LABELS,
   PAYMENT_METHOD_LABELS,
+  FREE_SHIPPING_LABEL,
 } from "./labels.ts";
 export {
   SHIPPING_METHODS,
@@ -13,6 +14,7 @@ export {
   SHIPPING_COSTS,
   FREE_SHIPPING_THRESHOLD,
   calcShippingCost,
+  deriveShippingCost,
 } from "./shipping.ts";
 export type { ShippingMethod } from "./shipping.ts";
 export type { ShippingAddress } from "./shippingAddress.ts";

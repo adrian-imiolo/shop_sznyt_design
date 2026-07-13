@@ -5,7 +5,13 @@ import {
   PAYMENT_METHOD_LABELS,
 } from "@sznyt/shared";
 import type { Order, OrderItem } from "../types";
-import { formatOrderDate, formatPaczkomatLine, formatRecipientLine } from "./formatting";
+import {
+  formatOrderDate,
+  formatPaczkomatLine,
+  formatRecipientLine,
+  formatShippingCost,
+  orderShippingCost,
+} from "./formatting";
 
 /**
  * The one presentational rendering of an Order for customer surfaces.
@@ -88,6 +94,12 @@ function SummaryCard({ order }: { order: Order }) {
             <span>{item.price * item.quantity} PLN</span>
           </div>
         ))}
+        {order.shippingMethod && (
+          <div className="flex justify-between font-dm-sans text-near-black text-sm">
+            <span>Dostawa</span>
+            <span>{formatShippingCost(orderShippingCost(order))}</span>
+          </div>
+        )}
       </div>
 
       <div className="border-t border-borders pt-4 flex justify-between font-dm-sans text-near-black font-medium">
@@ -276,9 +288,19 @@ function DetailBody({ order }: { order: Order }) {
       </div>
 
       {/* Total */}
-      <div className="border-t border-borders mt-10 pt-6 flex justify-between items-center">
-        <p className="font-dm-sans text-sm text-secondary-text tracking-widest uppercase">Suma</p>
-        <p className="font-cormorant text-3xl text-near-black font-light">{order.total} PLN</p>
+      <div className="border-t border-borders mt-10 pt-6 flex flex-col gap-3">
+        {order.shippingMethod && (
+          <div className="flex justify-between items-center">
+            <p className="font-dm-sans text-sm text-secondary-text tracking-widest uppercase">Dostawa</p>
+            <p className="font-dm-sans text-sm text-near-black">
+              {formatShippingCost(orderShippingCost(order))}
+            </p>
+          </div>
+        )}
+        <div className="flex justify-between items-center">
+          <p className="font-dm-sans text-sm text-secondary-text tracking-widest uppercase">Suma</p>
+          <p className="font-cormorant text-3xl text-near-black font-light">{order.total} PLN</p>
+        </div>
       </div>
     </>
   );
