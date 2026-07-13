@@ -21,6 +21,8 @@ const sampleOrder: OrderEmailData = {
   note: null,
 };
 
+const orderWithNote: OrderEmailData = { ...sampleOrder, note: "Kod do bramy: 1234" };
+
 describe("renderAdminNewOrder", () => {
   const { subject, html, text } = renderAdminNewOrder(sampleOrder);
 
@@ -53,10 +55,7 @@ describe("renderAdminNewOrder", () => {
   );
 
   it.each(["html", "text"] as const)("shows the customer note in %s", (channel) => {
-    const rendered = renderAdminNewOrder({
-      ...sampleOrder,
-      note: "Kod do bramy: 1234",
-    });
+    const rendered = renderAdminNewOrder(orderWithNote);
     const output = channel === "html" ? rendered.html : rendered.text;
     expect(output).toContain("Kod do bramy: 1234");
   });
@@ -64,10 +63,7 @@ describe("renderAdminNewOrder", () => {
   it.each(["html", "text"] as const)(
     "shows the note prominently in %s — before the order details",
     (channel) => {
-      const rendered = renderAdminNewOrder({
-        ...sampleOrder,
-        note: "Kod do bramy: 1234",
-      });
+      const rendered = renderAdminNewOrder(orderWithNote);
       const output = channel === "html" ? rendered.html : rendered.text;
       expect(output.indexOf("Kod do bramy: 1234")).toBeLessThan(
         output.indexOf("Ramka Orzechowa 21×30"),
@@ -75,8 +71,35 @@ describe("renderAdminNewOrder", () => {
     },
   );
 
+  it("renders the note as a highlighted callout cell in html", () => {
+    const rendered = renderAdminNewOrder(orderWithNote);
+    // Match the <td> that actually contains the note, capturing its style attr.
+    const callout = rendered.html.match(
+      /<td style="([^"]*)">(?:(?!<\/td>)[\s\S])*Kod do bramy: 1234/,
+    );
+    expect(callout).not.toBeNull();
+    expect(callout![1]).toContain("background:#F6F1E7");
+    expect(callout![1]).toContain("border-left:3px solid");
+  });
+
+  it("preserves note line breaks in the html callout", () => {
+    const rendered = renderAdminNewOrder({
+      ...sampleOrder,
+      note: "Kod do bramy: 1234\nZostawić u sąsiada",
+    });
+    expect(rendered.html).toContain("Kod do bramy: 1234<br>Zostawić u sąsiada");
+  });
+
+  it("emphasizes the note with delimiter lines in text", () => {
+    const rendered = renderAdminNewOrder(orderWithNote);
+    expect(rendered.text).toContain("=== UWAGI KLIENTA ===");
+    expect(rendered.text).toContain("Kod do bramy: 1234");
+  });
+
   it("omits the note section when the order has none", () => {
     expect(html).not.toContain("Uwagi do zamówienia");
     expect(text).not.toContain("Uwagi do zamówienia");
+    expect(html).not.toContain("Uwagi klienta");
+    expect(text).not.toContain("UWAGI KLIENTA");
   });
 });

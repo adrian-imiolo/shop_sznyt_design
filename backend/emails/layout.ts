@@ -8,6 +8,7 @@ const COLORS = {
   accent: "#B8965A",
   secondaryText: "#6B6560",
   borders: "#E5E2DD",
+  calloutBackground: "#F6F1E7",
 };
 
 const SERIF = `'Cormorant Garamond', Georgia, serif`;
@@ -60,6 +61,15 @@ export function wrapHtml({ title, bodyHtml }: { title: string; bodyHtml: string 
 /** Small labelled key/value row used across templates. */
 export function metaRowHtml(label: string, value: string): string {
   return `<p style="margin:0 0 4px;"><span style="color:${COLORS.secondaryText};">${escapeHtml(label)}:</span> ${escapeHtml(value)}</p>`;
+}
+
+/**
+ * Highlighted callout for content that must not be skimmed past (e.g. customer
+ * notes with gate codes). Table-based with inline styles — the only markup
+ * email clients reliably render.
+ */
+export function calloutHtml(label: string, value: string): string {
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;"><tr><td style="background:${COLORS.calloutBackground};border-left:3px solid ${COLORS.accent};padding:12px 16px;"><span style="font-family:${SANS};font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:${COLORS.accent};">${escapeHtml(label)}</span><br><span style="font-size:15px;color:${COLORS.nearBlack};">${textBlockToHtml(value)}</span></td></tr></table>`;
 }
 
 /** Accent-colored section heading inside the card. */

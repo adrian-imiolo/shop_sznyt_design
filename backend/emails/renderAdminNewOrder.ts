@@ -1,6 +1,8 @@
-import { formatPln, metaRowHtml, wrapHtml } from "./layout.ts";
+import { calloutHtml, formatPln, metaRowHtml, wrapHtml } from "./layout.ts";
 import { orderDetailsHtml, orderDetailsText } from "./orderSummary.ts";
 import type { OrderEmailData, RenderedEmail } from "./types.ts";
+
+const NOTE_HEADER = "=== UWAGI KLIENTA ===";
 
 /** Paid-order alert for the shop owners (recipient: CONTACT_RECIPIENT). */
 export function renderAdminNewOrder(data: OrderEmailData): RenderedEmail {
@@ -12,7 +14,7 @@ export function renderAdminNewOrder(data: OrderEmailData): RenderedEmail {
     title: `Nowe zamówienie #${data.orderId}`,
     bodyHtml: `
       ${metaRowHtml("Klient", data.customerEmail ?? "—")}
-      ${data.note ? metaRowHtml("Uwagi klienta", data.note) : ""}
+      ${data.note ? calloutHtml("Uwagi klienta", data.note) : ""}
       ${orderDetailsHtml(data, { includeNote: false })}
       <p style="margin:24px 0 0;">Zamówienie czeka na realizację w panelu administracyjnym.</p>
     `,
@@ -23,7 +25,7 @@ export function renderAdminNewOrder(data: OrderEmailData): RenderedEmail {
     "",
     `Numer zamówienia: #${data.orderId}`,
     `Klient: ${data.customerEmail ?? "—"}`,
-    ...(data.note ? [`Uwagi klienta: ${data.note}`] : []),
+    ...(data.note ? ["", NOTE_HEADER, data.note, "=".repeat(NOTE_HEADER.length)] : []),
     "",
     orderDetailsText(data, { includeNote: false }),
     "",
