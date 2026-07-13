@@ -6,6 +6,7 @@ import { Show } from "@clerk/react";
 import { useCart } from "../hooks/useCart";
 import Seo from "../components/Seo";
 import { apiFetch } from "../lib/api";
+import { clearCheckoutDraft } from "../checkout";
 import OrderCard from "../orders/OrderCard";
 
 function OrderSuccess() {
@@ -28,6 +29,8 @@ function OrderSuccess() {
           if (cancelled) return;
           setOrder(data);
           clearCart();
+          // order placed — the draft's PII must not linger in the session (#74)
+          clearCheckoutDraft();
           return;
         } catch {
           // order not recorded yet or network hiccup — fall through to retry
