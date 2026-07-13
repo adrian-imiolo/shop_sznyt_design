@@ -1,7 +1,12 @@
 // Shared receipt fragments used by the customer confirmation and the admin
 // new-order alert, so both emails always agree on what an order looks like.
 
-import { PAYMENT_METHOD_LABELS, SHIPPING_METHOD_LABELS, deriveShippingCost } from "@sznyt/shared";
+import {
+  FREE_SHIPPING_LABEL,
+  PAYMENT_METHOD_LABELS,
+  SHIPPING_METHOD_LABELS,
+  deriveShippingCost,
+} from "@sznyt/shared";
 import { escapeHtml, formatPln, layoutColors, sectionHeadingHtml } from "./layout.ts";
 import type { OrderEmailData, ShippingAddress } from "./types.ts";
 
@@ -48,7 +53,7 @@ function shippingCostOf(data: OrderEmailData): number {
 }
 
 function shippingCostLabel(cost: number): string {
-  return cost === 0 ? "Gratis" : formatPln(cost);
+  return cost === 0 ? FREE_SHIPPING_LABEL : formatPln(cost);
 }
 
 export function orderItemsHtml(data: OrderEmailData): string {
