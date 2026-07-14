@@ -25,6 +25,10 @@ dist-ssr
 
 .env
 
+# Playwright artifacts
+test-results/
+playwright-report/
+
 # Claude Code: ignore personal/cache only — commit team-shared config (settings.json, agents/, commands/, hooks)
 .claude/settings.local.json
 .claude/.credentials.json
