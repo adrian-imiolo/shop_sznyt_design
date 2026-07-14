@@ -7,14 +7,9 @@ import {
   renderReturnRequest,
   renderComplaintRequest,
 } from "./emails/index.ts";
-import {
-  buildCheckoutLineItems,
-  paidOrderFactsFromSession,
-  normalizeOrderNote,
-  recordPaidOrder,
-  notifyOrderPlaced,
-} from "./orders/index.ts";
 import { computeQuarterRevenue } from "./revenue/index.ts";
+import { createWebhookRouter } from "./routes/webhook.js";
+import { createCheckoutRouter } from "./routes/checkout.js";
 import { FULFILLMENT_STATUSES } from "@sznyt/shared";
 
 /**
@@ -36,18 +31,12 @@ export function createApp({ auth, stripe, mailer, prisma }) {
   // express-rate-limit to see real client IPs instead of the proxy's.
   app.set("trust proxy", 1);
 
-  // Public forms trigger outbound SMTP + DB writes; checkout calls Stripe.
-  // The honeypot filters dumb bots, this stops dumb loops.
+  // Public forms trigger outbound SMTP + DB writes. The honeypot filters
+  // dumb bots, this stops dumb loops. (Checkout has its own limiter in
+  // routes/checkout.js.)
   const formLimiter = rateLimit({
     windowMs: 60 * 1000,
     limit: 5,
-    standardHeaders: "draft-8",
-    legacyHeaders: false,
-    message: { error: "Zbyt wiele prób. Spróbuj ponownie za chwilę." },
-  });
-  const checkoutLimiter = rateLimit({
-    windowMs: 60 * 1000,
-    limit: 10,
     standardHeaders: "draft-8",
     legacyHeaders: false,
     message: { error: "Zbyt wiele prób. Spróbuj ponownie za chwilę." },
@@ -78,69 +67,14 @@ export function createApp({ auth, stripe, mailer, prisma }) {
     next();
   }
 
-  app.post(
-    "/webhook",
-    express.raw({ type: "application/json" }),
-    async (req, res) => {
-      if (!stripe) {
-        return res.status(503).json({ error: "Stripe not configured (demo mode)" });
-      }
-      const sig = req.headers["stripe-signature"];
-      let event;
-
-      try {
-        event = stripe.webhooks.constructEvent(
-          req.body,
-          sig,
-          process.env.STRIPE_WEBHOOK_SECRET,
-        );
-      } catch (err) {
-        return res.status(400).send(`Webhook error: ${err.message}`);
-      }
-      if (event.type === "checkout.session.completed") {
-        // This route is the Stripe adapter (ADR-0001): all Stripe I/O happens
-        // here, then plain facts go into the order-intake module.
-        try {
-          const session = event.data.object;
-
-          const lineItems = await stripe.checkout.sessions.listLineItems(
-            session.id,
-            { expand: ["data.price.product"], limit: 100 },
-          );
-
-          let paymentMethod = null;
-          if (session.payment_intent) {
-            try {
-              const pi = await stripe.paymentIntents.retrieve(session.payment_intent, {
-                expand: ["latest_charge"],
-              });
-              paymentMethod = pi.latest_charge?.payment_method_details?.type ?? null;
-            } catch {
-              // non-blocking — order still saves without it
-            }
-          }
-
-          const facts = paidOrderFactsFromSession(session, lineItems.data, paymentMethod);
-          const result = await recordPaidOrder(prisma, facts);
-
-          // Webhook retry for an already-recorded order — 200 no-op, and
-          // crucially no duplicate emails.
-          if (result.created) {
-            await notifyOrderPlaced(mailer, facts, result.order.id);
-          }
-        } catch (err) {
-          // Must return 500 so Stripe retries; a swallowed error here
-          // permanently loses a paid order.
-          console.error("Błąd przetwarzania zamówienia:", err.message);
-          return res.status(500).json({ error: "Order processing failed" });
-        }
-      }
-
-      res.json({ received: true });
-    },
-  );
+  // The money path (issue #107): webhook + checkout live in routes/, each
+  // the Stripe adapter for its direction (ADR-0001). The webhook router
+  // mounts before express.json() — signature verification needs the raw body.
+  app.use(createWebhookRouter({ stripe, prisma, mailer }));
 
   app.use(express.json());
+
+  app.use(createCheckoutRouter({ stripe, prisma }));
 
   app.get("/products", async (req, res) => {
     try {
@@ -245,64 +179,6 @@ export function createApp({ auth, stripe, mailer, prisma }) {
       res.json(contactMessage);
     } catch (err) {
       console.error(err);
-      res.status(500).json({ error: "Błąd serwera" });
-    }
-  });
-
-  app.post("/create-checkout-session", checkoutLimiter, async (req, res) => {
-    try {
-      if (!stripe) {
-        return res.status(503).json({ error: "Checkout disabled in demo mode" });
-      }
-      const { items, userId, shippingMethod, shippingAddress, note } = req.body;
-
-      const noteResult = normalizeOrderNote(note);
-      if (!noteResult.ok) {
-        return res.status(noteResult.status).json({ error: noteResult.error });
-      }
-
-      // Fetch the referenced products; all validation and pricing lives in the
-      // order-intake module (server-authoritative — the client only chooses
-      // ids and quantities).
-      const ids = Array.isArray(items)
-        ? items.map((item) => Number(item.id)).filter(Number.isInteger)
-        : [];
-      const products = ids.length
-        ? await prisma.product.findMany({ where: { id: { in: ids } } })
-        : [];
-
-      const result = buildCheckoutLineItems(
-        items,
-        products,
-        shippingMethod,
-        process.env.FRONTEND_URL,
-      );
-      if (!result.ok) {
-        return res.status(result.status).json({ error: result.error });
-      }
-
-      const customerEmail = shippingAddress?.email || undefined;
-
-      const session = await stripe.checkout.sessions.create({
-        payment_method_types: ["card", "p24", "blik"],
-        line_items: result.lineItems,
-        mode: "payment",
-        customer_email: customerEmail,
-        success_url: `${process.env.FRONTEND_URL}/sukces?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${process.env.FRONTEND_URL}/koszyk`,
-        metadata: {
-          ...(userId ? { userId } : {}),
-          ...(noteResult.note ? { note: noteResult.note } : {}),
-          shippingMethod,
-          shippingAddress: JSON.stringify(shippingAddress),
-        },
-      });
-      res.json({ url: session.url });
-    } catch (err) {
-      console.error(err);
-      if (err.code === "email_invalid") {
-        return res.status(400).json({ error: "Podaj poprawny adres e-mail." });
-      }
       res.status(500).json({ error: "Błąd serwera" });
     }
   });
