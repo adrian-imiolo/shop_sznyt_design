@@ -1,4 +1,5 @@
-import { sendEmail, renderOrderConfirmation, renderAdminNewOrder } from "../emails/index.ts";
+import { renderOrderConfirmation, renderAdminNewOrder } from "../emails/index.ts";
+import type { Mailer } from "../emails/index.ts";
 import type { OrderEmailData } from "../emails/types.ts";
 import type { PaidOrderFacts } from "./types.ts";
 
@@ -9,6 +10,7 @@ import type { PaidOrderFacts } from "./types.ts";
  * throws.
  */
 export async function notifyOrderPlaced(
+  mailer: Mailer,
   facts: PaidOrderFacts,
   orderId: number,
 ): Promise<void> {
@@ -34,7 +36,7 @@ export async function notifyOrderPlaced(
 
   if (emailData.customerEmail) {
     try {
-      await sendEmail({
+      await mailer.send({
         to: emailData.customerEmail,
         ...renderOrderConfirmation(emailData),
       });
@@ -45,7 +47,7 @@ export async function notifyOrderPlaced(
 
   if (process.env.CONTACT_RECIPIENT) {
     try {
-      await sendEmail({
+      await mailer.send({
         to: process.env.CONTACT_RECIPIENT,
         ...renderAdminNewOrder(emailData),
       });
