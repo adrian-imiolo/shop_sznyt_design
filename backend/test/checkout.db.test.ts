@@ -4,12 +4,10 @@
  * with the outbound Stripe client faked (createdSessions records the params
  * the app would send to Stripe).
  */
-import "dotenv/config"; // vitest doesn't load backend/.env into process.env
 import { describe, it, expect, beforeAll, beforeEach, afterAll } from "vitest";
 import request from "supertest";
-import { PrismaClient } from "../generated/prisma/client.js";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { resolveTestDatabaseUrl } from "../scripts/test-db-url.js";
+import type { PrismaClient } from "../generated/prisma/client.js";
+import { createTestPrisma, truncateCommerceTables } from "./db.ts";
 import { createApp } from "../app.js";
 import { fakeAuth, fakeStripe, captureMailer } from "./fakes.ts";
 
@@ -17,9 +15,7 @@ let prisma: PrismaClient;
 
 beforeAll(() => {
   process.env.FRONTEND_URL = "https://shop.test";
-  prisma = new PrismaClient({
-    adapter: new PrismaPg({ connectionString: resolveTestDatabaseUrl() }),
-  });
+  prisma = createTestPrisma();
 });
 
 afterAll(async () => {
@@ -27,9 +23,7 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-  await prisma.$executeRawUnsafe(
-    'TRUNCATE TABLE "OrderItem", "Order", "Product" RESTART IDENTITY CASCADE',
-  );
+  await truncateCommerceTables(prisma);
 });
 
 function buildApp({ stripe = fakeStripe() as unknown }: { stripe?: unknown } = {}) {

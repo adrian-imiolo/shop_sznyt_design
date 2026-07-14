@@ -7,13 +7,11 @@
  * with `generateTestHeaderString` + a test secret. Only outbound Stripe
  * calls (listLineItems, paymentIntents) are faked.
  */
-import "dotenv/config"; // vitest doesn't load backend/.env into process.env
 import { describe, it, expect, beforeAll, beforeEach, afterAll } from "vitest";
 import request from "supertest";
 import Stripe from "stripe";
-import { PrismaClient } from "../generated/prisma/client.js";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { resolveTestDatabaseUrl } from "../scripts/test-db-url.js";
+import type { PrismaClient } from "../generated/prisma/client.js";
+import { createTestPrisma, truncateCommerceTables } from "./db.ts";
 import { createApp } from "../app.js";
 import { fakeAuth, fakeStripe, captureMailer } from "./fakes.ts";
 
@@ -29,9 +27,7 @@ let prisma: PrismaClient;
 beforeAll(() => {
   process.env.STRIPE_WEBHOOK_SECRET = TEST_WEBHOOK_SECRET;
   process.env.CONTACT_RECIPIENT = ADMIN_RECIPIENT;
-  prisma = new PrismaClient({
-    adapter: new PrismaPg({ connectionString: resolveTestDatabaseUrl() }),
-  });
+  prisma = createTestPrisma();
 });
 
 afterAll(async () => {
@@ -39,9 +35,7 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-  await prisma.$executeRawUnsafe(
-    'TRUNCATE TABLE "OrderItem", "Order", "Product" RESTART IDENTITY CASCADE',
-  );
+  await truncateCommerceTables(prisma);
 });
 
 /** Stripe line item as listLineItems returns it (price.product expanded). */

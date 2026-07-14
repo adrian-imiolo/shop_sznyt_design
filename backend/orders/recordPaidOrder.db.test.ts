@@ -3,20 +3,16 @@
  * against a real Postgres: atomic stock decrement and stripeSessionId
  * idempotency. One-time setup: `npm run test:db:prepare`.
  */
-import "dotenv/config"; // vitest doesn't load backend/.env into process.env
 import { describe, it, expect, beforeAll, beforeEach, afterAll } from "vitest";
-import { PrismaClient } from "../generated/prisma/client.js";
-import { PrismaPg } from "@prisma/adapter-pg";
+import type { PrismaClient } from "../generated/prisma/client.js";
 import { recordPaidOrder } from "./recordPaidOrder.ts";
 import type { PaidOrderFacts } from "./types.ts";
-import { resolveTestDatabaseUrl } from "../scripts/test-db-url.js";
+import { createTestPrisma, truncateCommerceTables } from "../test/db.ts";
 
 let prisma: PrismaClient;
 
 beforeAll(() => {
-  prisma = new PrismaClient({
-    adapter: new PrismaPg({ connectionString: resolveTestDatabaseUrl() }),
-  });
+  prisma = createTestPrisma();
 });
 
 afterAll(async () => {
@@ -24,9 +20,7 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-  await prisma.$executeRawUnsafe(
-    'TRUNCATE TABLE "OrderItem", "Order", "Product" RESTART IDENTITY CASCADE',
-  );
+  await truncateCommerceTables(prisma);
 });
 
 async function seedProducts() {
