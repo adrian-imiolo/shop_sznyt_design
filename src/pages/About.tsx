@@ -26,7 +26,7 @@ function About() {
         {/* Image placeholder */}
         <div
           className="w-full md:w-1/2 min-h-[50vh] md:min-h-full bg-cover bg-center"
-          style={{ backgroundImage: "url(/images/pracownia.png)" }}
+          style={{ backgroundImage: "url(/images/pracownia.webp)" }}
         />
 
         {/* Text */}

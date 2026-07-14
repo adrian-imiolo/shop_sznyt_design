@@ -73,15 +73,15 @@ Render's free tier doesn't include Shell access. Seed via **Neon's SQL Editor** 
     'Dwa kolory, jeden charakter.',
     'Rama wykonana z litego dębu, w której naprzemienne kwadraty jasnego i ciemnego drewna tworzą wzór szachownicy. Każdy element precyzyjnie dopasowany — kontrast kolorów nadaje jej wyrazisty, a zarazem ponadczasowy charakter.',
     299,
-    '/images/szachownica-studio.png',
-    '/images/szachownica-lifestyle.png',
+    '/images/szachownica-studio.webp',
+    '/images/szachownica-lifestyle.webp',
     10, 0, NOW()),
    ('Ramka Corner Cut',
     'Minimalizm w każdym detalu.',
     'Dębowa rama z charakterystycznymi nacięciami na narożnikach, w które wpuszczono kontrastowy materiał. Połączenie drewna i wyraźnego detalu na rogach tworzy subtelny, nowoczesny akcent bez zbędnej ozdobności.',
     349,
-    '/images/corner-cut-studio.png',
-    '/images/corner-cut-lifestyle.png',
+    '/images/corner-cut-studio.webp',
+    '/images/corner-cut-lifestyle.webp',
     8, 0, NOW());
    ```
 
@@ -192,7 +192,7 @@ Then on GitHub:
 | Pay button works but backend returns 503 | `STRIPE_SECRET_KEY` not set | Complete step 6, redeploy |
 | Backend crash-loops after adding Stripe key | `STRIPE_WEBHOOK_SECRET` or `FRONTEND_URL` missing | Boot check requires all three together — set them, redeploy |
 | Payment succeeds but no order in DB | Webhook signature mismatch or wrong endpoint URL | Check Render logs for `Webhook error`; re-copy `whsec_...` from the exact endpoint, confirm the URL ends with `/webhook` |
-| Stripe checkout page shows no product image | `FRONTEND_URL` wrong or image path 404s | Open `<FRONTEND_URL>/images/szachownica-studio.png` in a browser — must resolve publicly |
+| Stripe checkout page shows no product image | `FRONTEND_URL` wrong or image path 404s | Open `<FRONTEND_URL>/images/szachownica-studio.webp` in a browser — must resolve publicly |
 | First request after some idle time hangs | Render free-tier cold start | Wait ~30 s; the service is waking. No fix on free tier |
 | Site appears in Google search | `noindex` meta missing | Check `index.html` — should have `<meta name="robots" content="noindex, nofollow" />` |
 

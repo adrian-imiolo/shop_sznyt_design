@@ -3,8 +3,8 @@ import { Link } from "react-router-dom";
 function Hero() {
   return (
     <section className="relative min-h-[60vh] md:min-h-screen flex items-end bg-near-black">
-      {/* Placeholder file — #78 drops the real photo at the same path */}
-      <div className="absolute inset-0 bg-[#2a2420] bg-cover bg-center bg-[url(/images/hero.png)]" />
+      {/* AI render (#78) — replaced by real photography in #11 */}
+      <div className="absolute inset-0 bg-[#2a2420] bg-cover bg-center bg-[url(/images/hero.webp)]" />
 
       {/* Gradient overlay so text is readable over the image */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
