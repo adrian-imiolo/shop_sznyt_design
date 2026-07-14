@@ -25,6 +25,11 @@ export interface SendEmailOptions extends RenderedEmail {
   replyTo?: string;
 }
 
+/** The mailer seam injected into createApp — tests swap in a capture-mailer. */
+export interface Mailer {
+  send(options: SendEmailOptions): Promise<unknown>;
+}
+
 /** The only code path that touches the nodemailer transport. */
 export async function sendEmail({ to, replyTo, subject, html, text }: SendEmailOptions) {
   if (!process.env.SMTP_HOST) {
