@@ -68,7 +68,10 @@ jobs:
       - name: Typecheck backend
         run: npm run typecheck --workspace backend
 
-      - name: Unit tests (frontend)
+      # Root vitest sweeps everything non-DB (frontend + shared + backend
+      # unit under the root config); the next step reruns backend unit under
+      # its own pinned config, matching how each suite runs locally.
+      - name: Unit tests (root suite)
         run: npm test
 
       - name: Unit tests (backend)
