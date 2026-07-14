@@ -21,8 +21,8 @@ async function main() {
           "Rama wykonana z litego dębu, w której naprzemienne kwadraty jasnego i ciemnego drewna tworzą wzór szachownicy. Każdy element precyzyjnie dopasowany — kontrast kolorów nadaje jej wyrazisty, a zarazem ponadczasowy charakter.",
         price: 299,
         // Relative — deployment-agnostic; checkout prefixes FRONTEND_URL for Stripe
-        imageUrl: "/images/szachownica-studio.png",
-        lifestyleImageUrl: "/images/szachownica-lifestyle.png",
+        imageUrl: "/images/szachownica-studio.webp",
+        lifestyleImageUrl: "/images/szachownica-lifestyle.webp",
         stock: 10,
       },
       {
@@ -31,8 +31,8 @@ async function main() {
         description:
           "Dębowa rama z charakterystycznymi nacięciami na narożnikach, w które wpuszczono kontrastowy materiał. Połączenie drewna i wyraźnego detalu na rogach tworzy subtelny, nowoczesny akcent bez zbędnej ozdobności.",
         price: 349,
-        imageUrl: "/images/corner-cut-studio.png",
-        lifestyleImageUrl: "/images/corner-cut-lifestyle.png",
+        imageUrl: "/images/corner-cut-studio.webp",
+        lifestyleImageUrl: "/images/corner-cut-lifestyle.webp",
         stock: 8,
       },
     ],

@@ -1,0 +1,13 @@
+# Product and brand imagery are repo-hosted static WebP with relative URLs
+
+The shop needs six image slots (2 products × studio/lifestyle, hero, o-nas pracownia) before any product physically exists. #78 fills them with AI renders generated from the real Szachownica design (Corner Cut generated to match its seed description — no physical design yet); #11 later replaces them with real photography through the same pipeline. Decided during the demo-first replan (2026-07-13) and grilled in #78.
+
+Decisions and why:
+
+- **Assets live in the repo at `public/images/`, served by Vercel's CDN.** No S3, no image CMS, no external image service — six files at ~70–175 KB each are not an asset-management problem, and a recruiter cloning the repo gets a working shop with zero setup. Real photos (#11) reuse the pipeline: same paths, new files, one commit.
+- **Relative `/images/...` URLs everywhere** — `backend/seed.js`, `Hero.tsx`, `About.tsx`, and the runbook SQL in `DEPLOY-DEMO.md`. Same-origin URLs work identically on the `.vercel.app` demo today and on `sznytdesign.pl` after cutover, with zero re-seeding. This supersedes the earlier absolute-`sznytdesign.pl` decision: those URLs would 404 on the demo while the domain still serves WordPress. The one consumer that needs absolute URLs — Stripe line-item thumbnails — gets them from `buildCheckoutLineItems.ts` prefixing `FRONTEND_URL` (shipped in #94), so the absolute form is derived at the trust boundary, never stored.
+- **WebP at fixed specs, sized for the largest rendering.** Products and pracownia: 1600×2000 (4:5) — 2× the PDP's ~800 px column for retina. Hero: 2560×1440 — full-viewport background. Quality 80 keeps every file well under the 300 KB budget (largest: pracownia at 149 KB). No srcset/`<picture>` refactor: all six render as CSS `background-image` or a single `<img>`, and six hand-tuned files don't justify a responsive-images pipeline.
+- **Sources are Gemini renders; conversion was one-off scripting, not repo tooling.** The generator outputs 928×1152/1376×768 PNGs with a visible watermark glyph; a sharp script upscaled to spec and clone-patched the glyph out (verified pixel-level). The script is deliberately not committed — real photography (#11) arrives watermark-free at native resolution, so the pipeline's repo-visible artifact is only the assets and their specs above.
+- **Honesty gate: renders are acceptable only while purchases are blocked.** Stock 0 on the public site plus `noindex` — nobody buys off a render. Lifting either requires #11 (real photos) first.
+
+Consequence: filling an image slot — now or at #11 — is "drop a to-spec WebP at the same path, commit". The demo deploy (#95) is unblocked.
