@@ -21,6 +21,7 @@ Premium e-commerce for designer wooden picture frames. Real production business 
 - Run backend: `npx tsx index.js` from `backend/` — NOT plain `node`
 - Seed: `npx tsx seed.js` from `backend/`
 - After Prisma schema change: `npx prisma migrate dev` AND `npx prisma generate`
+- E2E: `npm run test:e2e` (requires `stripe listen` running and ports 3000/5173 free; local-only, not in CI — see `e2e/README.md`)
 
 ## Git
 

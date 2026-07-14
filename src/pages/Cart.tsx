@@ -41,10 +41,14 @@ function AddressForm({ address, fieldErrors, onFieldChange }: AddressFormProps) 
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       {ADDRESS_FIELDS.map(({ key, label, full, type }) => (
         <div key={key} className={full ? "sm:col-span-2" : ""}>
-          <label className="font-dm-sans text-xs text-secondary-text tracking-widest uppercase block mb-1">
+          <label
+            htmlFor={`address-${key}`}
+            className="font-dm-sans text-xs text-secondary-text tracking-widest uppercase block mb-1"
+          >
             {label}
           </label>
           <input
+            id={`address-${key}`}
             type={type ?? "text"}
             value={address[key]}
             onChange={(e) => onFieldChange(key, e.target.value)}
