@@ -2,7 +2,8 @@ import express from "express";
 
 /**
  * Products routes (issue #108): public catalog reads, admin-only CRUD and
- * reorder. Handlers moved verbatim from app.js.
+ * reorder. Handler bodies moved verbatim from app.js; only registration
+ * order changed (see the reorder-route comment).
  *
  * @param {object} deps
  * @param {object} deps.prisma

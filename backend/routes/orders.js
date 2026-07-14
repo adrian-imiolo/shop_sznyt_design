@@ -5,7 +5,10 @@ import { FULFILLMENT_STATUSES } from "@sznyt/shared";
 /**
  * Orders routes (issue #108): admin list + fulfillment, per-user orders,
  * order detail with ownership check, and the public by-session lookup the
- * success page uses. Handlers moved verbatim from app.js.
+ * success page uses. Handler bodies moved verbatim from app.js; by-session
+ * now registers before /:id (matching is unaffected — /orders/:id can't
+ * match the two-segment by-session path; it just groups the multi-segment
+ * routes ahead of the catch-all-ish /:id).
  *
  * @param {object} deps
  * @param {object} deps.prisma
