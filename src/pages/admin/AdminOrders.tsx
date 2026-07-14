@@ -5,6 +5,8 @@ import { useResource } from "../../hooks/useResource";
 import { formatOrderDate } from "../../orders/formatting";
 import FulfillmentControls from "../../orders/FulfillmentControls";
 
+const ORDER_COLUMNS = ["Id", "Email", "Status płatności", "Realizacja", "Suma", "Dostawa", "Adres", "Data"];
+
 function addressLine(order: AdminOrder) {
   return order.shippingAddress
     ? Object.values(order.shippingAddress).filter(Boolean).join(", ")
@@ -25,6 +27,7 @@ function AdminOrders() {
             <div className="border border-borders p-4 space-y-2" key={i}>
               <Skeleton className="h-5 w-full" />
               <Skeleton className="h-5 w-full" />
+              <Skeleton className="h-5 w-full" />
               <Skeleton className="h-5 w-2/3" />
               <Skeleton className="h-16 w-full" />
             </div>
@@ -34,7 +37,7 @@ function AdminOrders() {
           <table className="w-full border-collapse min-w-[900px]">
             <thead className="bg-gray-100">
               <tr>
-                {["Id", "Email", "Status płatności", "Realizacja", "Suma", "Dostawa", "Adres", "Data"].map((h) => (
+                {ORDER_COLUMNS.map((h) => (
                   <th key={h} className="p-3 text-left">{h}</th>
                 ))}
               </tr>
@@ -42,8 +45,8 @@ function AdminOrders() {
             <tbody>
               {[1, 2, 3].map((i) => (
                 <tr className="border-b border-borders" key={i}>
-                  {Array.from({ length: 8 }).map((_, j) => (
-                    <td className="p-3" key={j}><Skeleton className="h-5 w-full" /></td>
+                  {ORDER_COLUMNS.map((h) => (
+                    <td className="p-3" key={h}><Skeleton className="h-5 w-full" /></td>
                   ))}
                 </tr>
               ))}
@@ -91,14 +94,9 @@ function AdminOrders() {
         <table className="w-full border-collapse text-sm min-w-[900px]">
           <thead className="bg-gray-100">
             <tr>
-              <th className="p-3 text-left">Id</th>
-              <th className="p-3 text-left">Email</th>
-              <th className="p-3 text-left">Status płatności</th>
-              <th className="p-3 text-left">Realizacja</th>
-              <th className="p-3 text-left">Suma</th>
-              <th className="p-3 text-left">Dostawa</th>
-              <th className="p-3 text-left">Adres</th>
-              <th className="p-3 text-left">Data</th>
+              {ORDER_COLUMNS.map((h) => (
+                <th key={h} className="p-3 text-left">{h}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
