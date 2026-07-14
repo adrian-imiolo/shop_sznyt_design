@@ -26,7 +26,7 @@ beforeEach(async () => {
   await truncateCommerceTables(prisma);
 });
 
-function buildApp({ stripe = fakeStripe() as unknown }: { stripe?: unknown } = {}) {
+function buildApp({ stripe = fakeStripe() as object }: { stripe?: object | null } = {}) {
   const app = createApp({
     auth: fakeAuth(),
     stripe,

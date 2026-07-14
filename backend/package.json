@@ -8,6 +8,7 @@
     "start": "tsx index.js",
     "build": "prisma generate && prisma migrate deploy",
     "seed": "tsx seed.js",
+    "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:db": "vitest run --config vitest.db.config.ts",
     "test:db:prepare": "node scripts/prepare-test-db.js"
@@ -33,8 +34,10 @@
   "devDependencies": {
     "@types/nodemailer": "^7.0.11",
     "@types/supertest": "^7.2.0",
+    "@types/node": "^24.10.1",
     "nodemon": "^3.1.14",
     "supertest": "^7.2.2",
+    "typescript": "~5.9.3",
     "vitest": "^4.1.10"
   }
 }
