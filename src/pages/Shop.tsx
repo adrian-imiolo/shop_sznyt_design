@@ -14,7 +14,7 @@ function ProductCard({ product }: { product: Product }) {
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
-        <div className="relative h-72 md:h-125">
+        <div className="relative aspect-[4/5]">
           <div
             className={`absolute inset-0 bg-cover bg-center transition-opacity duration-700 ${hovered ? "opacity-0" : "opacity-100"}`}
             style={{ backgroundImage: `url(${product.imageUrl})` }}

@@ -86,9 +86,10 @@ function ProductDetails() {
           className={`absolute inset-6 md:inset-10 bg-cover bg-center transition-opacity duration-700 ${hovered ? "opacity-0" : "opacity-100"}`}
           style={{ backgroundImage: `url(${product.imageUrl})` }}
         />
+        {/* Lifestyle frame sits high in the scene, so bias the crop upward */}
         <div
-          className={`absolute inset-6 md:inset-10 bg-cover bg-center transition-opacity duration-700 ${hovered ? "opacity-100" : "opacity-0"}`}
-          style={{ backgroundImage: `url(${product.lifestyleImageUrl})` }}
+          className={`absolute inset-6 md:inset-10 bg-cover transition-opacity duration-700 ${hovered ? "opacity-100" : "opacity-0"}`}
+          style={{ backgroundImage: `url(${product.lifestyleImageUrl})`, backgroundPosition: "center 15%" }}
         />
       </div>
 

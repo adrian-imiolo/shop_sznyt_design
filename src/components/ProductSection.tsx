@@ -52,10 +52,10 @@ function ProductSection({
             className={`absolute inset-0 bg-cover bg-center transition-opacity duration-700 ${hovered ? "opacity-0" : "opacity-100"}`}
             style={{ backgroundImage: `url(${imageUrl})` }}
           />
-          {/* Lifestyle image — visible on hover */}
+          {/* Lifestyle image — visible on hover; frame sits high in the scene, so bias the crop upward */}
           <div
-            className={`absolute inset-0 bg-cover bg-center transition-opacity duration-700 ${hovered ? "opacity-100" : "opacity-0"}`}
-            style={{ backgroundImage: `url(${lifestyleImageUrl})` }}
+            className={`absolute inset-0 bg-cover transition-opacity duration-700 ${hovered ? "opacity-100" : "opacity-0"}`}
+            style={{ backgroundImage: `url(${lifestyleImageUrl})`, backgroundPosition: "center 15%" }}
           />
         </div>
 
