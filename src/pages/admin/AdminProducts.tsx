@@ -80,7 +80,7 @@ function AdminProducts() {
     return (
       <div className="p-4 w-full">
         <RevenueBanner />
-        <div className="flex flex-col items-center w-full overflow-x-auto">
+        <div className="w-full overflow-x-auto">
           <table className="mt-2 w-full border-collapse min-w-[900px]">
             <thead className="bg-gray-100">
               <tr>
@@ -141,7 +141,7 @@ function AdminProducts() {
 
       <div className="p-4 w-full">
         <RevenueBanner />
-        <div className="flex flex-col items-center w-full overflow-x-auto">
+        <div className="w-full overflow-x-auto">
           <table className="mt-2 w-full border-collapse min-w-[900px]">
             <thead className="bg-gray-100">
               <tr>
@@ -191,13 +191,13 @@ function AdminProducts() {
                   <td className="p-3">
                     <div className="flex flex-col gap-3">
                     <Link
-                      className="text-accent hover:underline"
+                      className="text-accent hover:underline min-h-[40px] flex items-center"
                       to={`/admin/produkty/${product.id}`}
                     >
                       Edytuj
                     </Link>
                     <button
-                      className="text-red-600 hover:text-red-800"
+                      className="text-red-600 hover:text-red-800 min-h-[40px] flex items-center"
                       onClick={() => {
                         setIsDeleteModalOpen(true);
                         setProductToDelete(product.id);

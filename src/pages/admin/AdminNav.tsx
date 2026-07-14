@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 function AdminNav() {
   return (
     <div className="flex flex-wrap items-center gap-x-2 gap-y-1 w-full bg-near-black font-dm-sans text-warm-white px-4 py-3 sm:px-6 sm:py-5">
-      <h2 className="font-dm-sans uppercase tracking-widest text-sm sm:text-xl px-2 py-2 sm:px-4 sm:py-3 mr-auto">
+      <h2 className="max-sm:basis-full font-dm-sans uppercase tracking-widest text-sm sm:text-xl px-2 py-2 sm:px-4 sm:py-3 mr-auto">
         Panel admina
       </h2>
       <NavLink
