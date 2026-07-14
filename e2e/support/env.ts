@@ -15,5 +15,6 @@ export const FRONTEND_URL = "http://localhost:5173";
 export const BACKEND_URL = "http://localhost:3000";
 
 // "+clerk_test" marks a Clerk test identity: no real emails leave the dev
-// instance for it. The password is generated per run in global.setup.ts.
+// instance for it. Passwordless — sign-in uses Backend API sign-in tokens
+// (see clerkBackend.ts).
 export const E2E_CLERK_USER_EMAIL = "e2e+clerk_test@sznytdesign.pl";

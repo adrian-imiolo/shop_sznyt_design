@@ -1,33 +1,21 @@
 import { expect, test } from "@playwright/test";
 import { queryE2e } from "./support/db";
+import { E2E_ADDRESS, ORDER_TOTAL, SEED_PRODUCT } from "./support/fixtures";
 import { payWithTestCard, waitForSuccessRedirect } from "./support/stripeCheckout";
 
-// seed.js: product 1 = Ramka Szachownica, 299 PLN, stock 10
-const PRODUCT_ID = 1;
-const PRODUCT_PRICE = 299;
-const SHIPPING_COST = 25; // inpost_kurier below the free-shipping threshold
-
-const ADDRESS = {
-  firstName: "E2E",
-  lastName: "Tester",
-  email: "e2e-guest@example.com",
-  street: "Testowa 1",
-  postalCode: "00-001",
-  city: "Warszawa",
-  phone: "500600700",
-};
+const ADDRESS = { ...E2E_ADDRESS, email: "e2e-guest@example.com" };
 
 test("guest checkout: add to cart, pay with the 4242 card, order recorded and stock decremented", async ({
   page,
 }) => {
   const [before] = await queryE2e<{ stock: number }>(
     'SELECT stock FROM "Product" WHERE id = $1',
-    [PRODUCT_ID],
+    [SEED_PRODUCT.id],
   );
   expect(before.stock).toBeGreaterThan(0);
 
   // Browse → add to cart
-  await page.goto(`/sklep/${PRODUCT_ID}`);
+  await page.goto(`/sklep/${SEED_PRODUCT.id}`);
   await page.getByRole("button", { name: "Dodaj do koszyka" }).click();
   await expect(page.getByText("Dodano do koszyka!")).toBeVisible();
 
@@ -66,14 +54,14 @@ test("guest checkout: add to cart, pay with the 4242 card, order recorded and st
   );
   expect(order).toBeDefined();
   expect(order.status).toBe("paid");
-  expect(order.total).toBe(PRODUCT_PRICE + SHIPPING_COST);
+  expect(order.total).toBe(ORDER_TOTAL);
   expect(order.customerEmail).toBe(ADDRESS.email);
   await expect(page.getByText(`#${order.id}`)).toBeVisible();
 
   // Stock decremented atomically by the webhook
   const [after] = await queryE2e<{ stock: number }>(
     'SELECT stock FROM "Product" WHERE id = $1',
-    [PRODUCT_ID],
+    [SEED_PRODUCT.id],
   );
   expect(after.stock).toBe(before.stock - 1);
 });

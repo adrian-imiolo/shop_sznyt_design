@@ -3,27 +3,18 @@ import { clerk, setupClerkTestingToken } from "@clerk/testing/playwright";
 import { createSignInToken } from "./support/clerkBackend";
 import { queryE2e } from "./support/db";
 import { E2E_CLERK_USER_EMAIL } from "./support/env";
+import { E2E_ADDRESS, ORDER_TOTAL, SEED_PRODUCT } from "./support/fixtures";
 
-const ORDER_TOTAL = 324; // 299 product + 25 courier shipping
-
-const SHIPPING_ADDRESS = {
-  firstName: "E2E",
-  lastName: "Tester",
-  email: E2E_CLERK_USER_EMAIL,
-  street: "Testowa 1",
-  postalCode: "00-001",
-  city: "Warszawa",
-  phone: "500600700",
-};
+const SHIPPING_ADDRESS = { ...E2E_ADDRESS, email: E2E_CLERK_USER_EMAIL };
 
 test("order tracking: signed-in user sees their order in MyOrders and its detail page", async ({
   page,
 }) => {
-  // Clerk testing token + sign-in token: sign in programmatically — the flow
-  // under test is order tracking, not Clerk's sign-in UI (issue #110). The
-  // ticket strategy also bypasses the second factor this instance requires,
-  // which rules out plain password sign-in for a robot user.
-  const userId = process.env.E2E_CLERK_USER_ID as string; // set in global.setup.ts
+  // Clerk testing token + sign-in token (see clerkBackend.ts for why): sign
+  // in programmatically — the flow under test is order tracking, not Clerk's
+  // sign-in UI (issue #110).
+  const userId = process.env.E2E_CLERK_USER_ID;
+  if (!userId) throw new Error("E2E_CLERK_USER_ID not set — did global.setup.ts run?");
   const ticket = await createSignInToken(userId);
 
   await setupClerkTestingToken({ page });
@@ -72,14 +63,14 @@ test("order tracking: signed-in user sees their order in MyOrders and its detail
     ],
   );
   await queryE2e(
-    'INSERT INTO "OrderItem" ("quantity", "price", "orderId", "productId") VALUES (1, 299, $1, 1)',
-    [orderRow.id],
+    'INSERT INTO "OrderItem" ("quantity", "price", "orderId", "productId") VALUES (1, $1, $2, $3)',
+    [SEED_PRODUCT.price, orderRow.id, SEED_PRODUCT.id],
   );
 
   // MyOrders lists the order
   await page.goto("/moje-zamowienia");
   await expect(page.getByText(`Zamówienie #${orderRow.id}`)).toBeVisible();
-  await expect(page.getByText("Ramka Szachownica")).toBeVisible();
+  await expect(page.getByText(SEED_PRODUCT.name)).toBeVisible();
   await expect(page.getByText(`${ORDER_TOTAL} PLN`)).toBeVisible();
 
   // Detail page shows items, address, and total
@@ -87,7 +78,7 @@ test("order tracking: signed-in user sees their order in MyOrders and its detail
   await expect(
     page.getByRole("heading", { name: `Zamówienie #${orderRow.id}` }),
   ).toBeVisible();
-  await expect(page.getByText("1 szt. × 299 PLN")).toBeVisible();
-  await expect(page.getByText("Testowa 1").first()).toBeVisible();
+  await expect(page.getByText(`1 szt. × ${SEED_PRODUCT.price} PLN`)).toBeVisible();
+  await expect(page.getByText(E2E_ADDRESS.street).first()).toBeVisible();
   await expect(page.getByText(`${ORDER_TOTAL} PLN`)).toBeVisible();
 });

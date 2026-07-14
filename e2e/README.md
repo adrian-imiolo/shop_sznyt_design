@@ -45,8 +45,9 @@ Ports 3000 and 5173 must be free — stop `npm run dev` first
    database never fills with robot orders.
 2. Starts the backend against that database (with `SMTP_HOST` blanked, so no
    real order emails are sent) and the Vite frontend.
-3. Provisions a Clerk test user (`e2e+clerk_test@sznytdesign.pl`) with a
-   password generated fresh each run via the Clerk Backend API.
+3. Provisions a passwordless Clerk test user (`e2e+clerk_test@sznytdesign.pl`);
+   the tracking spec signs in with a single-use Backend API sign-in token
+   (the instance requires a second factor, which rules out password sign-in).
 4. Runs the specs serially (they share the database).
 
 Failure debugging: traces are kept on failure — `npx playwright show-trace
