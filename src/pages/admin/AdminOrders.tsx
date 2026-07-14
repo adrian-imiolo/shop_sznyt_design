@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import type { AdminOrder } from "../../types";
 import Skeleton from "../../components/Skeleton";
@@ -11,6 +12,21 @@ function addressLine(order: AdminOrder) {
   return order.shippingAddress
     ? Object.values(order.shippingAddress).filter(Boolean).join(", ")
     : "—";
+}
+
+/** One collapsed line by default; tap toggles the full address (card view only). */
+function ExpandableAddress({ order }: { order: AdminOrder }) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={() => setExpanded(!expanded)}
+      aria-expanded={expanded}
+      className={`block w-full text-left text-xs py-1 cursor-pointer ${expanded ? "" : "truncate"}`}
+    >
+      {addressLine(order)}
+    </button>
+  );
 }
 
 function AdminOrders() {
@@ -78,7 +94,7 @@ function AdminOrders() {
               <span className="font-medium">{order.total} PLN</span>
               <span className="text-xs">{order.shippingMethod ?? "—"}</span>
             </div>
-            <p className="text-xs truncate">{addressLine(order)}</p>
+            <ExpandableAddress order={order} />
             {order.note && (
               <p className="text-xs text-accent font-medium">Uwagi: {order.note}</p>
             )}
