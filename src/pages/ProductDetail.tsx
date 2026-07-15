@@ -36,13 +36,13 @@ function ProductDetails() {
     );
   if (!product)
     return (
-      <main className="flex flex-col md:flex-row lg:h-[calc(100vh-var(--spacing-nav))] lg:max-h-240">
+      <main className="flex flex-col md:flex-row lg:min-h-[calc(100vh-var(--spacing-nav))]">
         <Seo
           title="Produkt"
           description="Ręcznie robiona ramka z litego dębu od Sznyt Design. Designerski prezent, który zostaje na lata."
         />
         {/* Image side — 50% on tablet, 60% on desktop, left */}
-        <Skeleton className="relative w-full md:w-1/2 lg:w-3/5 min-h-[60vh] lg:h-full overflow-hidden"></Skeleton>
+        <Skeleton className="relative w-full md:w-1/2 lg:w-3/5 min-h-[60vh] lg:sticky lg:top-nav lg:h-[calc(100vh-var(--spacing-nav))] lg:max-h-240 overflow-hidden"></Skeleton>
         <div className="w-full bg-[#F5F3F0] md:w-1/2 lg:w-2/5 flex flex-col justify-between px-6 py-12 md:px-8 md:py-14 lg:px-16 lg:py-20">
           <div>
             <Skeleton className="w-1/2 h-6 mb-10"></Skeleton>
@@ -63,7 +63,9 @@ function ProductDetails() {
     );
 
   return (
-    <main className="flex flex-col md:flex-row lg:h-[calc(100vh-var(--spacing-nav))] lg:max-h-240">
+    // Text taller than the viewport must push the page, not spill over its padding —
+    // so the section grows (min-h) while the image panel stays sticky at viewport height
+    <main className="flex flex-col md:flex-row lg:min-h-[calc(100vh-var(--spacing-nav))]">
       <Seo
         title={product.name}
         description={`${product.tagline} Ręcznie robiona ramka z litego dębu od Sznyt Design — designerski prezent, który zostaje na lata.`}
@@ -78,7 +80,7 @@ function ProductDetails() {
 
       {/* Image side — 50% on tablet, 60% on desktop, left */}
       <div
-        className="relative w-full md:w-1/2 lg:w-3/5 min-h-[60vh] lg:h-full overflow-hidden cursor-pointer bg-warm-white p-6 md:p-10"
+        className="relative w-full md:w-1/2 lg:w-3/5 min-h-[60vh] lg:sticky lg:top-nav lg:h-[calc(100vh-var(--spacing-nav))] lg:max-h-240 overflow-hidden cursor-pointer bg-warm-white p-6 md:p-10"
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
