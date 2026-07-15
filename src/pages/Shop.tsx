@@ -87,7 +87,8 @@ function Shop() {
 
       {/* Product grid */}
       <section className="bg-warm-white px-6 py-8 md:py-16">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
+        {/* max-w-4xl (not 6xl): keeps a 4:5 card + title inside one laptop viewport */}
+        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
           {error ? (
             <p className="font-dm-sans text-sm text-red-600 col-span-2">{error}</p>
           ) : (
