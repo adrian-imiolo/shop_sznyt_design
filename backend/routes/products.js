@@ -1,5 +1,11 @@
 import express from "express";
 
+/** The writable product fields — anything else in the body is dropped. */
+function productInput(body) {
+  const { name, tagline, description, price, imageUrl, lifestyleImageUrl, stock } = body;
+  return { name, tagline, description, price, imageUrl, lifestyleImageUrl, stock };
+}
+
 /**
  * Products routes (issue #108): public catalog reads, admin-only CRUD and
  * reorder. Failures propagate to the shared serverError middleware (issue
@@ -47,10 +53,7 @@ export function createProductsRouter({ prisma, auth, requireAdmin }) {
     auth.requireAuth(),
     requireAdmin,
     async function createProduct(req, res) {
-      const { name, tagline, description, price, imageUrl, lifestyleImageUrl, stock } = req.body;
-      const product = await prisma.product.create({
-        data: { name, tagline, description, price, imageUrl, lifestyleImageUrl, stock },
-      });
+      const product = await prisma.product.create({ data: productInput(req.body) });
       res.json(product);
     },
   );
@@ -60,11 +63,10 @@ export function createProductsRouter({ prisma, auth, requireAdmin }) {
     auth.requireAuth(),
     requireAdmin,
     async function updateProduct(req, res) {
-      const { name, tagline, description, price, imageUrl, lifestyleImageUrl, stock } = req.body;
       const id = Number(req.params.id);
       const updated = await prisma.product.update({
         where: { id },
-        data: { name, tagline, description, price, imageUrl, lifestyleImageUrl, stock },
+        data: productInput(req.body),
       });
       res.json(updated);
     },
