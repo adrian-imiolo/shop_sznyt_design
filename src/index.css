@@ -8,6 +8,10 @@
   --font-serif: "Cormorant Garamond", Georgia, serif;
   --font-sans: "DM Sans", sans-serif;
 
+  /* Sticky navbar height (md+). Full-viewport sections use
+     calc(100vh - var(--spacing-nav)) so the fold lands exactly at their bottom edge. */
+  --spacing-nav: 4rem;
+
 }
 
 body {

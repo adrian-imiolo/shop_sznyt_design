@@ -36,7 +36,7 @@ function ProductDetails() {
     );
   if (!product)
     return (
-      <main className="flex flex-col md:flex-row lg:h-screen lg:max-h-240">
+      <main className="flex flex-col md:flex-row lg:h-[calc(100vh-var(--spacing-nav))] lg:max-h-240">
         <Seo
           title="Produkt"
           description="Ręcznie robiona ramka z litego dębu od Sznyt Design. Designerski prezent, który zostaje na lata."
@@ -63,7 +63,7 @@ function ProductDetails() {
     );
 
   return (
-    <main className="flex flex-col md:flex-row lg:h-screen lg:max-h-240">
+    <main className="flex flex-col md:flex-row lg:h-[calc(100vh-var(--spacing-nav))] lg:max-h-240">
       <Seo
         title={product.name}
         description={`${product.tagline} Ręcznie robiona ramka z litego dębu od Sznyt Design — designerski prezent, który zostaje na lata.`}
