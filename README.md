@@ -2,7 +2,7 @@
 
 > Premium e-commerce for designer wooden picture frames.
 
-**Live demo:** [shop-sznyt-design.vercel.app](https://shop-sznyt-design.vercel.app/) (read-only — checkout and admin disabled)
+**Live demo:** [shop-sznyt-design.vercel.app](https://shop-sznyt-design.vercel.app/) — full checkout on Stripe **test mode**: pay with card `4242 4242 4242 4242`, no real money moves
 **Production:** [sznytdesign.pl](https://sznytdesign.pl) _(post-cutover)_
 
 A custom React + Express + Postgres e-commerce stack built and operated end-to-end by one developer. No Shopify, no WooCommerce — full control over brand presentation, checkout flow, and admin tooling.
@@ -18,7 +18,17 @@ A custom React + Express + Postgres e-commerce stack built and operated end-to-e
 
 ## Live demo
 
-The demo is read-only: catalogue browsing, cart, paczkomat picker, contact form — all functional. The "Pay" button is intentionally disabled with an explanatory banner. The full checkout flow (Stripe Checkout, webhook-driven order creation, atomic stock decrement, customer + admin emails) is wired up and runs in production.
+The demo runs the **real checkout pipeline against Stripe test mode** — not a mock. Land on [shop-sznyt-design.vercel.app](https://shop-sznyt-design.vercel.app/), add a frame to the cart, fill in any address, and pay with test card `4242 4242 4242 4242` (any future expiry, any CVC). You'll get a real order confirmation page backed by a webhook-recorded order in Postgres.
+
+Worth noticing while you're in there:
+
+- **The Stripe webhook is the source of truth** — the order flips to `paid` only when Stripe's `checkout.session.completed` event lands, never from the client. Replay the event from the Stripe dashboard and no duplicate order appears (`stripeSessionId` is the idempotency key).
+- **Stock decrements atomically** in a Prisma transaction inside the webhook handler — two buyers can't oversell the last frame.
+- **Clerk role-based admin** — `/admin` is gated by `publicMetadata.role === "admin"`; sign up freely, you'll be authenticated but unauthorized (by design).
+- **npm-workspaces monorepo** with shared TypeScript types across the React frontend and Express backend — one definition of `Product`/`Order` on both sides of the API boundary.
+- **Transactional email module** — order confirmation, shipping notification, contact form; in the demo SMTP is intentionally unset, so the backend logs `[demo] sendEmail skipped` instead of sending.
+
+Demo infra: Vercel (frontend) + Render (backend) + Neon (Postgres) + Clerk dev + Stripe test mode — $0/month. Runbook: `docs/DEPLOY-DEMO.md`. First request may take ~30 s (Render free tier waking up).
 
 ## Tech stack
 
@@ -32,7 +42,7 @@ The demo is read-only: catalogue browsing, cart, paczkomat picker, contact form 
 | Database | PostgreSQL (Neon serverless in demo, Railway in prod) | Order → OrderItem → Product is naturally relational |
 | Auth | Clerk | Hosted; saves writing session/password infrastructure |
 | Payments | Stripe Checkout | Hosted = no PCI scope; webhook is the source of truth |
-| Email | Nodemailer + Google Workspace SMTP | Transactional volume too low to justify a paid provider |
+| Email | Nodemailer + hosting-provider SMTP | Transactional volume too low to justify a paid provider |
 | Hosting | Vercel (frontend) + Render/Railway (backend) + Neon (DB) | Vercel free tier for the SPA; Render free for demo backend |
 
 ## Architecture
@@ -52,8 +62,8 @@ The demo is read-only: catalogue browsing, cart, paczkomat picker, contact form 
            Prisma  │       │  SMTP
                    ▼       ▼
           ┌──────────────┐  ┌──────────┐
-          │  PostgreSQL  │  │  Google  │
-          │    (Neon)    │  │ Workspace│
+          │  PostgreSQL  │  │   SMTP   │
+          │    (Neon)    │  │ provider │
           └──────────────┘  └──────────┘
                    ▲
                    │ session claims (@clerk/express)
@@ -154,7 +164,8 @@ Set `VITE_DEMO_MODE=true` (frontend) to show the demo banner and test-card instr
 │   ├── context/             # Cart, cookie consent
 │   └── types.ts             # Shared types
 ├── backend/
-│   ├── index.js             # Express app — all routes (single file by design)
+│   ├── index.js             # Boot: env checks, app assembly
+│   ├── routes/              # checkout, webhook, orders, products, forms
 │   ├── seed.js              # Development seed
 │   └── prisma/
 │       ├── schema.prisma    # DB single source of truth
