@@ -46,7 +46,7 @@ function ProductSection({
         <Link
           to={`/sklep/${id}`}
           aria-label={`Zobacz produkt: ${name}`}
-          className="relative w-full md:w-1/2 min-h-[60vh] lg:min-h-screen overflow-hidden cursor-pointer"
+          className="relative w-full md:w-1/2 aspect-[4/5] overflow-hidden cursor-pointer"
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
         >
