@@ -8,9 +8,10 @@ import {
 
 /**
  * Public form routes (issue #108): contact, return (zwrot), and complaint
- * (reklamacja). Handlers moved verbatim from app.js. All three share one
- * rate-limit bucket, as before — a burst on any form counts against the same
- * per-IP limit.
+ * (reklamacja). All three share one rate-limit bucket — a burst on any form
+ * counts against the same per-IP limit. Contact failures propagate to the
+ * shared serverError middleware (issue #115); zwrot/reklamacja keep local
+ * catches because their 500 body carries a fallback contact address.
  *
  * @param {object} deps
  * @param {object} deps.prisma
@@ -31,34 +32,29 @@ export function createFormsRouter({ prisma, mailer }) {
   });
 
   // submit contact form
-  router.post("/contact", formLimiter, async (req, res) => {
+  router.post("/contact", formLimiter, async function submitContact(req, res) {
     const { name, email, message, _hp } = req.body;
     if (_hp) return res.json({ ok: true });
     if (!name || !email || !message) {
       return res.status(400).json({ error: "Wszystkie pola są wymagane." });
     }
+    const contactMessage = await prisma.contactMessage.create({
+      data: { name, email, message },
+    });
     try {
-      const contactMessage = await prisma.contactMessage.create({
-        data: { name, email, message },
+      await mailer.send({
+        to: process.env.CONTACT_RECIPIENT,
+        replyTo: email,
+        ...renderContactNotification({ name, email, message }),
       });
-      try {
-        await mailer.send({
-          to: process.env.CONTACT_RECIPIENT,
-          replyTo: email,
-          ...renderContactNotification({ name, email, message }),
-        });
-      } catch (emailErr) {
-        console.error("Błąd wysyłania emaila:", emailErr.message);
-      }
-      res.json(contactMessage);
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: "Błąd serwera" });
+    } catch (emailErr) {
+      console.error("Błąd wysyłania emaila:", emailErr.message);
     }
+    res.json(contactMessage);
   });
 
   // submit return form
-  router.post("/zwrot", formLimiter, async (req, res) => {
+  router.post("/zwrot", formLimiter, async function submitReturn(req, res) {
     const { orderNumber, name, email, reason, bankAccount, _hp } = req.body;
     if (_hp) return res.json({ ok: true });
     if (!orderNumber || !name || !email || !reason || !bankAccount) {
@@ -78,7 +74,7 @@ export function createFormsRouter({ prisma, mailer }) {
   });
 
   // submit complaint form
-  router.post("/reklamacja", formLimiter, async (req, res) => {
+  router.post("/reklamacja", formLimiter, async function submitComplaint(req, res) {
     const { orderNumber, name, email, description, _hp } = req.body;
     if (_hp) return res.json({ ok: true });
     if (!orderNumber || !name || !email || !description) {

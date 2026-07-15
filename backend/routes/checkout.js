@@ -5,7 +5,9 @@ import { buildCheckoutLineItems, normalizeOrderNote } from "../orders/index.ts";
 /**
  * Checkout-session route (issue #107) — the outbound half of the Stripe
  * adapter (ADR-0001). Validation and pricing live in the order-intake
- * module; this route only fetches products and talks to Stripe.
+ * module; this route only fetches products and talks to Stripe. The local
+ * catch only maps Stripe's email_invalid to a 400; everything else rethrows
+ * to the shared serverError middleware (issue #115).
  *
  * @param {object} deps
  * @param {object|null} deps.stripe  Stripe client, or null in demo mode.
@@ -23,8 +25,10 @@ export function createCheckoutRouter({ stripe, prisma }) {
     message: { error: "Zbyt wiele prób. Spróbuj ponownie za chwilę." },
   });
 
-  router.post("/create-checkout-session", checkoutLimiter, async (req, res) => {
-    try {
+  router.post(
+    "/create-checkout-session",
+    checkoutLimiter,
+    async function createCheckoutSession(req, res) {
       if (!stripe) {
         return res.status(503).json({ error: "Checkout disabled in demo mode" });
       }
@@ -57,29 +61,37 @@ export function createCheckoutRouter({ stripe, prisma }) {
 
       const customerEmail = shippingAddress?.email || undefined;
 
-      const session = await stripe.checkout.sessions.create({
-        payment_method_types: ["card", "p24", "blik"],
-        line_items: result.lineItems,
-        mode: "payment",
-        customer_email: customerEmail,
-        success_url: `${process.env.FRONTEND_URL}/sukces?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${process.env.FRONTEND_URL}/koszyk`,
-        metadata: {
-          ...(userId ? { userId } : {}),
-          ...(noteResult.note ? { note: noteResult.note } : {}),
-          shippingMethod,
-          shippingAddress: JSON.stringify(shippingAddress),
-        },
-      });
-      res.json({ url: session.url });
-    } catch (err) {
-      console.error(err);
-      if (err.code === "email_invalid") {
-        return res.status(400).json({ error: "Podaj poprawny adres e-mail." });
+      let session;
+      try {
+        session = await stripe.checkout.sessions.create({
+          payment_method_types: ["card", "p24", "blik"],
+          line_items: result.lineItems,
+          mode: "payment",
+          customer_email: customerEmail,
+          success_url: `${process.env.FRONTEND_URL}/sukces?session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${process.env.FRONTEND_URL}/koszyk`,
+          metadata: {
+            ...(userId ? { userId } : {}),
+            ...(noteResult.note ? { note: noteResult.note } : {}),
+            shippingMethod,
+            shippingAddress: JSON.stringify(shippingAddress),
+          },
+        });
+      } catch (err) {
+        if (err.code === "email_invalid") {
+          // err.message echoes the submitted address — log triage fields only,
+          // customer PII stays out of the logs
+          console.error("Stripe odrzucił adres e-mail:", {
+            code: err.code,
+            requestId: err.requestId,
+          });
+          return res.status(400).json({ error: "Podaj poprawny adres e-mail." });
+        }
+        throw err;
       }
-      res.status(500).json({ error: "Błąd serwera" });
-    }
-  });
+      res.json({ url: session.url });
+    },
+  );
 
   return router;
 }

@@ -4,45 +4,21 @@
  * boundary — every mutating route rejects anonymous (401) and signed-in
  * non-admin (403) callers before touching the database.
  */
-import { describe, it, expect, beforeAll, beforeEach, afterAll } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import request from "supertest";
-import type { PrismaClient } from "../generated/prisma/client.js";
-import { createTestPrisma, truncateCommerceTables } from "./db.ts";
-import { createApp } from "../app.js";
-import { fakeAuth, fakeStripe, captureMailer, type FakeAuthOptions } from "./fakes.ts";
+import { useAppHarness } from "./harness.ts";
 
-let prisma: PrismaClient;
+const harness = useAppHarness();
 
-beforeAll(() => {
-  prisma = createTestPrisma();
-});
-
-afterAll(async () => {
-  await prisma.$disconnect();
-});
-
-beforeEach(async () => {
-  await truncateCommerceTables(prisma);
-});
-
-function buildApp(authOptions: FakeAuthOptions = {}) {
-  return createApp({
-    auth: fakeAuth(authOptions),
-    stripe: fakeStripe(),
-    mailer: captureMailer(),
-    prisma,
-  });
-}
-
-const anonymous = () => buildApp();
-const nonAdmin = () => buildApp({ userId: "user_regular" });
-const admin = () => buildApp({ userId: "user_admin", role: "admin" });
+const anonymous = () => harness.appAs().app;
+const nonAdmin = () => harness.appAs({ userId: "user_regular" }).app;
+const admin = () => harness.appAs({ userId: "user_admin", role: "admin" }).app;
 
 const frameData = { name: "Rama Dębowa 30×40", price: 149.99, stock: 5 };
 
 describe("GET /products/:id", () => {
   it("returns the product publicly", async () => {
-    await prisma.product.create({ data: frameData });
+    await harness.prisma.product.create({ data: frameData });
 
     const res = await request(anonymous()).get("/products/1");
 
@@ -86,7 +62,7 @@ describe("POST /products — admin boundary", () => {
 
 describe("PUT /products/:id — admin boundary", () => {
   beforeEach(async () => {
-    await prisma.product.create({ data: frameData });
+    await harness.prisma.product.create({ data: frameData });
   });
 
   it("rejects anonymous callers with 401", async () => {
@@ -113,7 +89,7 @@ describe("PUT /products/:id — admin boundary", () => {
 
 describe("DELETE /products/:id — admin boundary", () => {
   beforeEach(async () => {
-    await prisma.product.create({ data: frameData });
+    await harness.prisma.product.create({ data: frameData });
   });
 
   it("rejects anonymous callers with 401", async () => {
@@ -140,7 +116,7 @@ describe("DELETE /products/:id — admin boundary", () => {
 
 describe("PATCH /products/reorder — admin boundary", () => {
   beforeEach(async () => {
-    await prisma.product.createMany({
+    await harness.prisma.product.createMany({
       data: [
         { name: "Rama A", price: 100, sortOrder: 0 },
         { name: "Rama B", price: 120, sortOrder: 1 },

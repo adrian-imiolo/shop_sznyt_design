@@ -7,6 +7,7 @@ import { createOrdersRouter } from "./routes/orders.js";
 import { createRevenueRouter } from "./routes/revenue.js";
 import { createFormsRouter } from "./routes/forms.js";
 import { createAdminAuth } from "./middleware/adminAuth.js";
+import { serverError } from "./middleware/errors.js";
 
 /**
  * App factory (issue #106). All external services come in through the
@@ -55,6 +56,10 @@ export function createApp({ auth, stripe, mailer, prisma }) {
   app.use(createOrdersRouter({ prisma, auth, mailer, requireAdmin, getRole }));
   app.use(createRevenueRouter({ prisma, auth, requireAdmin }));
   app.use(createFormsRouter({ prisma, mailer }));
+
+  // Tail error handler (issue #115) — Express 5 lands rejected async
+  // handlers here; must stay mounted after every router.
+  app.use(serverError);
 
   return app;
 }

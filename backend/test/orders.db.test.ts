@@ -4,41 +4,15 @@
  * read user B's orders, guest orders stay hidden behind the by-session lookup,
  * and admins bypass ownership for back-office work.
  */
-import { describe, it, expect, beforeAll, beforeEach, afterAll } from "vitest";
+import { describe, it, expect } from "vitest";
 import request from "supertest";
-import type { PrismaClient } from "../generated/prisma/client.js";
-import { createTestPrisma, truncateCommerceTables } from "./db.ts";
-import { createApp } from "../app.js";
-import { fakeAuth, fakeStripe, captureMailer, type FakeAuthOptions } from "./fakes.ts";
+import { useAppHarness } from "./harness.ts";
 
-let prisma: PrismaClient;
+const harness = useAppHarness();
 
-beforeAll(() => {
-  prisma = createTestPrisma();
-});
-
-afterAll(async () => {
-  await prisma.$disconnect();
-});
-
-beforeEach(async () => {
-  await truncateCommerceTables(prisma);
-});
-
-function buildApp(authOptions: FakeAuthOptions = {}) {
-  const mailer = captureMailer();
-  const app = createApp({
-    auth: fakeAuth(authOptions),
-    stripe: fakeStripe(),
-    mailer,
-    prisma,
-  });
-  return { app, mailer };
-}
-
-const anonymous = () => buildApp().app;
-const asUser = (userId: string) => buildApp({ userId }).app;
-const admin = () => buildApp({ userId: "user_admin", role: "admin" });
+const anonymous = () => harness.appAs().app;
+const asUser = (userId: string) => harness.appAs({ userId }).app;
+const admin = () => harness.appAs({ userId: "user_admin", role: "admin" });
 
 /** Paid order with one line item, owned by `userId` (null = guest). */
 async function seedOrder({
@@ -52,10 +26,10 @@ async function seedOrder({
   total?: number;
   customerEmail?: string | null;
 }) {
-  const product = await prisma.product.create({
+  const product = await harness.prisma.product.create({
     data: { name: "Rama Dębowa 30×40", price: 149.99, stock: 5 },
   });
-  return prisma.order.create({
+  return harness.prisma.order.create({
     data: {
       stripeSessionId: sessionId,
       status: "paid",

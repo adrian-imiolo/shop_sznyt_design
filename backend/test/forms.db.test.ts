@@ -4,39 +4,16 @@
  * send mail on anonymous input, so the coverage centers on the guardrails —
  * field validation and the honeypot — plus the capture-mailer contract.
  */
-import { describe, it, expect, beforeAll, beforeEach, afterAll } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import request from "supertest";
-import type { PrismaClient } from "../generated/prisma/client.js";
-import { createTestPrisma, truncateCommerceTables } from "./db.ts";
-import { createApp } from "../app.js";
-import { fakeAuth, fakeStripe, captureMailer } from "./fakes.ts";
+import { useAppHarness } from "./harness.ts";
 
-let prisma: PrismaClient;
+const harness = useAppHarness({ env: { CONTACT_RECIPIENT: "sklep@test.local" } });
 
-beforeAll(() => {
-  process.env.CONTACT_RECIPIENT = "sklep@test.local";
-  prisma = createTestPrisma();
-});
-
-afterAll(async () => {
-  await prisma.$disconnect();
-});
-
+// contact messages aren't commerce state, so the shared truncate skips them
 beforeEach(async () => {
-  await truncateCommerceTables(prisma);
-  await prisma.contactMessage.deleteMany();
+  await harness.prisma.contactMessage.deleteMany();
 });
-
-function buildApp() {
-  const mailer = captureMailer();
-  const app = createApp({
-    auth: fakeAuth(),
-    stripe: fakeStripe(),
-    mailer,
-    prisma,
-  });
-  return { app, mailer };
-}
 
 describe("POST /contact", () => {
   const validBody = {
@@ -46,7 +23,7 @@ describe("POST /contact", () => {
   };
 
   it("rejects a submission with missing fields (400)", async () => {
-    const { app, mailer } = buildApp();
+    const { app, mailer } = harness.appAs();
 
     const res = await request(app).post("/contact").send({ name: "Jan" });
 
@@ -55,7 +32,7 @@ describe("POST /contact", () => {
   });
 
   it("silently swallows honeypot submissions — no message stored, no email", async () => {
-    const { app, mailer } = buildApp();
+    const { app, mailer } = harness.appAs();
 
     const res = await request(app)
       .post("/contact")
@@ -64,11 +41,11 @@ describe("POST /contact", () => {
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ ok: true });
     expect(mailer.sent).toHaveLength(0);
-    expect(await prisma.contactMessage.count()).toBe(0);
+    expect(await harness.prisma.contactMessage.count()).toBe(0);
   });
 
   it("stores the message and notifies the shop with reply-to set to the sender", async () => {
-    const { app, mailer } = buildApp();
+    const { app, mailer } = harness.appAs();
 
     const res = await request(app).post("/contact").send(validBody);
 
@@ -92,7 +69,7 @@ describe("POST /zwrot", () => {
   };
 
   it("rejects a submission with missing fields (400)", async () => {
-    const { app, mailer } = buildApp();
+    const { app, mailer } = harness.appAs();
 
     const res = await request(app)
       .post("/zwrot")
@@ -103,7 +80,7 @@ describe("POST /zwrot", () => {
   });
 
   it("silently swallows honeypot submissions", async () => {
-    const { app, mailer } = buildApp();
+    const { app, mailer } = harness.appAs();
 
     const res = await request(app)
       .post("/zwrot")
@@ -114,7 +91,7 @@ describe("POST /zwrot", () => {
   });
 
   it("emails the return request to the shop", async () => {
-    const { app, mailer } = buildApp();
+    const { app, mailer } = harness.appAs();
 
     const res = await request(app).post("/zwrot").send(validBody);
 
@@ -137,7 +114,7 @@ describe("POST /reklamacja", () => {
   };
 
   it("rejects a submission with missing fields (400)", async () => {
-    const { app, mailer } = buildApp();
+    const { app, mailer } = harness.appAs();
 
     const res = await request(app).post("/reklamacja").send({ name: "Jan" });
 
@@ -146,7 +123,7 @@ describe("POST /reklamacja", () => {
   });
 
   it("emails the complaint to the shop", async () => {
-    const { app, mailer } = buildApp();
+    const { app, mailer } = harness.appAs();
 
     const res = await request(app).post("/reklamacja").send(validBody);
 

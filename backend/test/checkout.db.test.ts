@@ -4,36 +4,15 @@
  * with the outbound Stripe client faked (createdSessions records the params
  * the app would send to Stripe).
  */
-import { describe, it, expect, beforeAll, beforeEach, afterAll } from "vitest";
+import { describe, it, expect } from "vitest";
 import request from "supertest";
-import type { PrismaClient } from "../generated/prisma/client.js";
-import { createTestPrisma, truncateCommerceTables } from "./db.ts";
-import { createApp } from "../app.js";
-import { fakeAuth, fakeStripe, captureMailer } from "./fakes.ts";
+import { fakeStripe } from "./fakes.ts";
+import { useAppHarness } from "./harness.ts";
 
-let prisma: PrismaClient;
-
-beforeAll(() => {
-  process.env.FRONTEND_URL = "https://shop.test";
-  prisma = createTestPrisma();
-});
-
-afterAll(async () => {
-  await prisma.$disconnect();
-});
-
-beforeEach(async () => {
-  await truncateCommerceTables(prisma);
-});
+const harness = useAppHarness({ env: { FRONTEND_URL: "https://shop.test" } });
 
 function buildApp({ stripe = fakeStripe() as object }: { stripe?: object | null } = {}) {
-  const app = createApp({
-    auth: fakeAuth(),
-    stripe,
-    mailer: captureMailer(),
-    prisma,
-  });
-  return app;
+  return harness.appAs({}, { stripe }).app;
 }
 
 /** The slice of Stripe session-create params the tests assert on. */
@@ -60,7 +39,7 @@ const shippingAddress = {
 
 describe("POST /create-checkout-session", () => {
   it("creates a server-priced session and returns its url", async () => {
-    await prisma.product.create({
+    await harness.prisma.product.create({
       data: { name: "Rama Dębowa 30×40", price: 149.99, stock: 5, imageUrl: "/ramy/debowa.jpg" },
     });
     const stripe = fakeStripe({ checkoutSessionUrl: "https://stripe.test/pay/cs_1" });
@@ -104,7 +83,7 @@ describe("POST /create-checkout-session", () => {
   });
 
   it("rejects checkout above available stock with 409 and creates no session", async () => {
-    await prisma.product.create({
+    await harness.prisma.product.create({
       data: { name: "Rama Dębowa 30×40", price: 149.99, stock: 1 },
     });
     const stripe = fakeStripe();

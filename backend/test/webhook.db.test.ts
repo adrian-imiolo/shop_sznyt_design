@@ -7,13 +7,12 @@
  * with `generateTestHeaderString` + a test secret. Only outbound Stripe
  * calls (listLineItems, paymentIntents) are faked.
  */
-import { describe, it, expect, beforeAll, beforeEach, afterAll } from "vitest";
+import { describe, it, expect } from "vitest";
 import request from "supertest";
 import Stripe from "stripe";
-import type { PrismaClient } from "../generated/prisma/client.js";
-import { createTestPrisma, truncateCommerceTables } from "./db.ts";
-import { createApp } from "../app.js";
-import { fakeAuth, fakeStripe, captureMailer } from "./fakes.ts";
+import type { createApp } from "../app.js";
+import { fakeStripe } from "./fakes.ts";
+import { useAppHarness } from "./harness.ts";
 
 const TEST_WEBHOOK_SECRET = "whsec_test_integration_secret";
 const ADMIN_RECIPIENT = "admin@test.local";
@@ -22,20 +21,11 @@ const ADMIN_RECIPIENT = "admin@test.local";
 // offline crypto; the API key is never used.
 const signatureKit = new Stripe("sk_test_offline_signature_only");
 
-let prisma: PrismaClient;
-
-beforeAll(() => {
-  process.env.STRIPE_WEBHOOK_SECRET = TEST_WEBHOOK_SECRET;
-  process.env.CONTACT_RECIPIENT = ADMIN_RECIPIENT;
-  prisma = createTestPrisma();
-});
-
-afterAll(async () => {
-  await prisma.$disconnect();
-});
-
-beforeEach(async () => {
-  await truncateCommerceTables(prisma);
+const harness = useAppHarness({
+  env: {
+    STRIPE_WEBHOOK_SECRET: TEST_WEBHOOK_SECRET,
+    CONTACT_RECIPIENT: ADMIN_RECIPIENT,
+  },
 });
 
 /** Stripe line item as listLineItems returns it (price.product expanded). */
@@ -91,15 +81,13 @@ function signedPost(
 }
 
 function buildApp({ lineItems = [] as unknown[] } = {}) {
-  const mailer = captureMailer();
   const stripe = {
     ...fakeStripe({ lineItems }),
     // Real verification path — a forged or tampered payload must be
     // rejected by the same code that runs in production.
     webhooks: signatureKit.webhooks,
   };
-  const app = createApp({ auth: fakeAuth(), stripe, mailer, prisma });
-  return { app, mailer };
+  return harness.appAs({}, { stripe });
 }
 
 describe("POST /webhook — checkout.session.completed", () => {
@@ -129,7 +117,7 @@ describe("POST /webhook — checkout.session.completed", () => {
   ];
 
   async function seedProduct() {
-    await prisma.product.create({
+    await harness.prisma.product.create({
       data: { name: "Rama Dębowa 30×40", price: 149.99, stock: 5 },
     });
   }
@@ -224,7 +212,7 @@ describe("POST /webhook — checkout.session.completed", () => {
     expect(first.status).toBe(200);
     expect(second.status).toBe(200);
 
-    const orders = await prisma.order.findMany({
+    const orders = await harness.prisma.order.findMany({
       where: { stripeSessionId: "cs_test_paid_1" },
     });
     expect(orders).toHaveLength(1);
