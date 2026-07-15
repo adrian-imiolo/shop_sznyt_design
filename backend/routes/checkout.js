@@ -79,6 +79,7 @@ export function createCheckoutRouter({ stripe, prisma }) {
         });
       } catch (err) {
         if (err.code === "email_invalid") {
+          console.error(err);
           return res.status(400).json({ error: "Podaj poprawny adres e-mail." });
         }
         throw err;

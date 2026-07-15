@@ -15,8 +15,6 @@ beforeEach(async () => {
   await harness.prisma.contactMessage.deleteMany();
 });
 
-const buildApp = () => harness.appAs();
-
 describe("POST /contact", () => {
   const validBody = {
     name: "Jan Kowalski",
@@ -25,7 +23,7 @@ describe("POST /contact", () => {
   };
 
   it("rejects a submission with missing fields (400)", async () => {
-    const { app, mailer } = buildApp();
+    const { app, mailer } = harness.appAs();
 
     const res = await request(app).post("/contact").send({ name: "Jan" });
 
@@ -34,7 +32,7 @@ describe("POST /contact", () => {
   });
 
   it("silently swallows honeypot submissions — no message stored, no email", async () => {
-    const { app, mailer } = buildApp();
+    const { app, mailer } = harness.appAs();
 
     const res = await request(app)
       .post("/contact")
@@ -47,7 +45,7 @@ describe("POST /contact", () => {
   });
 
   it("stores the message and notifies the shop with reply-to set to the sender", async () => {
-    const { app, mailer } = buildApp();
+    const { app, mailer } = harness.appAs();
 
     const res = await request(app).post("/contact").send(validBody);
 
@@ -71,7 +69,7 @@ describe("POST /zwrot", () => {
   };
 
   it("rejects a submission with missing fields (400)", async () => {
-    const { app, mailer } = buildApp();
+    const { app, mailer } = harness.appAs();
 
     const res = await request(app)
       .post("/zwrot")
@@ -82,7 +80,7 @@ describe("POST /zwrot", () => {
   });
 
   it("silently swallows honeypot submissions", async () => {
-    const { app, mailer } = buildApp();
+    const { app, mailer } = harness.appAs();
 
     const res = await request(app)
       .post("/zwrot")
@@ -93,7 +91,7 @@ describe("POST /zwrot", () => {
   });
 
   it("emails the return request to the shop", async () => {
-    const { app, mailer } = buildApp();
+    const { app, mailer } = harness.appAs();
 
     const res = await request(app).post("/zwrot").send(validBody);
 
@@ -116,7 +114,7 @@ describe("POST /reklamacja", () => {
   };
 
   it("rejects a submission with missing fields (400)", async () => {
-    const { app, mailer } = buildApp();
+    const { app, mailer } = harness.appAs();
 
     const res = await request(app).post("/reklamacja").send({ name: "Jan" });
 
@@ -125,7 +123,7 @@ describe("POST /reklamacja", () => {
   });
 
   it("emails the complaint to the shop", async () => {
-    const { app, mailer } = buildApp();
+    const { app, mailer } = harness.appAs();
 
     const res = await request(app).post("/reklamacja").send(validBody);
 
