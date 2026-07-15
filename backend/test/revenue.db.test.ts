@@ -4,52 +4,30 @@
  * computeQuarterRevenue — here we cover the admin boundary and that only
  * paid orders reach the sum.
  */
-import { describe, it, expect, beforeAll, beforeEach, afterAll } from "vitest";
+import { describe, it, expect } from "vitest";
 import request from "supertest";
-import type { PrismaClient } from "../generated/prisma/client.js";
-import { createTestPrisma, truncateCommerceTables } from "./db.ts";
-import { createApp } from "../app.js";
-import { fakeAuth, fakeStripe, captureMailer, type FakeAuthOptions } from "./fakes.ts";
+import { useAppHarness } from "./harness.ts";
 import { QUARTERLY_REVENUE_CAP_PLN } from "../revenue/index.ts";
 
-let prisma: PrismaClient;
-
-beforeAll(() => {
-  prisma = createTestPrisma();
-});
-
-afterAll(async () => {
-  await prisma.$disconnect();
-});
-
-beforeEach(async () => {
-  await truncateCommerceTables(prisma);
-});
-
-function buildApp(authOptions: FakeAuthOptions = {}) {
-  return createApp({
-    auth: fakeAuth(authOptions),
-    stripe: fakeStripe(),
-    mailer: captureMailer(),
-    prisma,
-  });
-}
+const harness = useAppHarness();
 
 describe("GET /revenue/quarter", () => {
   it("rejects anonymous callers with 401", async () => {
-    const res = await request(buildApp()).get("/revenue/quarter");
+    const res = await request(harness.appAs().app).get("/revenue/quarter");
 
     expect(res.status).toBe(401);
   });
 
   it("rejects signed-in non-admins with 403", async () => {
-    const res = await request(buildApp({ userId: "user_regular" })).get("/revenue/quarter");
+    const res = await request(harness.appAs({ userId: "user_regular" }).app).get(
+      "/revenue/quarter",
+    );
 
     expect(res.status).toBe(403);
   });
 
   it("sums paid orders for the current quarter, excluding pending ones", async () => {
-    await prisma.order.createMany({
+    await harness.prisma.order.createMany({
       data: [
         { stripeSessionId: "cs_paid_1", status: "paid", total: 149.99 },
         { stripeSessionId: "cs_paid_2", status: "paid", total: 89.0 },
@@ -57,7 +35,7 @@ describe("GET /revenue/quarter", () => {
       ],
     });
 
-    const res = await request(buildApp({ userId: "user_admin", role: "admin" })).get(
+    const res = await request(harness.appAs({ userId: "user_admin", role: "admin" }).app).get(
       "/revenue/quarter",
     );
 
