@@ -79,7 +79,12 @@ export function createCheckoutRouter({ stripe, prisma }) {
         });
       } catch (err) {
         if (err.code === "email_invalid") {
-          console.error(err);
+          // err.message echoes the submitted address — log triage fields only,
+          // customer PII stays out of the logs
+          console.error("Stripe odrzucił adres e-mail:", {
+            code: err.code,
+            requestId: err.requestId,
+          });
           return res.status(400).json({ error: "Podaj poprawny adres e-mail." });
         }
         throw err;
