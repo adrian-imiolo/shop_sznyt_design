@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
 import type { ProductSectionProps } from "../types";
 
@@ -42,7 +43,9 @@ function ProductSection({
         className={`flex flex-col ${reverse ? "md:flex-row-reverse" : "md:flex-row"} lg:min-h-screen`}
       >
         {/* Image side */}
-        <div
+        <Link
+          to={`/sklep/${id}`}
+          aria-label={`Zobacz produkt: ${name}`}
           className="relative w-full md:w-1/2 min-h-[60vh] lg:min-h-screen overflow-hidden cursor-pointer"
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
@@ -57,7 +60,7 @@ function ProductSection({
             className={`absolute inset-0 bg-cover transition-opacity duration-700 ${hovered ? "opacity-100" : "opacity-0"}`}
             style={{ backgroundImage: `url(${lifestyleImageUrl})`, backgroundPosition: "center 15%" }}
           />
-        </div>
+        </Link>
 
         {/* Text side */}
         <div className="w-full md:w-1/2 flex items-center bg-warm-white px-6 py-12 md:px-10 lg:px-20">
