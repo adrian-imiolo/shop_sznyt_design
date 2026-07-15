@@ -21,8 +21,8 @@ function Navbar() {
   }, []);
 
   return (
-    <nav className={`sticky top-0 z-40 bg-warm-white border-b border-borders px-6 py-4 transition-shadow duration-300 ${scrolled ? "shadow-sm" : ""}`}>
-      <div className="flex items-center justify-between max-w-6xl mx-auto">
+    <nav className={`sticky top-0 z-40 bg-warm-white border-b border-borders px-6 py-4 md:py-0 md:h-nav transition-shadow duration-300 ${scrolled ? "shadow-sm" : ""}`}>
+      <div className="flex items-center justify-between max-w-6xl mx-auto md:h-full">
         <Link
           to="/"
           className="font-cormorant text-xl md:text-2xl text-near-black tracking-wide whitespace-nowrap"
