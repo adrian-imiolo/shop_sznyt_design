@@ -40,24 +40,25 @@ function ProductSection({
       </div>
 
       <section
-        className={`flex flex-col ${reverse ? "md:flex-row-reverse" : "md:flex-row"} lg:min-h-screen`}
+        className={`flex flex-col ${reverse ? "md:flex-row-reverse" : "md:flex-row"} lg:h-[calc(100vh-var(--spacing-nav))] lg:max-h-240`}
       >
-        {/* Image side */}
+        {/* Image side — 4:5 cover crop up to md; on lg the section is viewport-height,
+            so the whole frame must fit: contain inside a padded panel instead */}
         <Link
           to={`/sklep/${id}`}
           aria-label={`Zobacz produkt: ${name}`}
-          className="relative w-full md:w-1/2 aspect-[4/5] overflow-hidden cursor-pointer"
+          className="relative w-full md:w-1/2 aspect-[4/5] lg:aspect-auto lg:h-full overflow-hidden cursor-pointer bg-warm-white"
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
         >
           {/* Studio image — visible by default */}
           <div
-            className={`absolute inset-0 bg-cover bg-center transition-opacity duration-700 ${hovered ? "opacity-0" : "opacity-100"}`}
+            className={`absolute inset-0 lg:inset-10 bg-cover lg:bg-contain bg-center bg-no-repeat transition-opacity duration-700 ${hovered ? "opacity-0" : "opacity-100"}`}
             style={{ backgroundImage: `url(${imageUrl})` }}
           />
           {/* Lifestyle image — visible on hover; frame sits high in the scene, so bias the crop upward */}
           <div
-            className={`absolute inset-0 bg-cover transition-opacity duration-700 ${hovered ? "opacity-100" : "opacity-0"}`}
+            className={`absolute inset-0 lg:inset-10 bg-cover lg:bg-contain bg-no-repeat transition-opacity duration-700 ${hovered ? "opacity-100" : "opacity-0"}`}
             style={{ backgroundImage: `url(${lifestyleImageUrl})`, backgroundPosition: "center 15%" }}
           />
         </Link>
