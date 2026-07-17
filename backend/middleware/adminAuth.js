@@ -6,6 +6,8 @@
  * @param {{ getAuth: Function }} auth
  * @returns {{ getRole: Function, requireAdmin: Function }}
  */
+import { isAdminRole } from "@sznyt/shared";
+
 export function createAdminAuth(auth) {
   function getRole(req) {
     const { sessionClaims } = auth.getAuth(req);
@@ -13,7 +15,7 @@ export function createAdminAuth(auth) {
   }
 
   function requireAdmin(req, res, next) {
-    if (getRole(req) !== "admin") {
+    if (!isAdminRole(getRole(req))) {
       return res.status(403).json({ error: "Forbidden" });
     }
     next();

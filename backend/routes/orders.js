@@ -1,6 +1,6 @@
 import express from "express";
 import { renderOrderShipped } from "../emails/index.ts";
-import { FULFILLMENT_STATUSES } from "@sznyt/shared";
+import { FULFILLMENT_STATUSES, isAdminRole } from "@sznyt/shared";
 
 /**
  * Orders routes (issue #108): admin list + fulfillment, per-user orders,
@@ -103,7 +103,7 @@ export function createOrdersRouter({ prisma, auth, mailer, requireAdmin, getRole
     // sequential ids must not expose their shipping data to other signed-in users.
     // Admins bypass the ownership check: the admin order-detail page reads any
     // order (guest ones included) through this endpoint.
-    if (order.userId !== auth.getAuth(req).userId && getRole(req) !== "admin") {
+    if (order.userId !== auth.getAuth(req).userId && !isAdminRole(getRole(req))) {
       return res.status(403).json({ error: "Forbidden" });
     }
     res.json(order);
