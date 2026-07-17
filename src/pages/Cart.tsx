@@ -9,6 +9,7 @@ import {
   SHIPPING_COSTS,
   FREE_SHIPPING_THRESHOLD,
   ORDER_NOTE_MAX_LENGTH,
+  formatPln,
 } from "@sznyt/shared";
 import { useCheckout, checkoutTotals, PaczkomatPicker } from "../checkout";
 import type { CheckoutFieldErrors, CourierAddress } from "../checkout";
@@ -133,7 +134,7 @@ function Cart() {
                     {item.name}
                   </p>
                   <p className="font-dm-sans text-sm text-secondary-text">
-                    {item.price} PLN / szt.
+                    {formatPln(item.price)} / szt.
                   </p>
                 </div>
                 {/* Controls row */}
@@ -160,7 +161,7 @@ function Cart() {
                   </div>
                   <div className="flex flex-col items-end gap-1">
                     <p className="font-cormorant text-xl md:text-2xl text-near-black font-light">
-                      {item.price * item.quantity} PLN
+                      {formatPln(item.price * item.quantity)}
                     </p>
                     <button
                       onClick={() => removeItem(item.id)}
@@ -192,7 +193,7 @@ function Cart() {
               <p className="font-dm-sans text-sm text-near-black mb-3">
                 Brakuje Ci jeszcze{" "}
                 <span className="font-medium text-accent">
-                  {FREE_SHIPPING_THRESHOLD - subtotal} PLN
+                  {formatPln(FREE_SHIPPING_THRESHOLD - subtotal)}
                 </span>{" "}
                 do darmowej dostawy.
               </p>
@@ -228,7 +229,7 @@ function Cart() {
                   <span className="font-dm-sans text-sm">{option.label}</span>
                 </div>
                 <span className="font-dm-sans text-sm">
-                  {isFreeShipping ? "Gratis" : `${SHIPPING_COSTS[option.id]} PLN`}
+                  {isFreeShipping ? "Gratis" : formatPln(SHIPPING_COSTS[option.id])}
                 </span>
               </label>
             ))}
@@ -284,7 +285,7 @@ function Cart() {
               Produkty
             </p>
             <p className="font-cormorant text-2xl text-near-black font-light w-32 text-right">
-              {subtotal} PLN
+              {formatPln(subtotal)}
             </p>
           </div>
           {shippingMethod && (
@@ -293,7 +294,7 @@ function Cart() {
                 Dostawa
               </p>
               <p className="font-cormorant text-2xl text-near-black font-light w-32 text-right">
-                {shippingCost === 0 ? "Gratis" : `${shippingCost} PLN`}
+                {shippingCost === 0 ? "Gratis" : formatPln(shippingCost)}
               </p>
             </div>
           )}
@@ -302,7 +303,7 @@ function Cart() {
               Suma
             </p>
             <p className="font-cormorant text-3xl text-near-black font-light w-32 text-right">
-              {total} PLN
+              {formatPln(total)}
             </p>
           </div>
           {!shippingMethod && (

@@ -1,4 +1,5 @@
-import { calloutHtml, formatPln, metaRowHtml, wrapHtml } from "./layout.ts";
+import { formatPln } from "@sznyt/shared";
+import { calloutHtml, metaRowHtml, wrapHtml } from "./layout.ts";
 import { orderDetailsHtml, orderDetailsText } from "./orderSummary.ts";
 import type { OrderEmailData, RenderedEmail } from "./types.ts";
 

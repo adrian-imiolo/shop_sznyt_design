@@ -19,5 +19,6 @@ export {
 export type { ShippingMethod } from "./shipping.ts";
 export type { ShippingAddress } from "./shippingAddress.ts";
 export { ORDER_NOTE_MAX_LENGTH } from "./orderNote.ts";
+export { formatPln } from "./money.ts";
 export { REVENUE_THRESHOLDS } from "./revenue.ts";
 export type { QuarterRevenue, QuarterRevenueThreshold } from "./revenue.ts";

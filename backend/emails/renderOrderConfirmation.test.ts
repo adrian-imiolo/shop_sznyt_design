@@ -2,6 +2,10 @@ import { describe, expect, it } from "vitest";
 import { renderOrderConfirmation } from "./renderOrderConfirmation.ts";
 import type { OrderEmailData } from "./types.ts";
 
+// formatPln separates the amount from "PLN" with NBSP (U+00A0), kept as an
+// escape because a literal NBSP is indistinguishable from a space in an editor.
+const NBSP = "\u00A0";
+
 const sampleOrder: OrderEmailData = {
   orderId: 42,
   items: [{ name: "Ramka Dębowa 30×40", quantity: 2, unitPrice: 149 }],
@@ -35,8 +39,8 @@ describe("renderOrderConfirmation", () => {
     expect(output).toContain("#42");
     expect(output).toContain("Ramka Dębowa 30×40");
     expect(output).toContain("2"); // quantity
-    expect(output).toContain("149,00 PLN"); // unit price
-    expect(output).toContain("318,00 PLN"); // grand total
+    expect(output).toContain(`149${NBSP}PLN`); // unit price
+    expect(output).toContain(`318${NBSP}PLN`); // grand total
     expect(output).toContain("Jan Kowalski");
     expect(output).toContain("WAW123");
     expect(output).toContain("00-001 Warszawa");
@@ -49,7 +53,7 @@ describe("renderOrderConfirmation", () => {
     (channel) => {
       const output = channel === "html" ? html : text;
       expect(output).toContain("Dostawa");
-      expect(output).toContain("20,00 PLN"); // 318 total − 298 items
+      expect(output).toContain(`20${NBSP}PLN`); // 318 total − 298 items
     },
   );
 

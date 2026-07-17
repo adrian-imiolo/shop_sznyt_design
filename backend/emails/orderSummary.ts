@@ -6,8 +6,9 @@ import {
   PAYMENT_METHOD_LABELS,
   SHIPPING_METHOD_LABELS,
   deriveShippingCost,
+  formatPln,
 } from "@sznyt/shared";
-import { escapeHtml, formatPln, layoutColors, sectionHeadingHtml } from "./layout.ts";
+import { escapeHtml, layoutColors, sectionHeadingHtml } from "./layout.ts";
 import type { OrderEmailData, ShippingAddress } from "./types.ts";
 
 export function paymentMethodLabel(method: string | null): string {

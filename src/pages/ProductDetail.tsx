@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useState } from "react";
+import { formatPln } from "@sznyt/shared";
 import { useCart } from "../hooks/useCart";
 import type { Product } from "../types";
 import Skeleton from "../components/Skeleton";
@@ -123,7 +124,7 @@ function ProductDetails() {
         {/* Bottom: price + stock + button */}
         <div className="border-t border-borders pt-8">
           <p className="font-cormorant text-4xl text-near-black font-light mb-2">
-            {product.price} PLN
+            {formatPln(product.price)}
           </p>
           <p className="font-dm-sans text-xs text-secondary-text tracking-widest uppercase mb-8">
             Dostępność:{" "}

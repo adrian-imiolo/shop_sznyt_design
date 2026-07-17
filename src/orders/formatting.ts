@@ -1,4 +1,4 @@
-import { FREE_SHIPPING_LABEL, deriveShippingCost } from "@sznyt/shared";
+import { FREE_SHIPPING_LABEL, deriveShippingCost, formatPln } from "@sznyt/shared";
 import type { ShippingAddress } from "@sznyt/shared";
 
 // Pure order-presentation formatters shared by every surface that renders
@@ -52,5 +52,5 @@ export function orderShippingCost(order: {
 
 /** "Gratis" for free shipping, otherwise the amount — matching the emails. */
 export function formatShippingCost(cost: number): string {
-  return cost === 0 ? FREE_SHIPPING_LABEL : `${cost} PLN`;
+  return cost === 0 ? FREE_SHIPPING_LABEL : formatPln(cost);
 }

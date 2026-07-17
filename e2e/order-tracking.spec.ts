@@ -71,14 +71,14 @@ test("order tracking: signed-in user sees their order in MyOrders and its detail
   await page.goto("/moje-zamowienia");
   await expect(page.getByText(`Zamówienie #${orderRow.id}`)).toBeVisible();
   await expect(page.getByText(SEED_PRODUCT.name)).toBeVisible();
-  await expect(page.getByText(`${ORDER_TOTAL} PLN`)).toBeVisible();
+  await expect(page.getByText(`${ORDER_TOTAL}\u00A0PLN`)).toBeVisible();
 
   // Detail page shows items, address, and total
   await page.getByText(`Zamówienie #${orderRow.id}`).click();
   await expect(
     page.getByRole("heading", { name: `Zamówienie #${orderRow.id}` }),
   ).toBeVisible();
-  await expect(page.getByText(`1 szt. × ${SEED_PRODUCT.price} PLN`)).toBeVisible();
+  await expect(page.getByText(`1 szt. × ${SEED_PRODUCT.price}\u00A0PLN`)).toBeVisible();
   await expect(page.getByText(E2E_ADDRESS.street).first()).toBeVisible();
-  await expect(page.getByText(`${ORDER_TOTAL} PLN`)).toBeVisible();
+  await expect(page.getByText(`${ORDER_TOTAL}\u00A0PLN`)).toBeVisible();
 });
