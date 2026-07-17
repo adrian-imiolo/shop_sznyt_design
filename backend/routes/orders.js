@@ -1,5 +1,5 @@
 import express from "express";
-import { renderOrderShipped } from "../emails/index.ts";
+import { notifyOrderShipped } from "../orders/index.ts";
 import { FULFILLMENT_STATUSES, isAdminRole } from "@sznyt/shared";
 
 /**
@@ -45,21 +45,8 @@ export function createOrdersRouter({ prisma, auth, mailer, requireAdmin, getRole
         data: { fulfillmentStatus, trackingNumber: trackingNumber || null },
       });
 
-      // send shipping email when status set to shipped and we have customer email + tracking number
-      if (fulfillmentStatus === "shipped" && order.customerEmail && trackingNumber) {
-        try {
-          await mailer.send({
-            to: order.customerEmail,
-            ...renderOrderShipped({
-              orderId: order.id,
-              trackingNumber,
-              shippingMethod: order.shippingMethod,
-            }),
-          });
-        } catch (emailErr) {
-          console.error("Błąd wysyłania emaila o wysyłce:", emailErr.message);
-        }
-      }
+      // whether/when to email lives in order intake (issue #130)
+      await notifyOrderShipped(mailer, order, trackingNumber);
 
       res.json(order);
     },
