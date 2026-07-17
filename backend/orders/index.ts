@@ -3,6 +3,8 @@ export { paidOrderFactsFromSession } from "./stripeFacts.ts";
 export { normalizeOrderNote } from "./orderNote.ts";
 export { recordPaidOrder } from "./recordPaidOrder.ts";
 export { notifyOrderPlaced } from "./notifyOrderPlaced.ts";
+export { notifyOrderShipped } from "./notifyOrderShipped.ts";
+export type { ShippedOrderData } from "./notifyOrderShipped.ts";
 export type { PaidOrderFacts, PaidLineItem, CheckoutProduct, CartItemInput } from "./types.ts";
 export type { BuildCheckoutResult } from "./buildCheckoutLineItems.ts";
 export type { RecordPaidOrderResult } from "./recordPaidOrder.ts";
