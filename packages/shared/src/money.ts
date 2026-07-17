@@ -12,5 +12,5 @@ export function formatPln(amount: number): string {
   const isWhole = grosze % 100 === 0;
   const [whole, fraction = ""] = (grosze / 100).toFixed(isWhole ? 0 : 2).split(".");
   const grouped = whole.replace(/\B(?=(\d{3})+$)/g, NBSP);
-  return `${grouped}${fraction && `,${fraction}`}${NBSP}PLN`;
+  return `${grouped}${fraction ? `,${fraction}` : ""}${NBSP}PLN`;
 }

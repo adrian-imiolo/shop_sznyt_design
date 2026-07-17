@@ -7,6 +7,9 @@ import { E2E_ADDRESS, ORDER_TOTAL, SEED_PRODUCT } from "./support/fixtures";
 
 const SHIPPING_ADDRESS = { ...E2E_ADDRESS, email: E2E_CLERK_USER_EMAIL };
 
+// formatPln (@sznyt/shared) renders money with NBSP (U+00A0) before "PLN".
+const NBSP = "\u00A0";
+
 test("order tracking: signed-in user sees their order in MyOrders and its detail page", async ({
   page,
 }) => {
@@ -71,14 +74,14 @@ test("order tracking: signed-in user sees their order in MyOrders and its detail
   await page.goto("/moje-zamowienia");
   await expect(page.getByText(`Zamówienie #${orderRow.id}`)).toBeVisible();
   await expect(page.getByText(SEED_PRODUCT.name)).toBeVisible();
-  await expect(page.getByText(`${ORDER_TOTAL}\u00A0PLN`)).toBeVisible();
+  await expect(page.getByText(`${ORDER_TOTAL}${NBSP}PLN`)).toBeVisible();
 
   // Detail page shows items, address, and total
   await page.getByText(`Zamówienie #${orderRow.id}`).click();
   await expect(
     page.getByRole("heading", { name: `Zamówienie #${orderRow.id}` }),
   ).toBeVisible();
-  await expect(page.getByText(`1 szt. × ${SEED_PRODUCT.price}\u00A0PLN`)).toBeVisible();
+  await expect(page.getByText(`1 szt. × ${SEED_PRODUCT.price}${NBSP}PLN`)).toBeVisible();
   await expect(page.getByText(E2E_ADDRESS.street).first()).toBeVisible();
-  await expect(page.getByText(`${ORDER_TOTAL}\u00A0PLN`)).toBeVisible();
+  await expect(page.getByText(`${ORDER_TOTAL}${NBSP}PLN`)).toBeVisible();
 });
