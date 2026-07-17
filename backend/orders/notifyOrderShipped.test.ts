@@ -48,7 +48,7 @@ describe("notifyOrderShipped", () => {
     },
   );
 
-  it.each(["pending", "processing", "delivered"])(
+  it.each(["received", "processing", "delivered"])(
     "sends nothing when the fulfillment status is %s",
     async (fulfillmentStatus) => {
       const mailer = fakeMailer();
