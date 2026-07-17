@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { formatPln } from "@sznyt/shared";
 import type { AdminOrder } from "../../types";
 import Skeleton from "../../components/Skeleton";
 import { useResource } from "../../hooks/useResource";
@@ -91,7 +92,7 @@ function AdminOrders() {
               <span className="text-xs truncate">{order.customerEmail ?? "—"}</span>
             </div>
             <div className="flex items-center justify-between gap-2">
-              <span className="font-medium">{order.total} PLN</span>
+              <span className="font-medium">{formatPln(order.total)}</span>
               <span className="text-xs">{order.shippingMethod ?? "—"}</span>
             </div>
             <ExpandableAddress order={order} />
@@ -135,7 +136,7 @@ function AdminOrders() {
                     trackingNumber={order.trackingNumber}
                   />
                 </td>
-                <td className="p-3">{order.total} PLN</td>
+                <td className="p-3">{formatPln(order.total)}</td>
                 <td className="p-3">{order.shippingMethod ?? "—"}</td>
                 <td className="p-3 text-xs max-w-40">
                   {addressLine(order)}

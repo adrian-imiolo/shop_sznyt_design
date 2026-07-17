@@ -1,4 +1,4 @@
-import type { QuarterRevenue } from "@sznyt/shared";
+import { formatPln, type QuarterRevenue } from "@sznyt/shared";
 import Skeleton from "../../components/Skeleton";
 import { useResource } from "../../hooks/useResource";
 
@@ -27,13 +27,6 @@ const THRESHOLD_STYLES: Record<
     message: "Limit przekroczony — obowiązek rejestracji działalności w ciągu 7 dni!",
   },
 };
-
-function formatPln(value: number) {
-  return value.toLocaleString("pl-PL", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-}
 
 /** Running quarterly revenue vs the działalność-nierejestrowana cap. */
 function RevenueBanner() {
@@ -66,9 +59,9 @@ function RevenueBanner() {
           Przychód Q{data.quarter} {data.year}
         </p>
         <p className="text-sm tabular-nums">
-          <span className="font-semibold">{formatPln(data.totalPln)} zł</span>
+          <span className="font-semibold">{formatPln(data.totalPln)}</span>
           {" / "}
-          {formatPln(data.capPln)} zł ({percent.toFixed(1)}%)
+          {formatPln(data.capPln)} ({percent.toFixed(1)}%)
         </p>
       </div>
       <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/60">

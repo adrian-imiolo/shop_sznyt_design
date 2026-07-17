@@ -3,6 +3,7 @@ import {
   ORDER_STATUS_LABELS,
   SHIPPING_METHOD_LABELS,
   PAYMENT_METHOD_LABELS,
+  formatPln,
 } from "@sznyt/shared";
 import type { AdminOrderPayload, OrderItem } from "../../types";
 import Skeleton from "../../components/Skeleton";
@@ -33,10 +34,10 @@ function LineItemRow({ item }: { item: OrderItem }) {
       <div className="flex-1 min-w-0">
         <p className="font-medium truncate">{item.product?.name ?? DELETED_PRODUCT_NAME}</p>
         <p className="text-xs text-gray-500">
-          {item.quantity} szt. × {item.price} PLN
+          {item.quantity} szt. × {formatPln(item.price)}
         </p>
       </div>
-      <p className="font-medium whitespace-nowrap">{item.price * item.quantity} PLN</p>
+      <p className="font-medium whitespace-nowrap">{formatPln(item.price * item.quantity)}</p>
     </div>
   );
 }
@@ -109,7 +110,7 @@ function AdminOrderDetail() {
         )}
         <div className="flex justify-between py-3 font-medium">
           <span>Suma</span>
-          <span>{order.total} PLN</span>
+          <span>{formatPln(order.total)}</span>
         </div>
       </div>
 

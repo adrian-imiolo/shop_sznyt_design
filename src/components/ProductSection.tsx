@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { formatPln } from "@sznyt/shared";
 import { useCart } from "../hooks/useCart";
 import type { ProductSectionProps } from "../types";
 
@@ -79,7 +80,7 @@ function ProductSection({
               {description}
             </p>
             <p className="font-dm-sans text-lg text-near-black font-medium mb-8">
-              {price} PLN
+              {formatPln(price)}
             </p>
             <button
               disabled={cartQuantity >= stock}

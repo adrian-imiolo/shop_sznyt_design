@@ -23,10 +23,6 @@ export function escapeHtml(value: unknown): string {
     .replaceAll("'", "&#39;");
 }
 
-export function formatPln(amount: number): string {
-  return `${amount.toFixed(2).replace(".", ",")} PLN`;
-}
-
 /** Turns plain-text paragraphs into escaped HTML with preserved line breaks. */
 export function textBlockToHtml(value: string): string {
   return escapeHtml(value).replaceAll("\n", "<br>");

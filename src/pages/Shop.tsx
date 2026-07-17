@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { formatPln } from "@sznyt/shared";
 import type { Product } from "../types";
 import Seo from "../components/Seo";
 import { useResource } from "../hooks/useResource";
@@ -32,7 +33,7 @@ function ProductCard({ product }: { product: Product }) {
             {product.tagline}
           </p>
           <p className="font-dm-sans text-sm text-near-black">
-            {product.price} PLN
+            {formatPln(product.price)}
           </p>
         </div>
       </div>

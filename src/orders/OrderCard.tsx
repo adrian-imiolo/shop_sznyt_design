@@ -3,6 +3,7 @@ import {
   FULFILLMENT_LABELS,
   SHIPPING_METHOD_LABELS,
   PAYMENT_METHOD_LABELS,
+  formatPln,
 } from "@sznyt/shared";
 import type { Order, OrderItem } from "../types";
 import {
@@ -91,7 +92,7 @@ function SummaryCard({ order }: { order: Order }) {
         {order.items?.map((item) => (
           <div key={item.id} className="flex justify-between font-dm-sans text-near-black text-sm">
             <span>{item.product?.name ?? DELETED_PRODUCT_NAME} × {item.quantity}</span>
-            <span>{item.price * item.quantity} PLN</span>
+            <span>{formatPln(item.price * item.quantity)}</span>
           </div>
         ))}
         {order.shippingMethod && (
@@ -104,7 +105,7 @@ function SummaryCard({ order }: { order: Order }) {
 
       <div className="border-t border-borders pt-4 flex justify-between font-dm-sans text-near-black font-medium">
         <span>Suma</span>
-        <span>{order.total} PLN</span>
+        <span>{formatPln(order.total)}</span>
       </div>
     </div>
   );
@@ -133,7 +134,7 @@ function ListItem({ order }: { order: Order }) {
           />
         </div>
         <p className="font-cormorant text-2xl text-near-black font-light">
-          {order.total} PLN
+          {formatPln(order.total)}
         </p>
       </div>
 
@@ -213,11 +214,11 @@ function DetailBody({ order }: { order: Order }) {
                 {item.product?.name ?? DELETED_PRODUCT_NAME}
               </p>
               <p className="font-dm-sans text-sm text-secondary-text">
-                {item.quantity} szt. × {item.price} PLN
+                {item.quantity} szt. × {formatPln(item.price)}
               </p>
             </div>
             <p className="font-cormorant text-lg md:text-xl text-near-black font-light w-20 md:w-28 text-right">
-              {item.price * item.quantity} PLN
+              {formatPln(item.price * item.quantity)}
             </p>
           </div>
         ))}
@@ -299,7 +300,7 @@ function DetailBody({ order }: { order: Order }) {
         )}
         <div className="flex justify-between items-center">
           <p className="font-dm-sans text-sm text-secondary-text tracking-widest uppercase">Suma</p>
-          <p className="font-cormorant text-3xl text-near-black font-light">{order.total} PLN</p>
+          <p className="font-cormorant text-3xl text-near-black font-light">{formatPln(order.total)}</p>
         </div>
       </div>
     </>
