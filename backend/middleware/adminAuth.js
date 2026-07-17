@@ -1,3 +1,5 @@
+import { isAdminRole } from "@sznyt/shared";
+
 /**
  * Admin gate shared by the back-office routes (issue #108). The role lives
  * in Clerk session claims (metadata.role); built from the injected auth seam
@@ -6,8 +8,6 @@
  * @param {{ getAuth: Function }} auth
  * @returns {{ getRole: Function, requireAdmin: Function }}
  */
-import { isAdminRole } from "@sznyt/shared";
-
 export function createAdminAuth(auth) {
   function getRole(req) {
     const { sessionClaims } = auth.getAuth(req);
