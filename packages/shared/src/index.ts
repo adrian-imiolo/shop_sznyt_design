@@ -22,4 +22,14 @@ export { ORDER_NOTE_MAX_LENGTH } from "./orderNote.ts";
 export { formatPln } from "./money.ts";
 export { ADMIN_ROLE, isAdminRole } from "./roles.ts";
 export { REVENUE_THRESHOLDS } from "./revenue.ts";
+export {
+  CONTACT_FORM_FIELDS,
+  RETURN_FORM_FIELDS,
+  COMPLAINT_FORM_FIELDS,
+} from "./publicForms.ts";
+export type {
+  ContactFormBody,
+  ReturnFormBody,
+  ComplaintFormBody,
+} from "./publicForms.ts";
 export type { QuarterRevenue, QuarterRevenueThreshold } from "./revenue.ts";

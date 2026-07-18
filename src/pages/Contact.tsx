@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import type { ContactFormBody } from "@sznyt/shared";
 import Seo from "../components/Seo";
 import { usePublicForm } from "../hooks/usePublicForm";
 
@@ -14,8 +15,11 @@ function Contact() {
 
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
+    // Typing the body from the shared contract keeps this form in lockstep
+    // with the backend's required-fields guard (issue #133).
+    const body: ContactFormBody = { name, email, message };
     await submit(
-      { name, email, message },
+      body,
       {
         onSuccess: () => {
           setName("");
