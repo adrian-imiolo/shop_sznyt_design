@@ -1,4 +1,4 @@
-import type { QuarterRevenue } from "@sznyt/shared";
+import type { QuarterRevenue, QuarterRevenueThreshold } from "@sznyt/shared";
 
 export type BannerTone = "safe" | "warn" | "danger";
 
@@ -8,14 +8,8 @@ export type BannerPresentation = {
   percent: number;
 };
 
-/**
- * Pure presentation core for the DN revenue-cap banner: maps the backend's
- * quarter summary to a tone, the Polish warning copy, and a clamped percent.
- * The component renders this result — no logic in JSX (same pattern as
- * ADR-0003's checkout assembly).
- */
 const THRESHOLD_PRESENTATION: Record<
-  QuarterRevenue["threshold"],
+  QuarterRevenueThreshold,
   { tone: BannerTone; message: string | null }
 > = {
   safe: { tone: "safe", message: null },
@@ -33,6 +27,12 @@ const THRESHOLD_PRESENTATION: Record<
   },
 };
 
+/**
+ * Pure presentation core for the DN revenue-cap banner: maps the backend's
+ * quarter summary to a tone, the Polish warning copy, and a clamped percent.
+ * The component renders this result — no logic in JSX (same pattern as
+ * ADR-0003's checkout assembly).
+ */
 export function bannerPresentation(quarterRevenue: QuarterRevenue): BannerPresentation {
   const { tone, message } = THRESHOLD_PRESENTATION[quarterRevenue.threshold];
   // integer grosze keep boundary percentages exact (mirrors computeQuarterRevenue)

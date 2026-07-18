@@ -1,13 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { bannerPresentation } from "./bannerPresentation";
-import type { QuarterRevenue } from "@sznyt/shared";
+import type { QuarterRevenue, QuarterRevenueThreshold } from "@sznyt/shared";
 
 const CAP_PLN = 10813.5;
 
-function quarterRevenue(
-  totalPln: number,
-  threshold: QuarterRevenue["threshold"],
-): QuarterRevenue {
+function quarterRevenue(totalPln: number, threshold: QuarterRevenueThreshold): QuarterRevenue {
   return { quarter: 3, year: 2026, totalPln, capPln: CAP_PLN, threshold };
 }
 
@@ -26,10 +23,12 @@ describe("bannerPresentation", () => {
     );
   });
 
-  it("warn90: danger tone, start-registration copy", () => {
+  it("warn90: danger tone, start-registration copy, exactly 90 at the boundary", () => {
+    // 9732.15 = 10813.50 * 0.9 to the grosz
     const result = bannerPresentation(quarterRevenue(9732.15, "warn90"));
     expect(result.tone).toBe("danger");
     expect(result.message).toBe("Ponad 90% limitu — rozpocznij rejestrację działalności.");
+    expect(result.percent).toBe(90);
   });
 
   it("over: danger tone, statutory 7-day registration-obligation copy", () => {
