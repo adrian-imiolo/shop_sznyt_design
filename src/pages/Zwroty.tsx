@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import type { ComplaintFormBody, ReturnFormBody } from "@sznyt/shared";
 import Seo from "../components/Seo";
 import { usePublicForm } from "../hooks/usePublicForm";
 
@@ -19,7 +20,10 @@ function ZwrotForm() {
 
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
-    await submit({ orderNumber, name, email, reason, bankAccount });
+    // Typed from the shared contract so the form can't drift from the
+    // backend's required-fields guard (issue #133).
+    const body: ReturnFormBody = { orderNumber, name, email, reason, bankAccount };
+    await submit(body);
   }
 
   if (success)
@@ -88,7 +92,8 @@ function ReklamacjaForm() {
 
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
-    await submit({ orderNumber, name, email, description });
+    const body: ComplaintFormBody = { orderNumber, name, email, description };
+    await submit(body);
   }
 
   if (success)

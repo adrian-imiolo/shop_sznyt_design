@@ -1,17 +1,41 @@
 import express from "express";
 import { rateLimit } from "express-rate-limit";
 import {
+  CONTACT_FORM_FIELDS,
+  RETURN_FORM_FIELDS,
+  COMPLAINT_FORM_FIELDS,
+} from "@sznyt/shared";
+import {
   renderContactNotification,
   renderReturnRequest,
   renderComplaintRequest,
 } from "../emails/index.ts";
 
 /**
+ * How a form responds when the notification email fails to send (issue #133).
+ * The difference is intentional and load-bearing — do not unify:
+ *
+ * - "email-is-best-effort": the submission already succeeded (contact stores
+ *   the message in the DB first), so a send failure is logged and the response
+ *   still succeeds. Everything outside the send — the DB write included —
+ *   propagates to the shared serverError middleware (issue #115).
+ * - "fallback-address-500": nothing was persisted, so a send failure loses the
+ *   request — answer 500 with a body carrying the fallback contact address.
+ */
+const CATCH_POLICIES = ["email-is-best-effort", "fallback-address-500"];
+
+const FALLBACK_ADDRESS_ERROR =
+  "Błąd serwera. Spróbuj ponownie lub napisz bezpośrednio na kontakt@sznytdesign.pl.";
+
+/**
  * Public form routes (issue #108): contact, return (zwrot), and complaint
- * (reklamacja). All three share one rate-limit bucket — a burst on any form
- * counts against the same per-IP limit. Contact failures propagate to the
- * shared serverError middleware (issue #115); zwrot/reklamacja keep local
- * catches because their 500 body carries a fallback contact address.
+ * (reklamacja). Each form is a declaration of { fields, render, catchPolicy }
+ * over one shared skeleton (issue #133): honeypot check → required-fields
+ * guard → optional persist → render → send. Required-field lists come from
+ * @sznyt/shared so the frontend submit bodies are typed from the same source.
+ *
+ * All three share one rate-limit bucket — a burst on any form counts against
+ * the same per-IP limit.
  *
  * @param {object} deps
  * @param {object} deps.prisma
@@ -31,66 +55,64 @@ export function createFormsRouter({ prisma, mailer }) {
     message: { error: "Zbyt wiele prób. Spróbuj ponownie za chwilę." },
   });
 
-  // submit contact form
-  router.post("/contact", formLimiter, async function submitContact(req, res) {
-    const { name, email, message, _hp } = req.body;
-    if (_hp) return res.json({ ok: true });
-    if (!name || !email || !message) {
-      return res.status(400).json({ error: "Wszystkie pola są wymagane." });
+  /**
+   * @param {string} path
+   * @param {object} form
+   * @param {readonly string[]} form.fields required fields; missing any → 400.
+   *   Must include "email" — the skeleton sets it as the notification's replyTo
+   * @param {(data: object) => object} form.render email renderer for the picked fields
+   * @param {"email-is-best-effort" | "fallback-address-500"} form.catchPolicy
+   * @param {(data: object) => Promise<object>} [form.persist] runs before the
+   *   send, outside its catch; its return value becomes the response body
+   */
+  function defineFormRoute(path, { fields, render, catchPolicy, persist }) {
+    if (!CATCH_POLICIES.includes(catchPolicy)) {
+      throw new Error(`Unknown catchPolicy for ${path}: ${catchPolicy}`);
     }
-    const contactMessage = await prisma.contactMessage.create({
-      data: { name, email, message },
+
+    router.post(path, formLimiter, async function submitForm(req, res) {
+      if (req.body._hp) return res.json({ ok: true });
+      if (fields.some((field) => !req.body[field])) {
+        return res.status(400).json({ error: "Wszystkie pola są wymagane." });
+      }
+      const data = Object.fromEntries(fields.map((field) => [field, req.body[field]]));
+
+      const record = persist ? await persist(data) : null;
+      try {
+        await mailer.send({
+          to: process.env.CONTACT_RECIPIENT,
+          replyTo: data.email,
+          ...render(data),
+        });
+      } catch (err) {
+        console.error(`Błąd wysyłania emaila (${path}):`, err.message);
+        if (catchPolicy === "fallback-address-500") {
+          return res.status(500).json({ error: FALLBACK_ADDRESS_ERROR });
+        }
+      }
+      res.json(record ?? { ok: true });
     });
-    try {
-      await mailer.send({
-        to: process.env.CONTACT_RECIPIENT,
-        replyTo: email,
-        ...renderContactNotification({ name, email, message }),
-      });
-    } catch (emailErr) {
-      console.error("Błąd wysyłania emaila:", emailErr.message);
-    }
-    res.json(contactMessage);
+  }
+
+  defineFormRoute("/contact", {
+    fields: CONTACT_FORM_FIELDS,
+    render: renderContactNotification,
+    catchPolicy: "email-is-best-effort",
+    persist: function storeContactMessage(data) {
+      return prisma.contactMessage.create({ data });
+    },
   });
 
-  // submit return form
-  router.post("/zwrot", formLimiter, async function submitReturn(req, res) {
-    const { orderNumber, name, email, reason, bankAccount, _hp } = req.body;
-    if (_hp) return res.json({ ok: true });
-    if (!orderNumber || !name || !email || !reason || !bankAccount) {
-      return res.status(400).json({ error: "Wszystkie pola są wymagane." });
-    }
-    try {
-      await mailer.send({
-        to: process.env.CONTACT_RECIPIENT,
-        replyTo: email,
-        ...renderReturnRequest({ orderNumber, name, email, reason, bankAccount }),
-      });
-      res.json({ ok: true });
-    } catch (err) {
-      console.error("Błąd wysyłania zwrotu:", err.message);
-      res.status(500).json({ error: "Błąd serwera. Spróbuj ponownie lub napisz bezpośrednio na kontakt@sznytdesign.pl." });
-    }
+  defineFormRoute("/zwrot", {
+    fields: RETURN_FORM_FIELDS,
+    render: renderReturnRequest,
+    catchPolicy: "fallback-address-500",
   });
 
-  // submit complaint form
-  router.post("/reklamacja", formLimiter, async function submitComplaint(req, res) {
-    const { orderNumber, name, email, description, _hp } = req.body;
-    if (_hp) return res.json({ ok: true });
-    if (!orderNumber || !name || !email || !description) {
-      return res.status(400).json({ error: "Wszystkie pola są wymagane." });
-    }
-    try {
-      await mailer.send({
-        to: process.env.CONTACT_RECIPIENT,
-        replyTo: email,
-        ...renderComplaintRequest({ orderNumber, name, email, description }),
-      });
-      res.json({ ok: true });
-    } catch (err) {
-      console.error("Błąd wysyłania reklamacji:", err.message);
-      res.status(500).json({ error: "Błąd serwera. Spróbuj ponownie lub napisz bezpośrednio na kontakt@sznytdesign.pl." });
-    }
+  defineFormRoute("/reklamacja", {
+    fields: COMPLAINT_FORM_FIELDS,
+    render: renderComplaintRequest,
+    catchPolicy: "fallback-address-500",
   });
 
   return router;
