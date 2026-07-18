@@ -58,7 +58,8 @@ export function createFormsRouter({ prisma, mailer }) {
   /**
    * @param {string} path
    * @param {object} form
-   * @param {readonly string[]} form.fields required fields; missing any → 400
+   * @param {readonly string[]} form.fields required fields; missing any → 400.
+   *   Must include "email" — the skeleton sets it as the notification's replyTo
    * @param {(data: object) => object} form.render email renderer for the picked fields
    * @param {"email-is-best-effort" | "fallback-address-500"} form.catchPolicy
    * @param {(data: object) => Promise<object>} [form.persist] runs before the
