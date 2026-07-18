@@ -1,30 +1,20 @@
 import { formatPln, type QuarterRevenue } from "@sznyt/shared";
 import Skeleton from "../../components/Skeleton";
 import { useResource } from "../../hooks/useResource";
+import { bannerPresentation, type BannerTone } from "./bannerPresentation";
 
-const THRESHOLD_STYLES: Record<
-  QuarterRevenue["threshold"],
-  { container: string; bar: string; message: string | null }
-> = {
+const TONE_STYLES: Record<BannerTone, { container: string; bar: string }> = {
   safe: {
     container: "border-green-600 bg-green-50 text-green-900",
     bar: "bg-green-600",
-    message: null,
   },
-  warn70: {
+  warn: {
     container: "border-amber-500 bg-amber-50 text-amber-900",
     bar: "bg-amber-500",
-    message: "Ponad 70% limitu — czas zaplanować rejestrację działalności.",
   },
-  warn90: {
+  danger: {
     container: "border-red-600 bg-red-50 text-red-900",
     bar: "bg-red-600",
-    message: "Ponad 90% limitu — rozpocznij rejestrację działalności.",
-  },
-  over: {
-    container: "border-red-600 bg-red-50 text-red-900",
-    bar: "bg-red-600",
-    message: "Limit przekroczony — obowiązek rejestracji działalności w ciągu 7 dni!",
   },
 };
 
@@ -49,8 +39,8 @@ function RevenueBanner() {
     );
   }
 
-  const styles = THRESHOLD_STYLES[data.threshold];
-  const percent = (data.totalPln / data.capPln) * 100;
+  const { tone, message, percent } = bannerPresentation(data);
+  const styles = TONE_STYLES[tone];
 
   return (
     <div className={`w-full border-l-4 border p-4 font-dm-sans ${styles.container}`}>
@@ -65,12 +55,9 @@ function RevenueBanner() {
         </p>
       </div>
       <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/60">
-        <div
-          className={`h-full rounded-full ${styles.bar}`}
-          style={{ width: `${Math.min(percent, 100)}%` }}
-        />
+        <div className={`h-full rounded-full ${styles.bar}`} style={{ width: `${percent}%` }} />
       </div>
-      {styles.message && <p className="mt-2 text-sm font-medium">{styles.message}</p>}
+      {message && <p className="mt-2 text-sm font-medium">{message}</p>}
     </div>
   );
 }
