@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { renderContactNotification } from "./renderContactNotification.ts";
+import type { ContactNotificationData } from "./renderContactNotification.ts";
 
-const sampleData = {
+const sampleData: ContactNotificationData = {
   name: "Jan Kowalski",
   email: "jan@example.com",
   message: "Czy ramka 30×40 jest dostępna w orzechu?\nPozdrawiam",

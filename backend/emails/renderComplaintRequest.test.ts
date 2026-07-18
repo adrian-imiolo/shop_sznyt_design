@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { renderComplaintRequest } from "./renderComplaintRequest.ts";
+import type { ComplaintRequestData } from "./renderComplaintRequest.ts";
 
-const sampleData = {
+const sampleData: ComplaintRequestData = {
   orderNumber: "42",
   name: "Anna Nowak",
   email: "anna@example.com",
