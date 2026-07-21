@@ -8,8 +8,15 @@ import { useResource } from "../hooks/useResource";
 function ProductCard({ product }: { product: Product }) {
   const [hovered, setHovered] = useState(false);
 
+  // Hairline separator, mobile only: the single column has no gutter to group by,
+  // so pad below the caption and rule the card's bottom edge — the line lands
+  // centred in the row gap. The last card is left open so it doesn't double up
+  // with the border-t on the materials strip below.
   return (
-    <Link to={`/sklep/${product.id}`}>
+    <Link
+      to={`/sklep/${product.id}`}
+      className="block border-b border-borders pb-16 last:border-b-0 last:pb-0 md:border-b-0 md:pb-0"
+    >
       <div
         className="overflow-hidden"
         onMouseEnter={() => setHovered(true)}
@@ -25,7 +32,7 @@ function ProductCard({ product }: { product: Product }) {
             style={{ backgroundImage: `url(${product.lifestyleImageUrl})` }}
           />
         </div>
-        <div className="pt-4 pb-6">
+        <div className="pt-4">
           <h2 className="font-cormorant text-2xl text-near-black font-light mb-1">
             {product.name}
           </h2>
@@ -88,8 +95,10 @@ function Shop() {
 
       {/* Product grid */}
       <section className="bg-warm-white px-6 py-8 md:py-16">
-        {/* max-w-4xl (not 6xl): keeps a 4:5 card + title inside one laptop viewport */}
-        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
+        {/* max-w-4xl (not 6xl): keeps a 4:5 card + title inside one laptop viewport.
+            Row gap is much larger than the card's internal pt-4 so each image reads as
+            grouped with its own caption, not with the card below it. */}
+        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-y-16 md:gap-y-20 md:gap-x-10">
           {error ? (
             <p className="font-dm-sans text-sm text-red-600 col-span-2">{error}</p>
           ) : (
