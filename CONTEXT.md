@@ -90,6 +90,7 @@ All rendered by per-template render functions returning `{ subject, html, text }
 - **Production launches only with real products.** The domain flip waits for frames, photos, and descriptions (issues labeled `waiting-for-products`). The interim public artifact is the recruiter demo, not the domain.
 - **`noindex` until real photos.** Site ships with `<meta name="robots" content="noindex">` at the layout level. Lifted only after **real** product photos land — AI-rendered placeholder imagery does not lift it.
 - **Deployed databases only ever see `prisma migrate deploy`.** Run by the host at build time, never by hand. `migrate dev` is local-only — it can reset the database — and `backend/seed.js` wipes the product table, so it never runs against a deployed environment. Procedure: `docs/runbooks/production-migrations.md`.
+- **A half-configured service must not boot.** Env invariants live in `backend/config/bootEnv.ts` and are fatal: Stripe needs `STRIPE_WEBHOOK_SECRET` + `FRONTEND_URL`, and SMTP needs `CONTACT_RECIPIENT`. Each guards a state where the shop keeps answering 200 while payments or customer messages go nowhere. Absent services (no Stripe key, no SMTP host) are fine — that's demo mode.
 - **Admin must work at 375 px.** Wife uses phone as primary admin device.
 - **Returns and complaints are email-only.** No DB workflow. Forms post to `kontakt@sznytdesign.pl`.
 

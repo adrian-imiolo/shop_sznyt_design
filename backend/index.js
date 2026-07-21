@@ -7,19 +7,20 @@ import Stripe from "stripe";
 import { clerkMiddleware, requireAuth, getAuth } from "@clerk/express";
 import { sendEmail } from "./emails/index.ts";
 import { createApp } from "./app.js";
+import { findBootEnvErrors } from "./config/bootEnv.ts";
+
+// A half-configured service fails silently at runtime — refuse to boot instead.
+const bootEnvErrors = findBootEnvErrors(process.env);
+if (bootEnvErrors.length > 0) {
+  for (const error of bootEnvErrors) console.error(`FATAL: ${error}`);
+  process.exit(1);
+}
 
 const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY)
   : null;
 
 const isDemoMode = !stripe || !process.env.SMTP_HOST;
-
-// When Stripe is live, a missing webhook secret means payments succeed but orders
-// are never recorded, and a missing FRONTEND_URL 500s every checkout. Fail at boot.
-if (stripe && (!process.env.STRIPE_WEBHOOK_SECRET || !process.env.FRONTEND_URL)) {
-  console.error("FATAL: STRIPE_WEBHOOK_SECRET and FRONTEND_URL are required when STRIPE_SECRET_KEY is set.");
-  process.exit(1);
-}
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),

@@ -4,7 +4,7 @@
  * send mail on anonymous input, so the coverage centers on the guardrails —
  * field validation and the honeypot — plus the capture-mailer contract.
  */
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import request from "supertest";
 import { useAppHarness } from "./harness.ts";
 
@@ -133,5 +133,52 @@ describe("POST /reklamacja", () => {
     expect(mailer.sent).toHaveLength(1);
     expect(mailer.sent[0].to).toBe("sklep@test.local");
     expect(mailer.sent[0].html).toContain(validBody.description);
+  });
+});
+
+/**
+ * Demo mode, where SMTP is off too — the boot check (config/bootEnv.ts) makes
+ * this combination impossible once SMTP is configured. The route must not hand
+ * the mailer an undefined recipient (issue #143).
+ */
+describe("without CONTACT_RECIPIENT", () => {
+  let configuredRecipient: string | undefined;
+
+  beforeEach(() => {
+    configuredRecipient = process.env.CONTACT_RECIPIENT;
+    delete process.env.CONTACT_RECIPIENT;
+  });
+
+  afterEach(() => {
+    process.env.CONTACT_RECIPIENT = configuredRecipient;
+  });
+
+  it("stores a contact message and skips the notification", async () => {
+    const { app, mailer } = harness.appAs();
+
+    const res = await request(app).post("/contact").send({
+      name: "Jan Kowalski",
+      email: "jan@example.com",
+      message: "Czy rama 30×40 jest dostępna od ręki?",
+    });
+
+    expect(res.status).toBe(200);
+    expect(mailer.sent).toHaveLength(0);
+    expect(await harness.prisma.contactMessage.count()).toBe(1);
+  });
+
+  it("accepts a return request and skips the notification", async () => {
+    const { app, mailer } = harness.appAs();
+
+    const res = await request(app).post("/zwrot").send({
+      orderNumber: "17",
+      name: "Jan Kowalski",
+      email: "jan@example.com",
+      reason: "Rama nie pasuje do wnętrza",
+      bankAccount: "PL61109010140000071219812874",
+    });
+
+    expect(res.status).toBe(200);
+    expect(mailer.sent).toHaveLength(0);
   });
 });

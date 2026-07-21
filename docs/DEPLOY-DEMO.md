@@ -163,6 +163,8 @@ All of this happens in **test mode** — check the Stripe dashboard's test-mode 
 
 > **Never paste live keys here.** The demo must only ever see `sk_test_...` / `whsec_...` from test mode. Leave `SMTP_*` unset — the backend logs `[demo] sendEmail skipped` instead of sending order emails.
 
+> **If you ever do set `SMTP_HOST`, you must also set `CONTACT_RECIPIENT`.** Without it every admin notification — new order, contact, zwrot, reklamacja — is rejected for having no recipient while the customer still sees a success message. The backend refuses to boot on that combination and names the missing variable.
+
 ---
 
 ## 7. Smoke-test the demo
