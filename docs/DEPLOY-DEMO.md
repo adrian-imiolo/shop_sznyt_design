@@ -92,14 +92,14 @@ Render's free tier doesn't include Shell access. Seed via **Neon's SQL Editor** 
     'Dwa kolory, jeden charakter.',
     'Rama wykonana z litego dębu, w której naprzemienne kwadraty jasnego i ciemnego drewna tworzą wzór szachownicy. Każdy element precyzyjnie dopasowany — kontrast kolorów nadaje jej wyrazisty, a zarazem ponadczasowy charakter.',
     299,
-    '/images/szachownica-studio.webp',
+    '/images/szachownica-studio-v2.webp',
     '/images/szachownica-lifestyle.webp',
     10, 0, NOW()),
    ('Ramka Corner Cut',
     'Minimalizm w każdym detalu.',
     'Dębowa rama z charakterystycznymi nacięciami na narożnikach, w które wpuszczono kontrastowy materiał. Połączenie drewna i wyraźnego detalu na rogach tworzy subtelny, nowoczesny akcent bez zbędnej ozdobności.',
     349,
-    '/images/corner-cut-studio.webp',
+    '/images/corner-cut-studio-v2.webp',
     '/images/corner-cut-lifestyle.webp',
     8, 0, NOW());
    ```
@@ -212,7 +212,7 @@ Then on GitHub:
 | Pay button works but backend returns 503 | `STRIPE_SECRET_KEY` not set | Complete step 6, redeploy |
 | Backend crash-loops after adding Stripe key | `STRIPE_WEBHOOK_SECRET` or `FRONTEND_URL` missing | Boot check requires all three together — set them, redeploy |
 | Payment succeeds but no order in DB | Webhook signature mismatch or wrong endpoint URL | Check Render logs for `Webhook error`; re-copy `whsec_...` from the exact endpoint, confirm the URL ends with `/webhook` |
-| Stripe checkout page shows no product image | `FRONTEND_URL` wrong or image path 404s | Open `<FRONTEND_URL>/images/szachownica-studio.webp` in a browser — must resolve publicly |
+| Stripe checkout page shows no product image | `FRONTEND_URL` wrong or image path 404s | Open `<FRONTEND_URL>/images/szachownica-studio-v2.webp` in a browser — must resolve publicly |
 | First request after some idle time hangs | Render free-tier cold start | Wait ~30 s; the service is waking. No fix on free tier |
 | `/admin` renders but "Nie udało się załadować zamówień/przychodu" (products table is fine) | Session token has no `metadata` claim — backend 403s `/orders` and `/revenue` | Do step 2.5, then sign out and back in. Confirm in DevTools → Network: `403` (not 401) on `orders` is this exact cause |
 | Redirected off `/admin` to the home page | `publicMetadata.role` not `"admin"` on this instance's user | Clerk → Users → Public metadata → `{ "role": "admin" }`, sign out/in |

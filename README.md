@@ -2,8 +2,10 @@
 
 > Premium e-commerce for designer wooden picture frames.
 
+[![CI](https://github.com/adrian-imiolo/shop_sznyt_design/actions/workflows/ci.yml/badge.svg)](https://github.com/adrian-imiolo/shop_sznyt_design/actions/workflows/ci.yml)
+
 **Live demo:** [shop-sznyt-design.vercel.app](https://shop-sznyt-design.vercel.app/) — full checkout on Stripe **test mode**: pay with card `4242 4242 4242 4242`, no real money moves
-**Production:** [sznytdesign.pl](https://sznytdesign.pl) _(post-cutover)_
+**Production:** `sznytdesign.pl` — domain registered, cutover deliberately deferred until the real frames, photos, and copy exist. The demo is the current public artifact.
 
 A custom React + Express + Postgres e-commerce stack built and operated end-to-end by one developer. No Shopify, no WooCommerce — full control over brand presentation, checkout flow, and admin tooling.
 
@@ -39,7 +41,7 @@ Demo infra: Vercel (frontend) + Render (backend) + Neon (Postgres) + Clerk dev +
 | Routing | React Router 7 | SPA routing without Next.js overhead |
 | Backend | Express 5 on Node 20+ | A small monolith doesn't need a framework |
 | ORM | Prisma 7 | Type-safe queries, schema-first, painless migrations |
-| Database | PostgreSQL (Neon serverless in demo, Railway in prod) | Order → OrderItem → Product is naturally relational |
+| Database | PostgreSQL (Neon serverless in the demo; Railway at launch) | Order → OrderItem → Product is naturally relational |
 | Auth | Clerk | Hosted; saves writing session/password infrastructure |
 | Payments | Stripe Checkout | Hosted = no PCI scope; webhook is the source of truth |
 | Email | Nodemailer + hosting-provider SMTP | Transactional volume too low to justify a paid provider |
@@ -82,6 +84,25 @@ Demo infra: Vercel (frontend) + Render (backend) + Neon (Postgres) + Clerk dev +
 - **Cart lives client-side** in `localStorage` (gated by cookie consent) — never persisted server-side until payment.
 - **Orders survive product deletion.** `OrderItem.productId` is nullable with `onDelete: SetNull`; historical line items keep their price + name snapshot.
 
+## Testing
+
+Three layers, each with a different cost/confidence trade-off. The first two run on every push and pull request via GitHub Actions.
+
+| Layer | What it covers | Command |
+|---|---|---|
+| **Unit** — 219 tests, Vitest | Pure business logic extracted away from I/O: cart math, shipping-cost rules, checkout-draft validation, revenue-threshold banding, order-note normalisation, email rendering (subject + HTML + text) | `npm test` |
+| **Integration** — 8 suites, Vitest + real Postgres | Every Express route against a real database: webhook idempotency, atomic stock decrement, admin 403s, form honeypots | `npm run test:db --workspace backend` |
+| **E2E** — Playwright | Guest checkout through Stripe test mode and order tracking. Local-only by design (needs `stripe listen`) — see `e2e/README.md` | `npm run test:e2e` |
+
+Two decisions worth calling out:
+
+- **The integration suite is hermetic — it needs no secrets.** Clerk auth, Stripe, and the mailer are injected into `createApp()` as fakes, so CI runs the real routing, real Prisma queries, and real transaction boundaries against a throwaway Postgres service container, with zero third-party accounts involved. That's why the CI badge above is green without a single repository secret.
+- **Business logic is deliberately pulled out of route handlers** so it can be unit-tested without HTTP or a database. `bannerPresentation`, `calcShippingCost`, `buildCheckoutLineItems`, and `normalizeOrderNote` are pure functions; the routes stay thin.
+
+The test database is guarded — `backend/scripts/test-db-url.js` refuses any connection string whose database name doesn't end in `_test`, so a stray `TEST_DATABASE_URL` can't truncate a real one.
+
+Beyond automation, `docs/TEST-PLAN.md` is the human checklist for the two launch gates — the paths that only a person on a real phone can sign off.
+
 ## Features
 
 ### Customer
@@ -122,8 +143,7 @@ Crossing the threshold triggers business registration within 7 days. The regime 
 ```bash
 git clone https://github.com/adrian-imiolo/shop_sznyt_design.git
 cd shop_sznyt_design
-npm install
-cd backend && npm install && cd ..
+npm install                # workspaces: covers frontend, backend, and packages/shared
 
 cp backend/.env.example backend/.env
 # Fill in DATABASE_URL and CLERK_SECRET_KEY at minimum
@@ -156,23 +176,39 @@ Set `VITE_DEMO_MODE=true` (frontend) to show the demo banner and test-card instr
 
 ## Project layout
 
+npm workspaces: the root is the frontend, with `backend/` and `packages/*` as workspaces. One `npm install` at the root covers all three.
+
 ```
 .
 ├── src/                     # Frontend (React + Vite)
-│   ├── pages/               # Route components
+│   ├── pages/               # Route components (incl. pages/admin/)
 │   ├── components/          # Reusable UI
-│   ├── context/             # Cart, cookie consent
-│   └── types.ts             # Shared types
+│   ├── checkout/            # Checkout assembly — pure core + useCheckout hook
+│   ├── cart/                # Cart math and localStorage persistence
+│   ├── orders/              # Order rendering shared by customer and admin
+│   ├── context/             # Cart provider
+│   └── types.ts             # Frontend-only view types
+├── packages/shared/         # @sznyt/shared — types and rules used by BOTH sides
+│   └── src/                 # statuses, shipping costs, money, roles, form contracts
 ├── backend/
-│   ├── index.js             # Boot: env checks, app assembly
-│   ├── routes/              # checkout, webhook, orders, products, forms
+│   ├── index.js             # Boot: env checks, dependency wiring
+│   ├── app.js               # createApp() — injectable auth/Stripe/mailer (testability seam)
+│   ├── routes/              # checkout, webhook, orders, products, forms, revenue
+│   ├── orders/              # Order intake: recordPaidOrder, notifications, Stripe facts
+│   ├── emails/              # Per-template renderers → { subject, html, text }
+│   ├── revenue/             # Quarterly DN revenue computation
+│   ├── middleware/          # adminAuth, error handling
+│   ├── test/                # DB-backed integration suite + fakes/harness
 │   ├── seed.js              # Development seed
 │   └── prisma/
 │       ├── schema.prisma    # DB single source of truth
 │       └── migrations/
+├── e2e/                     # Playwright specs (local-only)
 ├── docs/
-│   ├── TEST-PLAN.md         # Pre-launch checklist
-│   └── adr/                 # Architectural decision records
+│   ├── TEST-PLAN.md         # Manual launch-gate checklist
+│   ├── DEPLOY-DEMO.md       # Demo deployment runbook
+│   ├── adr/                 # Architectural decision records
+│   └── runbooks/            # Refunds, production migrations
 ├── CONTEXT.md               # Domain glossary, business rules, entity model
 ├── CLAUDE.md                # AI-assistant project conventions
 └── README.md                # This file
@@ -180,11 +216,11 @@ Set `VITE_DEMO_MODE=true` (frontend) to show the demo banner and test-card instr
 
 ## Roadmap
 
-Tracked in [GitHub Issues](https://github.com/adrian-imiolo/shop_sznyt_design/issues). Highlights:
+Tracked in [GitHub Issues](https://github.com/adrian-imiolo/shop_sznyt_design/issues). The software is feature-complete for launch; what remains is blocked on things outside the code.
 
-- **Pre-launch (p0):** production provisioning, content audits, mobile sweeps, layout-level noindex meta
-- **Post-launch (p1):** branded transactional emails, quarterly DN revenue tracker, admin order detail page, GA4
-- **Blocked on business registration:** VAT invoice generation, NIP collection, Furgonetka integration
+- **Waiting on real products** — the domain cutover is gated on actual frames existing: real photography, real descriptions, care instructions, then production provisioning, DNS flip, and the two manual launch-gate walkthroughs in `docs/TEST-PLAN.md` (one involving a real Stripe charge, refunded afterwards). Deliberate: shipping a shop full of placeholder imagery would be worse than not shipping.
+- **Blocked on business registration** — VAT invoice generation, NIP collection at checkout, and the Furgonetka shipping API only become legal/possible once the DN revenue cap is crossed and the business is formally registered.
+- **Considered** — customer reviews on product pages.
 
 ## License & usage
 

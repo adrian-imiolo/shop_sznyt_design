@@ -11,7 +11,7 @@ import {
 import { escapeHtml, layoutColors, sectionHeadingHtml } from "./layout.ts";
 import type { OrderEmailData, ShippingAddress } from "./types.ts";
 
-export function paymentMethodLabel(method: string | null): string {
+function paymentMethodLabel(method: string | null): string {
   if (!method) return "—";
   return PAYMENT_METHOD_LABELS[method] ?? method;
 }
@@ -21,7 +21,7 @@ export function shippingMethodLabel(method: string | null): string {
   return SHIPPING_METHOD_LABELS[method] ?? method;
 }
 
-export function shippingAddressLines(
+function shippingAddressLines(
   address: ShippingAddress,
   shippingMethod: string | null,
 ): string[] {
@@ -57,7 +57,7 @@ function shippingCostLabel(cost: number): string {
   return cost === 0 ? FREE_SHIPPING_LABEL : formatPln(cost);
 }
 
-export function orderItemsHtml(data: OrderEmailData): string {
+function orderItemsHtml(data: OrderEmailData): string {
   const rows = data.items
     .map(
       (item) => `<tr>
@@ -85,7 +85,7 @@ export function orderItemsHtml(data: OrderEmailData): string {
   </table>`;
 }
 
-export function orderItemsText(data: OrderEmailData): string {
+function orderItemsText(data: OrderEmailData): string {
   const rows = data.items.map(
     (item) => `- ${item.name} × ${item.quantity} — ${formatPln(item.unitPrice)}`,
   );

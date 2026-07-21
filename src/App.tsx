@@ -6,7 +6,7 @@ import ProductDetail from "./pages/ProductDetail";
 import Shop from "./pages/Shop";
 import Cart from "./pages/Cart";
 import { CartProvider } from "./context/CartContext";
-import ScrollOnNav from "./utils/ScrollOnNav";
+import ScrollOnNav from "./components/ScrollOnNav";
 import AdminProducts from "./pages/admin/AdminProducts";
 import ShopLayout from "./components/ShopLayout";
 import AdminAddProduct from "./pages/admin/AdminAddProduct";
