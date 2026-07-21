@@ -78,17 +78,26 @@ export function createFormsRouter({ prisma, mailer }) {
       const data = Object.fromEntries(fields.map((field) => [field, req.body[field]]));
 
       const record = persist ? await persist(data) : null;
-      try {
-        await mailer.send({
-          to: process.env.CONTACT_RECIPIENT,
-          replyTo: data.email,
-          ...render(data),
-        });
-      } catch (err) {
-        console.error(`Błąd wysyłania emaila (${path}):`, err.message);
-        if (catchPolicy === "fallback-address-500") {
-          return res.status(500).json({ error: FALLBACK_ADDRESS_ERROR });
+      // No recipient means demo mode: the boot check (config/bootEnv.ts) makes
+      // an unset CONTACT_RECIPIENT fatal as soon as SMTP is configured, so the
+      // send would have been skipped by sendEmail anyway. Skipping it here
+      // keeps an undefined recipient out of the mailer contract (issue #143).
+      const recipient = process.env.CONTACT_RECIPIENT;
+      if (recipient) {
+        try {
+          await mailer.send({
+            to: recipient,
+            replyTo: data.email,
+            ...render(data),
+          });
+        } catch (err) {
+          console.error(`Błąd wysyłania emaila (${path}):`, err.message);
+          if (catchPolicy === "fallback-address-500") {
+            return res.status(500).json({ error: FALLBACK_ADDRESS_ERROR });
+          }
         }
+      } else {
+        console.log(`[demo] notification skipped (${path}) — CONTACT_RECIPIENT not set`);
       }
       res.json(record ?? { ok: true });
     });

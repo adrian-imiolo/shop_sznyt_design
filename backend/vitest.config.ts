@@ -6,6 +6,7 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     include: [
+      "config/**/*.test.ts",
       "emails/**/*.test.ts",
       "middleware/**/*.test.ts",
       "orders/**/*.test.ts",
