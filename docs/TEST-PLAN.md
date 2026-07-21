@@ -7,6 +7,8 @@ Two parts, matching the two launch gates:
 
 Both parts are HITL: Adrian (and/or wife) clicks through each step on real desktop and mobile devices. Any red is fixed before the gate closes.
 
+> **Neither part runs today.** Both gates are blocked on real products (issues labelled `waiting-for-products`), and Part B needs live Stripe keys on the flipped domain. The environment that *is* live is the recruiter demo — its smoke checklist lives in `docs/DEPLOY-DEMO.md` § 7 "Smoke-test the demo", not here, because it verifies a deployment rather than a launch gate. Re-read this plan when the frames exist; assume individual steps drifted while it sat idle.
+
 ## Setup
 
 ### Local dev (for reproducing reds and pre-run smoke tests)
