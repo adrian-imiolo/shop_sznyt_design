@@ -67,6 +67,7 @@ All rendered by per-template render functions returning `{ subject, html, text }
 - **Provider:** Clerk.
 - **Admin role:** `publicMetadata.role === "admin"` on the Clerk user. Read in backend via `@clerk/express` session claims; in frontend via a `useIsAdmin()` hook wrapping `useUser()`. Both surfaces share one source of truth.
 - **Two admins:** Adrian + wife. Each has own Clerk account with the admin role.
+- **Per-instance Clerk config:** the backend's half of that source of truth arrives through the JWT, so every Clerk instance (local dev, demo, production) needs the session token customized with `{"metadata": "{{user.public_metadata}}"}`. Without it the frontend admits the user and every admin endpoint 403s. Users and metadata don't carry across instances either. Setup: `docs/DEPLOY-DEMO.md` § 2.
 
 ## External services
 
@@ -88,6 +89,7 @@ All rendered by per-template render functions returning `{ subject, html, text }
 - **Quarterly revenue cap is monitored, not enforced.** Admin sees a banner with running total + 70 % / 90 % / over thresholds. Crossing it is a manual action (begin registration), not an automatic block.
 - **Production launches only with real products.** The domain flip waits for frames, photos, and descriptions (issues labeled `waiting-for-products`). The interim public artifact is the recruiter demo, not the domain.
 - **`noindex` until real photos.** Site ships with `<meta name="robots" content="noindex">` at the layout level. Lifted only after **real** product photos land — AI-rendered placeholder imagery does not lift it.
+- **Deployed databases only ever see `prisma migrate deploy`.** Run by the host at build time, never by hand. `migrate dev` is local-only — it can reset the database — and `backend/seed.js` wipes the product table, so it never runs against a deployed environment. Procedure: `docs/runbooks/production-migrations.md`.
 - **Admin must work at 375 px.** Wife uses phone as primary admin device.
 - **Returns and complaints are email-only.** No DB workflow. Forms post to `kontakt@sznytdesign.pl`.
 

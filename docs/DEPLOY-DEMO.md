@@ -25,8 +25,27 @@ Stack: **Vercel** (frontend) + **Render** (backend) + **Neon** (Postgres) + **Cl
 4. From the dashboard sidebar → **API keys**:
    - Copy the **Publishable key** (`pk_test_...`) → for Vercel as `VITE_CLERK_PUBLISHABLE_KEY`
    - Copy the **Secret key** (`sk_test_...`) → for Render as `CLERK_SECRET_KEY`
+5. **Customize the session token** — required for the admin panel. Sidebar → **Sessions** → **Customize session token** → **Edit**, and set the claims to:
+
+   ```json
+   { "metadata": "{{user.public_metadata}}" }
+   ```
+
+   Save.
 
 > Free tier covers up to 10 000 MAUs. Won't be a problem for a demo.
+
+> **Step 5 is per Clerk instance and easy to forget.** The backend reads the admin role from the JWT (`sessionClaims.metadata.role`, `backend/middleware/adminAuth.js`) while the frontend reads it from the user profile (`user.publicMetadata.role`, `src/hooks/useIsAdmin.ts`). Skip the claim and the two disagree: `/admin` renders, then every admin API call 403s. Do this again on every new instance — including the future production one. The claim key must be exactly `metadata`, mapping the whole `public_metadata` object — not `{"role": "{{user.public_metadata.role}}"}`.
+
+### Granting yourself admin (optional)
+
+The demo intentionally ships with **no admin user** — a recruiter who signs up sees the shop, not the back office. To use the back office yourself:
+
+1. Sign up on the deployed site (this Clerk instance has its own user pool — your local user does not carry over).
+2. Clerk dashboard → **Users** → your user → **Public metadata** → set `{ "role": "admin" }`. The value is case-sensitive: `isAdminRole` accepts `"admin"` only, not `"Admin"`.
+3. **Sign out and back in.** Already-issued tokens keep the old claims until they refresh; reloading alone will not fix a 403.
+
+`publicMetadata` ships to the browser on every session — a role label is fine there, secrets never are. The frontend `AdminGuard` only redirects; the backend `requireAdmin` 403 is the actual security boundary.
 
 ---
 
@@ -158,7 +177,8 @@ Open the Vercel URL and confirm:
 - [ ] In Neon SQL Editor: `SELECT id, status, total FROM "Order" ORDER BY id DESC LIMIT 1;` → status `paid`, and `SELECT name, stock FROM "Product";` → stock decremented by the purchased quantity
 - [ ] In Stripe dashboard → Webhooks → the endpoint, **Resend** the `checkout.session.completed` event → returns 200 and no duplicate order appears (idempotency)
 - [ ] `/kontakt` submits without error (backend logs `[demo] sendEmail skipped`)
-- [ ] `/admin` is gated by Clerk — sign up with email, you'll land on `/admin` with no admin permissions (intentional — admin role isn't granted)
+- [ ] `/admin` is gated — sign up with email, then open `/admin`: you're redirected to `/` because no admin role is granted (intentional)
+- [ ] If you granted yourself admin (step 2): `/admin` lists products **and** `/admin/zamowienia` loads without an error banner. Both failing while the products table renders means the session-token claim is missing — see Troubleshooting
 
 ---
 
@@ -194,6 +214,8 @@ Then on GitHub:
 | Payment succeeds but no order in DB | Webhook signature mismatch or wrong endpoint URL | Check Render logs for `Webhook error`; re-copy `whsec_...` from the exact endpoint, confirm the URL ends with `/webhook` |
 | Stripe checkout page shows no product image | `FRONTEND_URL` wrong or image path 404s | Open `<FRONTEND_URL>/images/szachownica-studio.webp` in a browser — must resolve publicly |
 | First request after some idle time hangs | Render free-tier cold start | Wait ~30 s; the service is waking. No fix on free tier |
+| `/admin` renders but "Nie udało się załadować zamówień/przychodu" (products table is fine) | Session token has no `metadata` claim — backend 403s `/orders` and `/revenue` | Do step 2.5, then sign out and back in. Confirm in DevTools → Network: `403` (not 401) on `orders` is this exact cause |
+| Redirected off `/admin` to the home page | `publicMetadata.role` not `"admin"` on this instance's user | Clerk → Users → Public metadata → `{ "role": "admin" }`, sign out/in |
 | Site appears in Google search | `noindex` meta missing | Check `index.html` — should have `<meta name="robots" content="noindex, nofollow" />` |
 
 ---
