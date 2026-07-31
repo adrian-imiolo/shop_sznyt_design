@@ -2,7 +2,38 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { formatPln } from "@sznyt/shared";
 import { useCart } from "../hooks/useCart";
+import Skeleton from "./Skeleton";
 import type { ProductSectionProps } from "../types";
+
+/**
+ * Placeholder shown while /products is in flight. Lives next to the real
+ * section so the two layouts stay in step — the panel split, the aspect
+ * ratios and the lg contain-inset are duplicated here on purpose.
+ */
+export function ProductSectionSkeleton({ reverse = false }: { reverse?: boolean }) {
+  return (
+    <section
+      className={`flex flex-col ${reverse ? "md:flex-row-reverse" : "md:flex-row"} lg:h-[calc(100vh-var(--spacing-nav))] lg:max-h-240`}
+    >
+      <div className="relative w-full md:w-1/2 aspect-[4/5] lg:aspect-auto lg:h-full overflow-hidden bg-warm-white">
+        <Skeleton className="absolute inset-0 lg:inset-10" />
+      </div>
+
+      <div className="w-full md:w-1/2 flex items-center bg-warm-white px-6 py-12 md:px-10 lg:px-20">
+        <div className="max-w-md w-full">
+          <Skeleton className="h-3 w-32 mb-4" />
+          <Skeleton className="h-10 md:h-12 lg:h-14 w-3/4 mb-4" />
+          <Skeleton className="h-6 w-2/3 mb-6" />
+          <Skeleton className="h-4 w-full mb-2" />
+          <Skeleton className="h-4 w-full mb-2" />
+          <Skeleton className="h-4 w-4/5 mb-8" />
+          <Skeleton className="h-6 w-24 mb-8" />
+          <Skeleton className="h-12 w-48" />
+        </div>
+      </div>
+    </section>
+  );
+}
 
 function ProductSection({
   id,

@@ -3,7 +3,22 @@ import { Link } from "react-router-dom";
 import { formatPln } from "@sznyt/shared";
 import type { Product } from "../types";
 import Seo from "../components/Seo";
+import Skeleton from "../components/Skeleton";
 import { useResource } from "../hooks/useResource";
+
+// Mirrors ProductCard's box model so the grid doesn't reflow when data lands.
+function ProductCardSkeleton() {
+  return (
+    <div className="block border-b border-borders pb-16 last:border-b-0 last:pb-0 md:border-b-0 md:pb-0">
+      <Skeleton className="aspect-[4/5] w-full" />
+      <div className="pt-4">
+        <Skeleton className="h-7 w-2/3 mb-1" />
+        <Skeleton className="h-5 w-1/2 mb-3" />
+        <Skeleton className="h-4 w-24" />
+      </div>
+    </div>
+  );
+}
 
 function ProductCard({ product }: { product: Product }) {
   const [hovered, setHovered] = useState(false);
@@ -49,8 +64,7 @@ function ProductCard({ product }: { product: Product }) {
 }
 
 function Shop() {
-  const { data, error: loadFailed } = useResource<Product[]>("/products");
-  const products = data ?? [];
+  const { data: products, error: loadFailed } = useResource<Product[]>("/products");
   const error = loadFailed ? "Nie udało się załadować produktów. Spróbuj ponownie." : null;
 
   return (
@@ -101,6 +115,11 @@ function Shop() {
         <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-y-16 md:gap-y-20 md:gap-x-10">
           {error ? (
             <p className="font-dm-sans text-sm text-red-600 col-span-2">{error}</p>
+          ) : !products ? (
+            <>
+              <ProductCardSkeleton />
+              <ProductCardSkeleton />
+            </>
           ) : (
             products.map((product) => (
               <ProductCard key={product.id} product={product} />
