@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: sznyt-design-backend
+    name: shop_sznyt_design
     runtime: node
     # Starter, not free: free web services spin down after 15 min without
     # inbound traffic and take ~45 s to wake, which the demo's first visitor

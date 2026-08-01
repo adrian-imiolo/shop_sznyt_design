@@ -54,11 +54,11 @@ The demo intentionally ships with **no admin user** — a recruiter who signs up
 1. Go to <https://render.com>, sign in with GitHub.
 2. **+ New** → **Web Service** → connect the `shop_sznyt_design` repo.
 3. Render reads `render.yaml` from the repo root and pre-fills the settings. Confirm:
-   - **Name:** `sznyt-design-backend`
+   - **Name:** `shop_sznyt_design`
    - **Root directory:** `backend`
    - **Build command:** `npm install && npm run build` (runs `prisma generate && prisma migrate deploy`)
    - **Start command:** `npm start`
-   - **Plan:** Free
+   - **Plan:** Starter (see the note below — Free sleeps)
 4. In the **Environment** section, add:
 
    | Key | Value |
@@ -73,9 +73,13 @@ The demo intentionally ships with **no admin user** — a recruiter who signs up
    > **Don't set the Stripe vars yet.** The backend exits at boot if `STRIPE_SECRET_KEY` is set without `STRIPE_WEBHOOK_SECRET` + `FRONTEND_URL`, and the webhook secret only exists after you register the endpoint (step 6) — which needs this service's URL. Until then the backend runs with checkout returning 503, which is fine for wiring up the rest.
 
 5. **Create Web Service**. Wait ~3–5 min for the first build.
-6. When the status turns green, copy the public URL (e.g. `https://sznyt-design-backend.onrender.com`). You'll paste it as `VITE_API_URL` in Vercel.
+6. When the status turns green, copy the public URL (currently `https://shop-sznyt-design.onrender.com` — Render slugifies the service name, underscores become hyphens). You'll paste it as `VITE_API_URL` in Vercel.
 
-> Free tier sleeps after 15 min of inactivity. First request after sleep takes ~30 s to wake the service — fine for a demo, the interviewer's first click will warm it.
+> **Don't use the Free instance type for the recruiter demo.** Free web services spin down after 15 min without inbound traffic and take about a minute to wake. Measured on this service over a clean 21-minute idle window: **44.5 s** to first byte cold, against **0.22 s** warm.
+>
+> The earlier assumption that "the interviewer's first click will warm it" was backwards — the recruiter *is* the first click, and they are the one who pays the 44 s. Starter (~$7/mo) runs continuously and removes it. Upgraded 2026-08-01.
+>
+> Note that Neon's free tier suspends independently after ~5 min idle, so the first request after a long gap still pays a database wake — seconds, not a minute. `Home` and `Shop` render loading skeletons so that reads as loading rather than an empty shop (#147).
 
 ### Seed the database (one-off)
 
@@ -149,7 +153,7 @@ All of this happens in **test mode** — check the Stripe dashboard's test-mode 
 1. Go to <https://dashboard.stripe.com>, sign in.
 2. **Developers → API keys** → copy the **Secret key** (`sk_test_...`).
 3. **Developers → Webhooks** → **+ Add endpoint**:
-   - **Endpoint URL:** `https://sznyt-design-backend.onrender.com/webhook` (your Render URL + `/webhook`)
+   - **Endpoint URL:** `https://shop-sznyt-design.onrender.com/webhook` (your Render URL + `/webhook`)
    - **Events:** select `checkout.session.completed` only
 4. Open the new endpoint and reveal the **Signing secret** (`whsec_...`).
 5. In Render → Service → **Environment**, add:
@@ -215,7 +219,8 @@ Then on GitHub:
 | Backend crash-loops after adding Stripe key | `STRIPE_WEBHOOK_SECRET` or `FRONTEND_URL` missing | Boot check requires all three together — set them, redeploy |
 | Payment succeeds but no order in DB | Webhook signature mismatch or wrong endpoint URL | Check Render logs for `Webhook error`; re-copy `whsec_...` from the exact endpoint, confirm the URL ends with `/webhook` |
 | Stripe checkout page shows no product image | `FRONTEND_URL` wrong or image path 404s | Open `<FRONTEND_URL>/images/szachownica-studio-v2.webp` in a browser — must resolve publicly |
-| First request after some idle time hangs | Render free-tier cold start | Wait ~30 s; the service is waking. No fix on free tier |
+| First request after some idle time hangs (~45 s) | Render **Free** instance type spinning down after 15 min idle | Upgrade the instance type to Starter (Settings → Instance Type). Measured 44.5 s cold vs 0.22 s warm before the upgrade |
+| First request after a long gap is slow but only by seconds | Neon free tier suspends after ~5 min idle; first query wakes it | Expected. Loading skeletons cover it (#147). Don't "keep warm" by pinging an endpoint that queries Postgres — that burns Neon's free compute-hour budget and can suspend the project |
 | `/admin` renders but "Nie udało się załadować zamówień/przychodu" (products table is fine) | Session token has no `metadata` claim — backend 403s `/orders` and `/revenue` | Do step 2.5, then sign out and back in. Confirm in DevTools → Network: `403` (not 401) on `orders` is this exact cause |
 | Redirected off `/admin` to the home page | `publicMetadata.role` not `"admin"` on this instance's user | Clerk → Users → Public metadata → `{ "role": "admin" }`, sign out/in |
 | Site appears in Google search | `noindex` meta missing | Check `index.html` — should have `<meta name="robots" content="noindex, nofollow" />` |
