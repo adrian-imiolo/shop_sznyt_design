@@ -124,7 +124,7 @@ function Cart() {
           {items.map((item) => (
             <div key={item.id} className="flex gap-4 py-6 md:py-8">
               <div
-                className="w-16 h-16 md:w-24 md:h-24 bg-cover bg-center shrink-0 mt-1"
+                className="w-16 md:w-24 aspect-[4/5] bg-cover bg-center shrink-0 mt-1"
                 style={{ backgroundImage: `url(${item.imageUrl})` }}
               />
               <div className="flex-1 min-w-0 flex flex-col gap-3">
