@@ -30,7 +30,7 @@ Worth noticing while you're in there:
 - **npm-workspaces monorepo** with shared TypeScript types across the React frontend and Express backend — one definition of `Product`/`Order` on both sides of the API boundary.
 - **Transactional email module** — order confirmation, shipping notification, contact form; in the demo SMTP is intentionally unset, so the backend logs `[demo] sendEmail skipped` instead of sending.
 
-Demo infra: Vercel (frontend) + Render (backend) + Neon (Postgres) + Clerk dev + Stripe test mode — $0/month. Runbook: `docs/DEPLOY-DEMO.md`. First request may take ~30 s (Render free tier waking up).
+Demo infra: Vercel (frontend) + Render Starter (backend) + Neon (Postgres) + Clerk dev + Stripe test mode. Runbook: `docs/DEPLOY-DEMO.md`. The backend runs on a paid instance so it doesn't spin down — the demo is warm when you open it.
 
 ## Tech stack
 
@@ -45,7 +45,7 @@ Demo infra: Vercel (frontend) + Render (backend) + Neon (Postgres) + Clerk dev +
 | Auth | Clerk | Hosted; saves writing session/password infrastructure |
 | Payments | Stripe Checkout | Hosted = no PCI scope; webhook is the source of truth |
 | Email | Nodemailer + hosting-provider SMTP | Transactional volume too low to justify a paid provider |
-| Hosting | Vercel (frontend) + Render/Railway (backend) + Neon (DB) | Vercel free tier for the SPA; Render free for demo backend |
+| Hosting | Vercel (frontend) + Render/Railway (backend) + Neon (DB) | Vercel free tier for the SPA; Render Starter for the demo backend so it never spins down |
 
 ## Architecture
 
