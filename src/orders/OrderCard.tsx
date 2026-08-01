@@ -143,7 +143,7 @@ function ListItem({ order }: { order: Order }) {
         <div className="flex flex-col gap-2">
           {order.items.map((item) => (
             <div key={item.id} className="flex items-center gap-3">
-              <ItemThumb item={item} sizeClass="w-10 h-10" />
+              <ItemThumb item={item} sizeClass="w-10 aspect-[4/5]" />
               <p className="font-dm-sans text-sm text-secondary-text">
                 {item.product?.name ?? DELETED_PRODUCT_NAME}{" "}
                 <span className="text-near-black">× {item.quantity}</span>
@@ -208,7 +208,7 @@ function DetailBody({ order }: { order: Order }) {
       <div className="flex flex-col divide-y divide-borders mb-12">
         {order.items?.map((item) => (
           <div key={item.id} className="flex gap-4 md:gap-6 py-6 items-center">
-            <ItemThumb item={item} sizeClass="w-14 h-14 md:w-20 md:h-20" />
+            <ItemThumb item={item} sizeClass="w-14 md:w-20 aspect-[4/5]" />
             <div className="flex-1 min-w-0">
               <p className="font-cormorant text-lg md:text-xl text-near-black font-light">
                 {item.product?.name ?? DELETED_PRODUCT_NAME}

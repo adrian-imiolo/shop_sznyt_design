@@ -30,7 +30,7 @@ function SectionLabel({ children }: { children: string }) {
 function LineItemRow({ item }: { item: OrderItem }) {
   return (
     <div className="flex items-center gap-3 py-3">
-      <ItemThumb item={item} sizeClass="w-12 h-12" />
+      <ItemThumb item={item} sizeClass="w-12 aspect-[4/5]" />
       <div className="flex-1 min-w-0">
         <p className="font-medium truncate">{item.product?.name ?? DELETED_PRODUCT_NAME}</p>
         <p className="text-xs text-gray-500">
