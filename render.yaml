@@ -2,7 +2,11 @@ services:
   - type: web
     name: sznyt-design-backend
     runtime: node
-    plan: free
+    # Starter, not free: free web services spin down after 15 min without
+    # inbound traffic and take ~45 s to wake, which the demo's first visitor
+    # of the day always pays. Must match the dashboard instance type — if
+    # this says free, a Blueprint sync silently downgrades the paid service.
+    plan: starter
     rootDir: backend
     buildCommand: npm install && npm run build
     startCommand: npm start
