@@ -38,3 +38,4 @@ playwright-report/
 .claude/statsig/
 .claude/history.jsonl
 .claude/ide/
+.vercel
