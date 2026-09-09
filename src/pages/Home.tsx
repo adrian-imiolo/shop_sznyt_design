@@ -33,7 +33,7 @@ function Home() {
         </section>
       ) : !products ? (
         <>
-          <ProductSectionSkeleton />
+          <ProductSectionSkeleton first />
           <ProductSectionSkeleton reverse />
         </>
       ) : (
@@ -49,6 +49,7 @@ function Home() {
             lifestyleImageUrl={product.lifestyleImageUrl}
             reverse={index % 2 !== 0}
             stock={product.stock}
+            first={index === 0}
           />
         ))
       )}

@@ -10,10 +10,16 @@ import type { ProductSectionProps } from "../types";
  * section so the two layouts stay in step — the panel split, the aspect
  * ratios and the lg contain-inset are duplicated here on purpose.
  */
-export function ProductSectionSkeleton({ reverse = false }: { reverse?: boolean }) {
+export function ProductSectionSkeleton({
+  reverse = false,
+  first = false,
+}: {
+  reverse?: boolean;
+  first?: boolean;
+}) {
   return (
     <section
-      className={`flex flex-col ${reverse ? "md:flex-row-reverse" : "md:flex-row"} lg:h-[calc(100vh-var(--spacing-nav))] lg:max-h-240`}
+      className={`flex flex-col ${reverse ? "md:flex-row-reverse" : "md:flex-row"} ${first ? "" : "border-t border-borders"} lg:h-[calc(100vh-var(--spacing-nav))] lg:max-h-240`}
     >
       <div className="relative w-full md:w-1/2 aspect-[4/5] lg:aspect-auto lg:h-full overflow-hidden bg-warm-white">
         <Skeleton className="absolute inset-0 lg:inset-10" />
@@ -51,6 +57,7 @@ function ProductSection({
   lifestyleImageUrl,
   reverse = false,
   stock,
+  first = false,
 }: ProductSectionProps) {
   const [hovered, setHovered] = useState(false);
   const [added, setAdded] = useState(false);
@@ -78,7 +85,7 @@ function ProductSection({
       </div>
 
       <section
-        className={`flex flex-col ${reverse ? "md:flex-row-reverse" : "md:flex-row"} lg:h-[calc(100vh-var(--spacing-nav))] lg:max-h-240`}
+        className={`flex flex-col ${reverse ? "md:flex-row-reverse" : "md:flex-row"} ${first ? "" : "border-t border-borders"} lg:h-[calc(100vh-var(--spacing-nav))] lg:max-h-240`}
       >
         {/* Image side — 4:5 cover crop up to md; on lg the section is viewport-height,
             so the whole frame must fit: contain inside a padded panel instead */}

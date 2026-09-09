@@ -19,6 +19,7 @@ export type ProductSectionProps = {
   lifestyleImageUrl: string;
   reverse?: boolean;
   stock: number;
+  first?: boolean;
 };
 
 export type OrderItem = {
