@@ -8,7 +8,7 @@ function About() {
         description="Sznyt Design tworzy ręcznie robione ramki z litego dębu. Poznaj historię pracowni i filozofię projektowania designerskich prezentów, które trwają."
       />
       {/* Hero — page title */}
-      <section className="bg-near-black px-6 py-16 md:py-32 flex items-end">
+      <section className="bg-near-black px-6 py-10 md:py-16 flex items-end">
         <div className="max-w-6xl mx-auto w-full">
           <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">
             O nas
