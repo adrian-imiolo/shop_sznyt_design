@@ -105,7 +105,7 @@ function ProductDetails() {
             {" / "}
             {product.name}
           </p>
-          <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">
+          <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4 ml-1">
             Sznyt Design
           </p>
           <h1 className="font-cormorant text-3xl md:text-4xl lg:text-5xl text-near-black font-light leading-tight mb-4">
