@@ -117,7 +117,7 @@ function ProductSection({
         >
           <div className="max-w-md w-full flex flex-col justify-between">
             <div>
-              <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">
+              <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4 ml-1">
                 Sznyt Design
               </p>
               <h2 className="font-cormorant text-3xl md:text-4xl lg:text-5xl text-near-black font-light mb-4">
