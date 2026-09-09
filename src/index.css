@@ -5,8 +5,8 @@
   --color-accent: #B8965A;
   --color-secondary-text: #6B6560;
   --color-borders: #E5E2DD;
-  --font-serif: "Cormorant Garamond", Georgia, serif;
-  --font-sans: "DM Sans", sans-serif;
+  --font-cormorant: "Cormorant Garamond", Georgia, serif;
+  --font-dm-sans: "DM Sans", sans-serif;
 
   /* Sticky navbar height (md+). Full-viewport sections use
      calc(100vh - var(--spacing-nav)) so the fold lands exactly at their bottom edge. */
