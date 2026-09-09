@@ -1,6 +1,6 @@
 import Seo from "../components/Seo";
 
-const SELLER_PHONE = "+48 534 218 485";
+const SELLER_PHONE = "+48 505 964 523";
 
 interface BrowserStorageRow {
   item: string;
@@ -46,7 +46,7 @@ function PolitykaPrywatnosci() {
 
           <section>
             <h2 className="font-cormorant text-2xl text-near-black font-light mb-4">1. Administrator danych</h2>
-            <p className="text-secondary-text">Administratorem Twoich danych osobowych jest <strong className="text-near-black">Adrian Imioło</strong> prowadzący działalność nierejestrowaną pod nazwą <strong className="text-near-black">Sznyt Design</strong>, Bolesława Śmiałego 8/24, 70-351 Szczecin, e-mail: kontakt@sznytdesign.pl, tel.: <strong className="text-near-black">{SELLER_PHONE}</strong>.</p>
+            <p className="text-secondary-text">Administratorem Twoich danych osobowych jest <strong className="text-near-black">Agnieszka Imioło</strong> prowadząca działalność nierejestrowaną pod nazwą <strong className="text-near-black">Sznyt Design</strong>, Bolesława Śmiałego 8/24, 70-351 Szczecin, e-mail: kontakt@sznytdesign.pl, tel.: <strong className="text-near-black">{SELLER_PHONE}</strong>.</p>
           </section>
 
           <section>

@@ -1,8 +1,8 @@
 import Seo from "../components/Seo";
 
-const SELLER_PHONE = "+48 534 218 485";
+const SELLER_PHONE = "+48 505 964 523";
 
-const RETURN_ADDRESS = "Sznyt Design, Adrian Imioło, Bolesława Śmiałego 8/24, 70-351 Szczecin";
+const RETURN_ADDRESS = "Sznyt Design, Agnieszka Imioło, Bolesława Śmiałego 8/24, 70-351 Szczecin";
 
 function Regulamin() {
   return (
@@ -21,7 +21,7 @@ function Regulamin() {
           <section>
             <h2 className="font-cormorant text-2xl text-near-black font-light mb-4">§ 1. Postanowienia ogólne</h2>
             <ol className="list-decimal list-outside ml-5 flex flex-col gap-2 text-secondary-text">
-              <li>Sklep internetowy dostępny pod adresem <strong className="text-near-black">sznytdesign.pl</strong> prowadzony jest przez <strong className="text-near-black">Adriana Imioło</strong> prowadzącego działalność nierejestrowaną pod nazwą <strong className="text-near-black">Sznyt Design</strong>, adres: Bolesława Śmiałego 8/24, 70-351 Szczecin, e-mail: kontakt@sznytdesign.pl, tel.: <strong className="text-near-black">{SELLER_PHONE}</strong>.</li>
+              <li>Sklep internetowy dostępny pod adresem <strong className="text-near-black">sznytdesign.pl</strong> prowadzony jest przez <strong className="text-near-black">Agnieszkę Imioło</strong> prowadzącą działalność nierejestrowaną pod nazwą <strong className="text-near-black">Sznyt Design</strong>, adres: Bolesława Śmiałego 8/24, 70-351 Szczecin, e-mail: kontakt@sznytdesign.pl, tel.: <strong className="text-near-black">{SELLER_PHONE}</strong>.</li>
               <li>Niniejszy Regulamin określa zasady korzystania ze Sklepu, w tym zasady świadczenia usług drogą elektroniczną, składania zamówień, realizacji dostaw, płatności oraz prawa Kupującego.</li>
               <li>Sklep prowadzi sprzedaż wyłącznie na terenie Rzeczypospolitej Polskiej.</li>
             </ol>
@@ -30,7 +30,7 @@ function Regulamin() {
           <section>
             <h2 className="font-cormorant text-2xl text-near-black font-light mb-4">§ 2. Definicje</h2>
             <ul className="flex flex-col gap-2 text-secondary-text">
-              <li><strong className="text-near-black">Sprzedawca</strong> — Adrian Imioło, Sznyt Design.</li>
+              <li><strong className="text-near-black">Sprzedawca</strong> — Agnieszka Imioło, Sznyt Design.</li>
               <li><strong className="text-near-black">Kupujący / Klient</strong> — osoba fizyczna, osoba prawna lub jednostka organizacyjna składająca zamówienie w Sklepie.</li>
               <li><strong className="text-near-black">Konsument</strong> — Kupujący będący osobą fizyczną dokonującą zakupu niezwiązanego bezpośrednio z działalnością zawodową lub gospodarczą.</li>
               <li><strong className="text-near-black">Przedsiębiorca na prawach konsumenta</strong> — osoba fizyczna zawierająca umowę bezpośrednio związaną z jej działalnością gospodarczą, gdy z treści umowy wynika, że nie ma ona dla niej charakteru zawodowego. Postanowienia Regulaminu dotyczące Konsumenta stosuje się do niej odpowiednio (art. 7aa ustawy o prawach konsumenta).</li>
