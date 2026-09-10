@@ -1,5 +1,3 @@
-import { readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
 import { expect, test } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import Eyebrow from "./Eyebrow";
@@ -50,24 +48,28 @@ test("omits the nudge by default, so the other kickers keep box alignment", () =
 // hand-roll the markup in a new file, which is exactly how 29 copies happened.
 // This is the part that makes that impossible.
 
+// Sources are read through import.meta.glob rather than node:fs so this file
+// stays inside tsconfig.app.json's browser-only types. Pulling @types/node into
+// the app project to satisfy one test would also let process and fs typecheck
+// inside components, which is a worse trade than a Vite-native glob.
+
 const IDENTITY_TOKENS = ["text-accent", "tracking-[0.3em]", "uppercase"];
 
-function sourceFiles(dir: string): string[] {
-  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
-    const path = join(dir, entry.name);
-    if (entry.isDirectory()) return sourceFiles(path);
-    return /\.tsx?$/.test(entry.name) ? [path] : [];
-  });
-}
+const sources = import.meta.glob("../**/*.{ts,tsx}", {
+  query: "?raw",
+  eager: true,
+  import: "default",
+}) as Record<string, string>;
 
 test("no file outside Eyebrow.tsx hand-rolls the eyebrow identity", () => {
-  const offenders = sourceFiles(join(process.cwd(), "src"))
-    .filter((path) => !/Eyebrow\.(tsx|test\.tsx)$/.test(path))
-    .filter((path) =>
-      [...readFileSync(path, "utf8").matchAll(/className="([^"]*)"/g)].some(
-        ([, classes]) => IDENTITY_TOKENS.every((token) => classes.includes(token)),
+  const offenders = Object.entries(sources)
+    .filter(([path]) => !/Eyebrow\.(tsx|test\.tsx)$/.test(path))
+    .filter(([, source]) =>
+      [...source.matchAll(/className="([^"]*)"/g)].some(([, classes]) =>
+        IDENTITY_TOKENS.every((token) => classes.includes(token)),
       ),
-    );
+    )
+    .map(([path]) => path);
 
   expect(offenders).toEqual([]);
 });
