@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { formatPln } from "@sznyt/shared";
 import type { Product } from "../types";
+import Eyebrow from "../components/Eyebrow";
 import Seo from "../components/Seo";
 import Skeleton from "../components/Skeleton";
 import { useResource } from "../hooks/useResource";
@@ -76,9 +77,7 @@ function Shop() {
       {/* Page header */}
       <section className="bg-near-black px-6 py-10 md:py-16 flex items-end">
         <div className="max-w-6xl mx-auto w-full">
-          <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">
-            Sklep
-          </p>
+          <Eyebrow>Sklep</Eyebrow>
           <h1 className="font-cormorant text-4xl md:text-6xl lg:text-7xl text-warm-white font-light leading-tight">
             Poznaj nasze ramy.
           </h1>
@@ -89,9 +88,7 @@ function Shop() {
       <section className="bg-warm-white border-b border-borders px-6 py-12 md:py-16">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-center gap-10 md:gap-20">
           <div className="md:w-1/2">
-            <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">
-              Nasze podejście
-            </p>
+            <Eyebrow>Nasze podejście</Eyebrow>
             <h2 className="font-cormorant text-3xl md:text-4xl text-near-black font-light leading-snug">
               Każda rama to świadoma decyzja o formie i materiale.
             </h2>
@@ -149,9 +146,7 @@ function Shop() {
             },
           ].map((item) => (
             <div key={item.label}>
-              <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-3">
-                {item.label}
-              </p>
+              <Eyebrow spacing="mb-3">{item.label}</Eyebrow>
               <h3 className="font-cormorant text-2xl text-near-black font-light mb-3">
                 {item.title}
               </h3>

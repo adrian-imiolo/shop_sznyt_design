@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import type { ReactNode } from "react";
+import Eyebrow from "../components/Eyebrow";
 import Seo from "../components/Seo";
 
 const faqs = [
@@ -112,7 +113,7 @@ function FAQ() {
         description="Najczęściej zadawane pytania o ramki z litego dębu Sznyt Design — materiały, wysyłka, zwroty i dbanie o drewno. Wszystko, co warto wiedzieć."
       />
       <div className="max-w-3xl mx-auto">
-        <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">Pomoc</p>
+        <Eyebrow>Pomoc</Eyebrow>
         <h1 className="font-cormorant text-4xl md:text-5xl text-near-black font-light mb-4">
           Najczęściej zadawane pytania
         </h1>
@@ -123,9 +124,7 @@ function FAQ() {
         <div className="flex flex-col gap-12">
           {faqs.map((section) => (
             <div key={section.category}>
-              <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-2">
-                {section.category}
-              </p>
+              <Eyebrow spacing="mb-2">{section.category}</Eyebrow>
               <div>
                 {section.items.map((item) => (
                   <FAQItem key={item.q} q={item.q} a={item.a} />
@@ -137,7 +136,7 @@ function FAQ() {
         </div>
 
         <div className="mt-16 p-8 border border-borders flex flex-col gap-3">
-          <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase">Potrzebujesz pomocy?</p>
+          <Eyebrow spacing="">Potrzebujesz pomocy?</Eyebrow>
           <p className="font-cormorant text-2xl text-near-black font-light">Chętnie odpowiemy na każde pytanie.</p>
           <div className="flex flex-col sm:flex-row gap-4 mt-2">
             <Link

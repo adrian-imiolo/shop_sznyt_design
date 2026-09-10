@@ -1,3 +1,4 @@
+import Eyebrow from "../components/Eyebrow";
 import Seo from "../components/Seo";
 
 const SELLER_PHONE = "+48 505 964 523";
@@ -38,7 +39,7 @@ function PolitykaPrywatnosci() {
         description="Polityka prywatności sznytdesign.pl — jak Sznyt Design chroni Twoje dane osobowe, do czego je wykorzystuje i jakie masz prawa jako Kupujący."
       />
       <div className="max-w-3xl mx-auto">
-        <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">Informacje prawne</p>
+        <Eyebrow>Informacje prawne</Eyebrow>
         <h1 className="font-cormorant text-4xl md:text-5xl text-near-black font-light mb-2">Polityka prywatności</h1>
         <p className="font-dm-sans text-xs text-secondary-text mb-12">Obowiązuje od: 13 lipca 2026 r.</p>
 

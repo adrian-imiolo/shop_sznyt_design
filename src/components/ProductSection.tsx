@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { formatPln } from "@sznyt/shared";
 import { useCart } from "../hooks/useCart";
+import Eyebrow from "./Eyebrow";
 import Skeleton from "./Skeleton";
 import type { ProductSectionProps } from "../types";
 
@@ -117,9 +118,7 @@ function ProductSection({
         >
           <div className="max-w-md w-full flex flex-col justify-between">
             <div>
-              <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4 ml-1">
-                Sznyt Design
-              </p>
+              <Eyebrow alignsWithHeading>Sznyt Design</Eyebrow>
               <h2 className="font-cormorant text-3xl md:text-4xl lg:text-5xl text-near-black font-light mb-4">
                 {name}
               </h2>

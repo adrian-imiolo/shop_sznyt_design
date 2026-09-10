@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import type { ContactFormBody } from "@sznyt/shared";
+import Eyebrow from "../components/Eyebrow";
 import Seo from "../components/Seo";
 import { usePublicForm } from "../hooks/usePublicForm";
 
@@ -39,9 +40,7 @@ function Contact() {
       {/* Hero header */}
       <section className="bg-near-black px-6 py-10 md:py-16 flex items-end">
         <div className="max-w-6xl mx-auto w-full">
-          <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">
-            Kontakt
-          </p>
+          <Eyebrow>Kontakt</Eyebrow>
           <h1 className="font-cormorant text-4xl md:text-6xl lg:text-7xl text-warm-white font-light leading-tight">
             Porozmawiajmy.
           </h1>
@@ -54,9 +53,7 @@ function Contact() {
 
           {/* Form */}
           <div className="md:w-1/2">
-            <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-10">
-              Napisz do nas
-            </p>
+            <Eyebrow spacing="mb-10">Napisz do nas</Eyebrow>
             <form onSubmit={handleSubmit} className="flex flex-col gap-6">
               <input {...honeypotProps} />
               <div className="flex flex-col gap-2">
@@ -113,9 +110,7 @@ function Contact() {
           {/* Contact info */}
           <div className="md:w-1/2 flex flex-col gap-10 md:pt-16">
             <div>
-              <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">
-                Email
-              </p>
+              <Eyebrow>Email</Eyebrow>
               <a
                 href="mailto:kontakt@sznytdesign.pl"
                 className="font-cormorant text-2xl text-near-black font-light hover:text-accent transition-colors"
@@ -124,17 +119,13 @@ function Contact() {
               </a>
             </div>
             <div>
-              <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">
-                Czas odpowiedzi
-              </p>
+              <Eyebrow>Czas odpowiedzi</Eyebrow>
               <p className="font-dm-sans text-sm text-secondary-text leading-relaxed">
                 Odpowiadamy w ciągu 1–2 dni roboczych. W wiadomości możesz zapytać o produkt, zamówienie lub współpracę.
               </p>
             </div>
             <div>
-              <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">
-                Pomocne linki
-              </p>
+              <Eyebrow>Pomocne linki</Eyebrow>
               <div className="flex flex-col gap-2">
                 <Link to="/faq" className="font-dm-sans text-sm text-near-black hover:text-accent transition-colors">
                   Najczęściej zadawane pytania →

@@ -1,6 +1,7 @@
 import ProductSection, { ProductSectionSkeleton } from "../components/ProductSection";
 import Hero from "../components/Hero";
 import BrandStatement from "../components/BrandStatement";
+import Eyebrow from "../components/Eyebrow";
 import Seo from "../components/Seo";
 import type { Product } from "../types";
 import { useResource } from "../hooks/useResource";
@@ -76,9 +77,7 @@ function Home() {
             },
           ].map((item) => (
             <div key={item.label} className="flex flex-col gap-3">
-              <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase">
-                {item.label}
-              </p>
+              <Eyebrow spacing="">{item.label}</Eyebrow>
               <h3 className="font-cormorant text-2xl text-near-black font-light">
                 {item.title}
               </h3>

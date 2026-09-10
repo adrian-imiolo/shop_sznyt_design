@@ -1,3 +1,4 @@
+import Eyebrow from "../components/Eyebrow";
 import Seo from "../components/Seo";
 
 function About() {
@@ -10,9 +11,7 @@ function About() {
       {/* Hero — page title */}
       <section className="bg-near-black px-6 py-10 md:py-16 flex items-end">
         <div className="max-w-6xl mx-auto w-full">
-          <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">
-            O nas
-          </p>
+          <Eyebrow>O nas</Eyebrow>
           <h1 className="font-cormorant text-4xl md:text-6xl lg:text-7xl text-warm-white font-light leading-tight">
             Tworzymy ramy,
             <br />
@@ -32,9 +31,7 @@ function About() {
         {/* Text */}
         <div className="w-full md:w-1/2 bg-warm-white flex items-center px-6 py-12 md:px-20">
           <div className="max-w-md">
-            <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-6">
-              Nasza historia
-            </p>
+            <Eyebrow spacing="mb-6">Nasza historia</Eyebrow>
             <h2 className="font-cormorant text-3xl md:text-4xl text-near-black font-light leading-tight mb-6">
               Każda rama powstaje z namysłem.
             </h2>
@@ -54,9 +51,7 @@ function About() {
       {/* Process */}
       <section className="bg-warm-white border-t border-borders px-6 py-12 md:py-24">
         <div className="max-w-3xl mx-auto">
-          <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-8 md:mb-16">
-            Proces, który ma znaczenie
-          </p>
+          <Eyebrow spacing="mb-8 md:mb-16">Proces, który ma znaczenie</Eyebrow>
           {[
             {
               number: "01",
