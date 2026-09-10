@@ -1,3 +1,5 @@
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { expect, test } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import Eyebrow from "./Eyebrow";
@@ -42,4 +44,30 @@ test("omits the nudge by default, so the other kickers keep box alignment", () =
   expect(renderToStaticMarkup(<Eyebrow>Sznyt Design</Eyebrow>)).not.toContain(
     "ml-1",
   );
+});
+
+// The module alone doesn't stop the #156/#157 class of bug — anyone can still
+// hand-roll the markup in a new file, which is exactly how 29 copies happened.
+// This is the part that makes that impossible.
+
+const IDENTITY_TOKENS = ["text-accent", "tracking-[0.3em]", "uppercase"];
+
+function sourceFiles(dir: string): string[] {
+  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(dir, entry.name);
+    if (entry.isDirectory()) return sourceFiles(path);
+    return /\.tsx?$/.test(entry.name) ? [path] : [];
+  });
+}
+
+test("no file outside Eyebrow.tsx hand-rolls the eyebrow identity", () => {
+  const offenders = sourceFiles(join(process.cwd(), "src"))
+    .filter((path) => !/Eyebrow\.(tsx|test\.tsx)$/.test(path))
+    .filter((path) =>
+      [...readFileSync(path, "utf8").matchAll(/className="([^"]*)"/g)].some(
+        ([, classes]) => IDENTITY_TOKENS.every((token) => classes.includes(token)),
+      ),
+    );
+
+  expect(offenders).toEqual([]);
 });
