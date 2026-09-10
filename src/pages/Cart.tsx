@@ -12,6 +12,7 @@ import {
   formatPln,
 } from "@sznyt/shared";
 import { useCheckout, checkoutTotals, PaczkomatPicker } from "../checkout";
+import Eyebrow from "../components/Eyebrow";
 import type { CheckoutFieldErrors, CourierAddress } from "../checkout";
 import Seo from "../components/Seo";
 
@@ -178,9 +179,7 @@ function Cart() {
 
         {/* Shipping */}
         <div className="border-t border-borders pt-8 pb-8">
-          <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-6">
-            Dostawa
-          </p>
+          <Eyebrow spacing="mb-6">Dostawa</Eyebrow>
           {isFreeShipping ? (
             <div className="flex items-center gap-3 bg-accent/10 border border-accent px-4 py-3 mb-6">
               <span className="text-accent text-base">✓</span>

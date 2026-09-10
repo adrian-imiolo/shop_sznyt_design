@@ -5,6 +5,7 @@ import {
   PAYMENT_METHOD_LABELS,
   formatPln,
 } from "@sznyt/shared";
+import Eyebrow from "../components/Eyebrow";
 import type { Order, OrderItem } from "../types";
 import {
   formatOrderDate,
@@ -228,9 +229,7 @@ function DetailBody({ order }: { order: Order }) {
         {/* Payment method */}
         {order.paymentMethod && (
           <div className="sm:col-span-2">
-            <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">
-              Płatność
-            </p>
+            <Eyebrow>Płatność</Eyebrow>
             <p className="font-dm-sans text-sm text-near-black font-medium">
               {PAYMENT_METHOD_LABELS[order.paymentMethod] ?? order.paymentMethod}
             </p>
@@ -239,9 +238,7 @@ function DetailBody({ order }: { order: Order }) {
 
         {/* Shipping info */}
         <div>
-          <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">
-            Dostawa
-          </p>
+          <Eyebrow>Dostawa</Eyebrow>
           {order.shippingMethod ? (
             <div className="font-dm-sans text-sm text-near-black flex flex-col gap-1">
               <p className="font-medium">{SHIPPING_METHOD_LABELS[order.shippingMethod] ?? order.shippingMethod}</p>
@@ -262,9 +259,7 @@ function DetailBody({ order }: { order: Order }) {
 
         {/* Address */}
         <div>
-          <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">
-            Dane odbiorcy
-          </p>
+          <Eyebrow>Dane odbiorcy</Eyebrow>
           {address ? (
             <div className="font-dm-sans text-sm text-near-black flex flex-col gap-1">
               {address.firstName && <p>{address.firstName} {address.lastName}</p>}
@@ -280,9 +275,7 @@ function DetailBody({ order }: { order: Order }) {
         {/* Order note */}
         {order.note && (
           <div className="sm:col-span-2">
-            <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">
-              Uwagi do zamówienia
-            </p>
+            <Eyebrow>Uwagi do zamówienia</Eyebrow>
             <p className="font-dm-sans text-sm text-near-black">{order.note}</p>
           </div>
         )}

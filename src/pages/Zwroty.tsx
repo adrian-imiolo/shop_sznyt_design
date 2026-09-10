@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import type { ComplaintFormBody, ReturnFormBody } from "@sznyt/shared";
+import Eyebrow from "../components/Eyebrow";
 import Seo from "../components/Seo";
 import { usePublicForm } from "../hooks/usePublicForm";
 
@@ -160,7 +161,7 @@ function Zwroty() {
         description="Jak zgłosić zwrot lub reklamację ramki kupionej w Sznyt Design. Prosta procedura, 14 dni na odstąpienie od umowy — krok po kroku."
       />
       <div className="max-w-3xl mx-auto">
-        <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">Obsługa posprzedażowa</p>
+        <Eyebrow>Obsługa posprzedażowa</Eyebrow>
         <h1 className="font-cormorant text-4xl md:text-5xl text-near-black font-light mb-4">
           Zwroty i reklamacje
         </h1>
@@ -189,12 +190,12 @@ function Zwroty() {
         {/* Info boxes */}
         <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="border border-borders p-6 flex flex-col gap-2">
-            <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase">Zwrot</p>
+            <Eyebrow spacing="">Zwrot</Eyebrow>
             <p className="font-cormorant text-xl text-near-black font-light">14 dni na decyzję</p>
             <p className="font-dm-sans text-xs text-secondary-text leading-relaxed">Możesz sprawdzić produkt jak w sklepie stacjonarnym — odpowiadasz tylko za zmniejszenie jego wartości wykraczające poza takie sprawdzenie. Koszt odesłania pokrywa Klient. Zwrot środków do 14 dni od otrzymania oświadczenia o odstąpieniu.</p>
           </div>
           <div className="border border-borders p-6 flex flex-col gap-2">
-            <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase">Reklamacja</p>
+            <Eyebrow spacing="">Reklamacja</Eyebrow>
             <p className="font-cormorant text-xl text-near-black font-light">Rozpatrzenie w 14 dni</p>
             <p className="font-dm-sans text-xs text-secondary-text leading-relaxed">Niezgodność produktu z umową lub uszkodzenie w transporcie. Koszt odesłania pokrywa Sprzedawca. Zdjęcia przyspieszają rozpatrzenie, ale nie są wymagane.</p>
           </div>

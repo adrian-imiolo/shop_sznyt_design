@@ -1,10 +1,10 @@
+import Eyebrow from "./Eyebrow";
+
 function BrandStatement() {
   return (
     <section className="bg-near-black py-16 md:py-32 px-6">
       <div className="max-w-2xl mx-auto text-center">
-        <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-6">
-          Nasza filozofia
-        </p>
+        <Eyebrow spacing="mb-6">Nasza filozofia</Eyebrow>
         <h2 className="font-cormorant text-3xl md:text-5xl lg:text-6xl text-warm-white font-light leading-tight mb-8">
           Każda rama to decyzja.
           <br />

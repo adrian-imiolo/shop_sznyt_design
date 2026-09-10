@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import Eyebrow from "./Eyebrow";
 
 function Hero() {
   return (
@@ -11,9 +12,7 @@ function Hero() {
 
       {/* Text content — bottom-left, zieta.pl style */}
       <div className="relative z-10 max-w-6xl mx-auto w-full px-6 pb-16 md:pb-20">
-        <p className="font-dm-sans text-xs text-accent tracking-[0.3em] uppercase mb-4">
-          Sznyt Design
-        </p>
+        <Eyebrow>Sznyt Design</Eyebrow>
         <h1 className="font-cormorant text-4xl md:text-6xl lg:text-7xl text-warm-white font-light leading-tight mb-6">
           Rama, która
           <br />
