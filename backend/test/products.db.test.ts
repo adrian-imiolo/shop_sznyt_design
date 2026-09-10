@@ -114,6 +114,26 @@ describe("DELETE /products/:id — admin boundary", () => {
   });
 });
 
+describe("POST | PUT /products — numeric input guard", () => {
+  it("rejects a price that isn't a number with 400", async () => {
+    const res = await request(admin())
+      .post("/products")
+      .send({ ...frameData, price: "sto złotych" });
+
+    expect(res.status).toBe(400);
+  });
+
+  it("rejects a stock that isn't a number with 400", async () => {
+    await harness.prisma.product.create({ data: frameData });
+
+    const res = await request(admin())
+      .put("/products/1")
+      .send({ ...frameData, stock: "dużo" });
+
+    expect(res.status).toBe(400);
+  });
+});
+
 describe("PATCH /products/reorder — admin boundary", () => {
   beforeEach(async () => {
     await harness.prisma.product.createMany({

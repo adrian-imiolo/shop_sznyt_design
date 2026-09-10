@@ -6,6 +6,23 @@ function productInput(body) {
   return { name, tagline, description, price, imageUrl, lifestyleImageUrl, stock };
 }
 
+const NUMERIC_FIELD_LABELS = { price: "Cena", stock: "Ilość" };
+
+/**
+ * Price and stock reach Prisma untouched, so a non-numeric value surfaces as an
+ * opaque 500 instead of naming the offending field (issue #162). The admin UI
+ * validates before submitting; this is the edge guard for every other caller.
+ * Absent fields pass through — PUT reads `undefined` as "leave this column".
+ */
+function numericFieldError(body) {
+  for (const [field, label] of Object.entries(NUMERIC_FIELD_LABELS)) {
+    const value = body[field];
+    if (value === undefined) continue;
+    if (typeof value !== "number" || !Number.isFinite(value)) return `${label} musi być liczbą`;
+  }
+  return null;
+}
+
 /**
  * Products routes (issue #108): public catalog reads, admin-only CRUD and
  * reorder. Failures propagate to the shared serverError middleware (issue
@@ -53,6 +70,9 @@ export function createProductsRouter({ prisma, auth, requireAdmin }) {
     auth.requireAuth(),
     requireAdmin,
     async function createProduct(req, res) {
+      const inputError = numericFieldError(req.body);
+      if (inputError) return res.status(400).json({ error: inputError });
+
       const product = await prisma.product.create({ data: productInput(req.body) });
       res.json(product);
     },
@@ -63,6 +83,9 @@ export function createProductsRouter({ prisma, auth, requireAdmin }) {
     auth.requireAuth(),
     requireAdmin,
     async function updateProduct(req, res) {
+      const inputError = numericFieldError(req.body);
+      if (inputError) return res.status(400).json({ error: inputError });
+
       const id = Number(req.params.id);
       const updated = await prisma.product.update({
         where: { id },
