@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { addToCart, mergeDuplicateItems } from "./cartItems";
+import { addItemToState, addToCart, mergeDuplicateItems } from "./cartItems";
 import type { CartItem } from "../types";
 
 function frame(overrides: Partial<CartItem> = {}): CartItem {
@@ -46,8 +46,8 @@ describe("addToCart", () => {
 
     const result = addToCart(cart, product());
 
-    // same reference on no-op is contract: CartProvider uses it to decide
-    // whether the add succeeded
+    // same reference on no-op is contract: addItemToState reads it to decide
+    // whether the add succeeded, and React reads it to skip the re-render
     expect(result).toBe(cart);
   });
 
@@ -57,6 +57,53 @@ describe("addToCart", () => {
     const result = addToCart(cart, product({ stock: 0 }));
 
     expect(result).toBe(cart);
+  });
+});
+
+describe("addItemToState", () => {
+  it("advances the cart and bumps the token when the add succeeds", () => {
+    const prev = { items: [], lastAdd: 0 };
+
+    const result = addItemToState(prev, product());
+
+    expect(result.items).toEqual([frame({ quantity: 1 })]);
+    expect(result.lastAdd).toBe(1);
+  });
+
+  it("returns the previous state untouched when the add is a no-op", () => {
+    const prev = { items: [frame({ quantity: 5, stock: 5 })], lastAdd: 7 };
+
+    const result = addItemToState(prev, product());
+
+    // identical reference, so React bails out of the re-render entirely
+    expect(result).toBe(prev);
+  });
+
+  // The #167 signal bug. The shipped CartProvider answered "did this add
+  // succeed?" with addToCart(items, ...) !== items, computed against the render
+  // closure rather than the pending state. Two clicks landing in one render —
+  // the case #70's stock guard exists for — both read the same stale closure,
+  // so the second add reported success and the toast claimed "Dodano do
+  // koszyka!" while the cart had not changed. Folding the token into the state
+  // makes each add see its predecessor's result.
+  it("does not bump the token for a second add that the stock guard rejects", () => {
+    const empty = { items: [] as CartItem[], lastAdd: 0 };
+
+    const afterFirst = addItemToState(empty, product({ stock: 1 }));
+    const afterSecond = addItemToState(afterFirst, product({ stock: 1 }));
+
+    expect(afterFirst.lastAdd).toBe(1);
+    expect(afterSecond.lastAdd).toBe(1);
+    expect(afterSecond.items).toEqual([frame({ quantity: 1, stock: 1 })]);
+  });
+
+  it("bumps the token once per add while stock remains", () => {
+    const start = { items: [] as CartItem[], lastAdd: 0 };
+
+    const end = [1, 2, 3].reduce((state) => addItemToState(state, product()), start);
+
+    expect(end.lastAdd).toBe(3);
+    expect(end.items[0].quantity).toBe(3);
   });
 });
 

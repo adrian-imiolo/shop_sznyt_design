@@ -3,6 +3,7 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import ScrollToTop from "./ScrollToTop";
 import DemoBanner from "./DemoBanner";
+import CartFeedback from "./CartFeedback";
 
 function ShopLayout() {
   return (
@@ -12,6 +13,7 @@ function ShopLayout() {
       <Outlet />
       <Footer />
       <ScrollToTop />
+      <CartFeedback />
     </>
   );
 }
