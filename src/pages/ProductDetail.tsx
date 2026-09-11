@@ -13,18 +13,10 @@ function ProductDetails() {
   const { data: product, error: loadFailed } = useResource<Product>(`/products/${id}`);
   const error = loadFailed ? "Nie udało się załadować produktu." : null;
   const [hovered, setHovered] = useState(false);
-  const [added, setAdded] = useState(false);
   const { addItem, items } = useCart();
 
   const cartItem = items.find((i) => i.id === Number(id));
   const cartQuantity = cartItem ? cartItem.quantity : 0;
-
-  function addedToCart() {
-    setAdded(true);
-    setTimeout(() => {
-      setAdded(false);
-    }, 3000);
-  }
 
   if (error)
     return (
@@ -70,14 +62,6 @@ function ProductDetails() {
         title={product.name}
         description={`${product.tagline} Ręcznie robiona ramka z litego dębu od Sznyt Design — designerski prezent, który zostaje na lata.`}
       />
-      {/* Add to cart feedback popup */}
-      <div
-        className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-near-black text-warm-white font-dm-sans text-sm px-6 py-4 flex items-center gap-3 transition-opacity duration-500 ${added ? "opacity-100" : "opacity-0 pointer-events-none"}`}
-      >
-        <span className="text-accent">✓</span>
-        <p>Dodano do koszyka!</p>
-      </div>
-
       {/* Image side — 50% on tablet, 60% on desktop, left */}
       <div
         className="relative w-full md:w-1/2 lg:w-3/5 min-h-[60vh] lg:h-[calc(100vh-var(--spacing-nav))] lg:max-h-240 overflow-hidden cursor-pointer bg-warm-white p-6 md:p-10"
@@ -129,18 +113,15 @@ function ProductDetails() {
           </p>
           <button
             disabled={cartQuantity >= product.stock}
-            onClick={() => {
-              const wasAdded = addItem({
+            onClick={() =>
+              addItem({
                 id: Number(id),
                 name: product.name,
                 price: product.price,
                 imageUrl: product.imageUrl,
                 stock: product.stock,
-              });
-              if (wasAdded) {
-                addedToCart();
-              }
-            }}
+              })
+            }
             className="disabled:opacity-50 disabled:cursor-not-allowed inline-block font-dm-sans text-sm text-near-black border border-near-black px-10 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300"
           >
             {cartQuantity >= product.stock

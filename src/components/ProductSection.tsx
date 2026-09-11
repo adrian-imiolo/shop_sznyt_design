@@ -61,97 +61,73 @@ function ProductSection({
   first = false,
 }: ProductSectionProps) {
   const [hovered, setHovered] = useState(false);
-  const [added, setAdded] = useState(false);
   const { addItem, items } = useCart();
 
   const cartItem = items.find((i) => i.id === id);
   const cartQuantity = cartItem ? cartItem.quantity : 0;
 
-  function addedToCart() {
-    setAdded(true);
-    setTimeout(() => {
-      setAdded(false);
-    }, 3000);
-  }
-
   return (
-    <>
-      {/* Add to cart feedback popup */}
-
-      <div
-        className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-near-black text-warm-white font-dm-sans text-sm px-6 py-4 flex items-center gap-3 transition-opacity duration-500 ${added ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+    <section
+      className={`flex flex-col ${reverse ? "md:flex-row-reverse" : "md:flex-row"} ${first ? "" : "border-t border-borders"} lg:h-[calc(100vh-var(--spacing-nav))] lg:max-h-240`}
+    >
+      {/* Image side — 4:5 cover crop up to md; on lg the section is viewport-height,
+          so the whole frame must fit: contain inside a padded panel instead */}
+      <Link
+        to={`/sklep/${id}`}
+        aria-label={`Zobacz produkt: ${name}`}
+        className="relative w-full md:w-1/2 aspect-[4/5] lg:aspect-auto lg:h-full overflow-hidden cursor-pointer bg-warm-white"
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
       >
-        <span className="text-accent">✓</span>
-        <p>Dodano do koszyka!</p>
-      </div>
-
-      <section
-        className={`flex flex-col ${reverse ? "md:flex-row-reverse" : "md:flex-row"} ${first ? "" : "border-t border-borders"} lg:h-[calc(100vh-var(--spacing-nav))] lg:max-h-240`}
-      >
-        {/* Image side — 4:5 cover crop up to md; on lg the section is viewport-height,
-            so the whole frame must fit: contain inside a padded panel instead */}
-        <Link
-          to={`/sklep/${id}`}
-          aria-label={`Zobacz produkt: ${name}`}
-          className="relative w-full md:w-1/2 aspect-[4/5] lg:aspect-auto lg:h-full overflow-hidden cursor-pointer bg-warm-white"
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
-        >
-          {/* Studio image — visible by default */}
-          <div
-            className={`absolute inset-0 lg:inset-10 bg-cover lg:bg-contain bg-center bg-no-repeat transition-opacity duration-700 ${hovered ? "opacity-0" : "opacity-100"}`}
-            style={{ backgroundImage: `url(${imageUrl})` }}
-          />
-          {/* Lifestyle image — visible on hover; frame sits high in the scene, so bias the crop upward */}
-          <div
-            className={`absolute inset-0 lg:inset-10 bg-cover lg:bg-contain bg-no-repeat transition-opacity duration-700 ${hovered ? "opacity-100" : "opacity-0"}`}
-            style={{ backgroundImage: `url(${lifestyleImageUrl})`, backgroundPosition: "center 15%" }}
-          />
-        </Link>
-
-        {/* Text side — a single max-w-md block (not vertically centered, so it
-            tracks the image's near-full-height visual span instead of floating
-            in the middle) that hugs the image edge as a unit when reverse,
-            instead of the text always sinking to the outer page edge */}
+        {/* Studio image — visible by default */}
         <div
-          className={`w-full md:w-1/2 flex bg-warm-white px-6 py-12 md:px-10 lg:px-20 ${reverse ? "md:justify-end" : ""}`}
-        >
-          <div className="max-w-md w-full flex flex-col justify-between">
-            <div>
-              <Eyebrow alignsWithHeading>Sznyt Design</Eyebrow>
-              <h2 className="font-cormorant text-3xl md:text-4xl lg:text-5xl text-near-black font-light mb-4">
-                {name}
-              </h2>
-              <p className="font-cormorant text-xl text-secondary-text italic mb-6">
-                {tagline}
-              </p>
-              <p className="font-dm-sans text-sm text-secondary-text leading-relaxed">
-                {description}
-              </p>
-            </div>
-            <div className="mt-8">
-              <p className="font-dm-sans text-lg text-near-black font-medium mb-8">
-                {formatPln(price)}
-              </p>
-              <button
-                disabled={cartQuantity >= stock}
-                onClick={() => {
-                  const wasAdded = addItem({ id, name, price, imageUrl, stock });
-                  if (wasAdded) {
-                    addedToCart();
-                  }
-                }}
-                className="disabled:opacity-50 disabled:cursor-not-allowed inline-block font-dm-sans text-sm text-near-black border border-near-black px-8 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300"
-              >
-                {cartQuantity >= stock
-                  ? "Maksymalna ilość w koszyku"
-                  : "Dodaj do koszyka"}
-              </button>
-            </div>
+          className={`absolute inset-0 lg:inset-10 bg-cover lg:bg-contain bg-center bg-no-repeat transition-opacity duration-700 ${hovered ? "opacity-0" : "opacity-100"}`}
+          style={{ backgroundImage: `url(${imageUrl})` }}
+        />
+        {/* Lifestyle image — visible on hover; frame sits high in the scene, so bias the crop upward */}
+        <div
+          className={`absolute inset-0 lg:inset-10 bg-cover lg:bg-contain bg-no-repeat transition-opacity duration-700 ${hovered ? "opacity-100" : "opacity-0"}`}
+          style={{ backgroundImage: `url(${lifestyleImageUrl})`, backgroundPosition: "center 15%" }}
+        />
+      </Link>
+
+      {/* Text side — a single max-w-md block (not vertically centered, so it
+          tracks the image's near-full-height visual span instead of floating
+          in the middle) that hugs the image edge as a unit when reverse,
+          instead of the text always sinking to the outer page edge */}
+      <div
+        className={`w-full md:w-1/2 flex bg-warm-white px-6 py-12 md:px-10 lg:px-20 ${reverse ? "md:justify-end" : ""}`}
+      >
+        <div className="max-w-md w-full flex flex-col justify-between">
+          <div>
+            <Eyebrow alignsWithHeading>Sznyt Design</Eyebrow>
+            <h2 className="font-cormorant text-3xl md:text-4xl lg:text-5xl text-near-black font-light mb-4">
+              {name}
+            </h2>
+            <p className="font-cormorant text-xl text-secondary-text italic mb-6">
+              {tagline}
+            </p>
+            <p className="font-dm-sans text-sm text-secondary-text leading-relaxed">
+              {description}
+            </p>
+          </div>
+          <div className="mt-8">
+            <p className="font-dm-sans text-lg text-near-black font-medium mb-8">
+              {formatPln(price)}
+            </p>
+            <button
+              disabled={cartQuantity >= stock}
+              onClick={() => addItem({ id, name, price, imageUrl, stock })}
+              className="disabled:opacity-50 disabled:cursor-not-allowed inline-block font-dm-sans text-sm text-near-black border border-near-black px-8 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300"
+            >
+              {cartQuantity >= stock
+                ? "Maksymalna ilość w koszyku"
+                : "Dodaj do koszyka"}
+            </button>
           </div>
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   );
 }
 

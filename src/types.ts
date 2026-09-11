@@ -80,7 +80,13 @@ export type { ShippingMethod } from "@sznyt/shared";
 
 export type CartContextType = {
   items: CartItem[];
-  addItem: (item: Omit<CartItem, "quantity">) => boolean;
+  /**
+   * Counts adds that actually landed. Changes are the signal; the value itself
+   * means nothing. Consumed by CartFeedback — see ADR-0008 for why success is
+   * state the cart owns rather than something `addItem` returns.
+   */
+  lastAdd: number;
+  addItem: (item: Omit<CartItem, "quantity">) => void;
   removeItem: (id: number) => void;
   updateQuantity: (id: number, quantity: number) => void;
   clearCart: () => void;
