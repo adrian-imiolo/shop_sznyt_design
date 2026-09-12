@@ -6,27 +6,28 @@ import type { Product } from "../types";
 import Eyebrow from "../components/Eyebrow";
 import Skeleton from "../components/Skeleton";
 import Seo from "../components/Seo";
+import CatalogUnavailable from "../components/CatalogUnavailable";
+import { addToCartLabel, availabilityLabel, canAddToCart } from "../catalog/availability";
 import { useResource } from "../hooks/useResource";
 
 function ProductDetails() {
   const { id } = useParams();
-  const { data: product, error: loadFailed } = useResource<Product>(`/products/${id}`);
-  const error = loadFailed ? "Nie udało się załadować produktu." : null;
+  const { data: product, error: loadFailed, reload } = useResource<Product>(`/products/${id}`);
   const [hovered, setHovered] = useState(false);
   const { addItem, items } = useCart();
 
   const cartItem = items.find((i) => i.id === Number(id));
   const cartQuantity = cartItem ? cartItem.quantity : 0;
 
-  if (error)
+  if (loadFailed)
     return (
-      <>
+      <main>
         <Seo
           title="Produkt"
           description="Ręcznie robiona ramka z litego dębu od Sznyt Design. Designerski prezent, który zostaje na lata."
         />
-        <p className="font-dm-sans text-sm text-red-600 p-6">{error}</p>
-      </>
+        <CatalogUnavailable title="Produkt chwilowo niedostępny." onRetry={reload} />
+      </main>
     );
   if (!product)
     return (
@@ -108,11 +109,10 @@ function ProductDetails() {
             {formatPln(product.price)}
           </p>
           <p className="font-dm-sans text-xs text-secondary-text tracking-widest uppercase mb-8">
-            Dostępność:{" "}
-            {product.stock > 0 ? `${product.stock} szt.` : "Brak w magazynie"}
+            Dostępność: {availabilityLabel(product.stock)}
           </p>
           <button
-            disabled={cartQuantity >= product.stock}
+            disabled={!canAddToCart(product.stock, cartQuantity)}
             onClick={() =>
               addItem({
                 id: Number(id),
@@ -124,9 +124,7 @@ function ProductDetails() {
             }
             className="disabled:opacity-50 disabled:cursor-not-allowed inline-block font-dm-sans text-sm text-near-black border border-near-black px-10 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300"
           >
-            {cartQuantity >= product.stock
-              ? "Maksymalna ilość w koszyku"
-              : "Dodaj do koszyka"}
+            {addToCartLabel(product.stock, cartQuantity)}
           </button>
           <div className="mt-6">
             <Link

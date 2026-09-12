@@ -5,6 +5,7 @@ import { useCart } from "../hooks/useCart";
 import Eyebrow from "./Eyebrow";
 import Skeleton from "./Skeleton";
 import type { ProductSectionProps } from "../types";
+import { addToCartLabel, canAddToCart } from "../catalog/availability";
 
 /**
  * Placeholder shown while /products is in flight. Lives next to the real
@@ -116,13 +117,11 @@ function ProductSection({
               {formatPln(price)}
             </p>
             <button
-              disabled={cartQuantity >= stock}
+              disabled={!canAddToCart(stock, cartQuantity)}
               onClick={() => addItem({ id, name, price, imageUrl, stock })}
               className="disabled:opacity-50 disabled:cursor-not-allowed inline-block font-dm-sans text-sm text-near-black border border-near-black px-8 py-3 hover:bg-near-black hover:text-warm-white transition-colors duration-300"
             >
-              {cartQuantity >= stock
-                ? "Maksymalna ilość w koszyku"
-                : "Dodaj do koszyka"}
+              {addToCartLabel(stock, cartQuantity)}
             </button>
           </div>
         </div>

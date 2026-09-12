@@ -1,7 +1,13 @@
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import Eyebrow from "./Eyebrow";
 
-function Hero() {
+type HeroProps = {
+  /** One line between the heading and the CTA — the sold-out notice while that state holds. */
+  notice?: ReactNode;
+};
+
+function Hero({ notice }: HeroProps) {
   return (
     <section className="relative min-h-[60vh] md:min-h-[calc(100vh-var(--spacing-nav))] flex items-end bg-near-black">
       {/* AI render (#78) — replaced by real photography in #11 */}
@@ -18,6 +24,7 @@ function Hero() {
           <br />
           staje się sztuką
         </h1>
+        {notice}
         <Link
           to="/sklep"
           className="inline-block font-dm-sans text-sm text-warm-white border border-warm-white/50 px-8 py-3 hover:bg-warm-white hover:text-near-black transition-colors duration-300"
