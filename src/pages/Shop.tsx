@@ -5,6 +5,8 @@ import type { Product } from "../types";
 import Eyebrow from "../components/Eyebrow";
 import Seo from "../components/Seo";
 import Skeleton from "../components/Skeleton";
+import SoldOutBadge from "../components/SoldOutBadge";
+import CatalogUnavailable from "../components/CatalogUnavailable";
 import { useResource } from "../hooks/useResource";
 
 // Mirrors ProductCard's box model so the grid doesn't reflow when data lands.
@@ -39,6 +41,7 @@ function ProductCard({ product }: { product: Product }) {
         onMouseLeave={() => setHovered(false)}
       >
         <div className="relative aspect-[4/5]">
+          {product.stock <= 0 && <SoldOutBadge />}
           <div
             className={`absolute inset-0 bg-cover bg-center transition-opacity duration-700 ${hovered ? "opacity-0" : "opacity-100"}`}
             style={{ backgroundImage: `url(${product.imageUrl})` }}
@@ -65,8 +68,7 @@ function ProductCard({ product }: { product: Product }) {
 }
 
 function Shop() {
-  const { data: products, error: loadFailed } = useResource<Product[]>("/products");
-  const error = loadFailed ? "Nie udało się załadować produktów. Spróbuj ponownie." : null;
+  const { data: products, error: loadFailed, reload } = useResource<Product[]>("/products");
 
   return (
     <main>
@@ -110,8 +112,10 @@ function Shop() {
             Row gap is much larger than the card's internal pt-4 so each image reads as
             grouped with its own caption, not with the card below it. */}
         <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-y-16 md:gap-y-20 md:gap-x-10">
-          {error ? (
-            <p className="font-dm-sans text-sm text-red-600 col-span-2">{error}</p>
+          {loadFailed ? (
+            <div className="md:col-span-2">
+              <CatalogUnavailable compact onRetry={reload} />
+            </div>
           ) : !products ? (
             <>
               <ProductCardSkeleton />

@@ -3,11 +3,16 @@ import Hero from "../components/Hero";
 import BrandStatement from "../components/BrandStatement";
 import Eyebrow from "../components/Eyebrow";
 import Seo from "../components/Seo";
+import SoldOutNotice from "../components/SoldOutNotice";
+import CatalogUnavailable from "../components/CatalogUnavailable";
 import type { Product } from "../types";
+import { isSoldOut } from "../catalog/availability";
 import { useResource } from "../hooks/useResource";
 
 function Home() {
-  const { data: products, error: loadFailed } = useResource<Product[]>("/products");
+  const { data: products, error: loadFailed, reload } = useResource<Product[]>("/products");
+  // Derived once the catalog is in, so the notice cannot flash before it loads
+  const soldOut = products !== null && isSoldOut(products);
 
   return (
     <>
@@ -16,22 +21,14 @@ function Home() {
         title="Home"
         description="Ręcznie robione ramki z litego dębu — designerski prezent, który zostaje na lata. Kolekcja Sznyt Design, projektowana i wykonywana w Polsce."
       />
-      <Hero />
+      <Hero notice={soldOut ? <SoldOutNotice /> : undefined} />
       <div id="kolekcja" />
 
       {/* Three states, never a silently empty collection: the backend can be
           slow to wake, and a homepage that renders straight through to
           BrandStatement reads as "shop is broken" rather than "still loading". */}
       {loadFailed ? (
-        <section className="bg-warm-white px-6 py-16 text-center">
-          <p className="font-dm-sans text-sm text-secondary-text">
-            Nie udało się załadować kolekcji. Odśwież stronę lub zajrzyj do{" "}
-            <a href="/sklep" className="text-near-black underline">
-              sklepu
-            </a>
-            .
-          </p>
-        </section>
+        <CatalogUnavailable onRetry={reload} />
       ) : !products ? (
         <>
           <ProductSectionSkeleton first />

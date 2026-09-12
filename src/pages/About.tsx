@@ -39,10 +39,15 @@ function About() {
               Sznyt Design to projekt stworzony z przekonania, że rama nie
               powinna krzyczeć. Powinna trwać — w tle, ale nie niewidocznie.
             </p>
-            <p className="font-dm-sans text-sm text-secondary-text leading-relaxed">
+            <p className="font-dm-sans text-sm text-secondary-text leading-relaxed mb-4">
               Wybieramy materiały, które się starzeją z godnością. Projektujemy
               formy, które nie wychodzą z mody. Każdy detal jest decyzją, nie
               przypadkiem.
+            </p>
+            {/* Prose, not derived from stock: the studio's status is part of its story */}
+            <p className="font-dm-sans text-sm text-secondary-text leading-relaxed">
+              Obecnie pracownia wstrzymała produkcję — kolekcja pozostaje do
+              obejrzenia w sklepie.
             </p>
           </div>
         </div>
