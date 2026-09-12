@@ -61,7 +61,7 @@ Preconditions: staged URL up, all products seeded with `stock = 0`, `VITE_DEMO_M
 
 ### A3. Shop (`/sklep`)
 
-- [ ] Products load in grid (name, tagline, price — cards intentionally have no stock info or add-to-cart button)
+- [ ] Products load in grid (name, tagline, price; cards carry no add-to-cart button). At stock 0 each card shows the „Wyprzedane” badge over the photo
 - [ ] Hover swaps to lifestyle image
 - [ ] Click navigates to `/sklep/:id`
 - [ ] Philosophy + materials strips render
@@ -73,13 +73,18 @@ Preconditions: staged URL up, all products seeded with `stock = 0`, `VITE_DEMO_M
 - [ ] Image swap on hover
 - [ ] "← Odkryj całą kolekcję" → `/sklep`
 
-### A5. Stock-0 gating (the portfolio state)
+### A5. Sold-out state (the portfolio state)
 
-- [ ] Product detail: availability line shows **"Brak w magazynie"** (instead of "X szt.")
-- [ ] Product detail: add-to-cart button disabled
-- [ ] Home product section: add-to-cart button disabled (note: label reads "Maksymalna ilość w koszyku" — the button caps at stock, there is no separate out-of-stock label on Home)
+Holds when no product has stock. It is derived from the catalog, so stock in the admin is the only switch (see `CONTEXT.md`).
+
+- [ ] Home hero: the line „Pracownia wstrzymała produkcję — kolekcja pozostaje do obejrzenia.” sits under the heading once the collection has loaded — never while the skeletons are up
+- [ ] Shop: every card carries the „Wyprzedane” badge
+- [ ] Product detail: availability line shows **"Dostępność: Wyprzedane"** (instead of "X szt."); add-to-cart button disabled and labelled „Wyprzedane”
+- [ ] Home product section: add-to-cart button disabled and labelled „Wyprzedane” (not „Maksymalna ilość w koszyku”)
+- [ ] O nas: the story ends with the sentence about the studio pausing production
 - [ ] No path adds a stock-0 product to the cart; cart badge stays at 0
 - [ ] `/koszyk` shows the empty-cart state with a link to the shop
+- [ ] Raise one product to stock 1 in the admin: the hero line disappears, that product's button reads „Dodaj do koszyka” and its card loses the badge, the other product stays „Wyprzedane”. Reset it to 0: everything above returns
 
 ### A6. Contact form (`/kontakt`)
 
@@ -131,15 +136,25 @@ The cookie banner was removed in #96 — cart and checkout draft are strictly-ne
 - [ ] Forms (kontakt, zwroty) usable
 - [ ] Footer: centered, columns side by side
 
+### A13. Backend unreachable
+
+Stop the backend (or point `VITE_API_URL` at a dead port) and load each page.
+
+- [ ] Home: the collection area shows „Kolekcja chwilowo niedostępna.” with a „Spróbuj ponownie” button — no skeletons left pulsing, no red text; hero, BrandStatement and the strips still render
+- [ ] Shop: the grid area shows the same block
+- [ ] Product detail: „Produkt chwilowo niedostępny.” with the retry button
+- [ ] Start the backend and click „Spróbuj ponownie”: skeletons, then the collection, with no page reload
+
 ---
 
 ## Part B — Commerce (gate: #85)
 
 Preconditions: DNS flipped, real stock seeded (≥ 1), Stripe live keys + production webhook endpoint configured, Clerk production instance with `publicMetadata.role = "admin"` on both admin accounts. One step makes a **real charge** — refund it afterwards.
 
-### B1. Stock seeded — the A5 gating is gone
+### B1. Stock seeded — the A5 sold-out state is gone
 
-- [ ] Product detail: availability line shows "X szt." (no "Brak w magazynie"), add-to-cart enabled
+- [ ] Home hero: no sold-out line; shop cards: no „Wyprzedane” badge
+- [ ] Product detail: availability line shows "X szt." (no „Wyprzedane”), add-to-cart enabled
 - [ ] Home product section: add-to-cart button enabled, adds to cart
 - [ ] Stock quantities match what was actually seeded
 
