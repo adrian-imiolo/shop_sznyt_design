@@ -7,14 +7,14 @@
 **Live demo:** [shop-sznyt-design.vercel.app](https://shop-sznyt-design.vercel.app/) — full checkout on Stripe **test mode**: pay with card `4242 4242 4242 4242`, no real money moves
 **Production:** `sznytdesign.pl` — domain registered, cutover deliberately deferred until the real frames, photos, and copy exist. The demo is the current public artifact.
 
-A custom React + Express + Postgres e-commerce stack built and operated end-to-end by one developer. No Shopify, no WooCommerce — full control over brand presentation, checkout flow, and admin tooling.
+A custom React + Express + Postgres e-commerce stack built end-to-end by one developer, running today as a public demo ahead of launch. No Shopify, no WooCommerce — full control over brand presentation, checkout flow, and admin tooling.
 
 ---
 
 ## What's interesting
 
-- **Real production code, not a tutorial clone.** Powers a working business.
-- **Operates under Polish _działalność nierejestrowana_ (DN)** — unregistered business activity below a quarterly revenue cap (~10,800 PLN in 2026). The regime constrains the code: no VAT invoices, no NIP collection, statutory 14-day refund right, quarterly revenue tracker in the admin.
+- **Built for a real business, not a tutorial clone.** Written to launch for an actual frame maker; until the real catalogue exists, the demo is the only public deployment.
+- **Designed for Polish _działalność nierejestrowana_ (DN)** — unregistered business activity below a quarterly revenue cap (~10,800 PLN in 2026). The regime constrains the code: no VAT invoices, no NIP collection, statutory 14-day refund right, quarterly revenue tracker in the admin.
 - **Solo-built, full stack.** Frontend, backend, database, payments, transactional emails, admin panel.
 - **Architectural decisions documented.** See `CONTEXT.md` for the domain model and `docs/adr/` for the why-behind each major choice.
 
@@ -121,7 +121,7 @@ Beyond automation, `docs/TEST-PLAN.md` is the human checklist for the two launch
 
 ## Business context
 
-The shop operates under Polish **działalność nierejestrowana (DN)** — unregistered commercial activity below a quarterly revenue cap (10,813.50 PLN in 2026). This shaped the codebase:
+The shop is designed to trade under Polish **działalność nierejestrowana (DN)** — unregistered commercial activity below a quarterly revenue cap (10,813.50 PLN in 2026). This shaped the codebase:
 
 - **`rachunek` only**, no `faktura VAT` until business registration
 - **No NIP field** at checkout
